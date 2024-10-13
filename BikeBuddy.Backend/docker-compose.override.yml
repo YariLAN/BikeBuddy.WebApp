@@ -1,0 +1,14 @@
+services:
+  bikebuddy_api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=49d36ee8-c90b-4a7d-91ef-713429ccb341
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/BikeBuddy.API.pfx
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro

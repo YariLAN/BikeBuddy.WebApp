@@ -1,0 +1,6 @@
+@BikeBuddy.API_HostAddress = http://localhost:5216
+
+GET {{BikeBuddy.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
