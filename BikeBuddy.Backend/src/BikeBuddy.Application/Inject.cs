@@ -1,0 +1,37 @@
+﻿using BikeBuddy.Application.Services.Auth.Login;
+using BikeBuddy.Application.Services.Auth.Register;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+namespace BikeBuddy.Application;
+
+public static class Inject
+{
+    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
+
+        services.AddOptions<JwtBearerOptions>()
+            .Configure<IConfiguration>((options, configuration) =>
+            {
+                var jwtOptions = configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions!.SecretKey))
+                };
+            });
+
+        services.AddTransient<IRegisterService, RegisterService>();
+        services.AddTransient<ILoginService, LoginService>();
+
+        return services;
+    }
+}

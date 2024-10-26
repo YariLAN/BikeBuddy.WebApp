@@ -1,12 +1,19 @@
-using System.Security.Cryptography.X509Certificates;
+using BikeBuddy.API.Shared.Extensions;
+using BikeBuddy.Application;
+using BikeBuddy.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-builder.WebHost.UseUrls("http://*:8080", "https://*:8081");
+builder.Services.AddCustomSwaggerGen();
+
+builder.Services.AddAuthentication(builder.Configuration);
+
+builder.Services.AddInfrastructure();
+builder.Services.AddApplication(builder.Configuration);
 
 var app = builder.Build();
 
@@ -18,6 +25,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

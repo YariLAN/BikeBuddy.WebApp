@@ -7,11 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4B5BFC3-74C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeBuddy.API", "src\BikeBuddy.API\BikeBuddy.API.csproj", "{E1B49F90-4DF3-4DC0-9D43-30266B93B526}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeBuddy.Infrastructure.PostgreSQL", "src\BikeBuddy.Infrastructure.PostgreSQL\BikeBuddy.Infrastructure.PostgreSQL.csproj", "{BFE758F2-C6EF-475B-9BCC-0B898187F3BD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeBuddy.Infrastructure", "src\BikeBuddy.Infrastructure.PostgreSQL\BikeBuddy.Infrastructure.csproj", "{BFE758F2-C6EF-475B-9BCC-0B898187F3BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeBuddy.Domain", "src\BikeBuddy.Domain\BikeBuddy.Domain.csproj", "{27161FA6-6B5C-4FF1-808D-41CD851B2EFE}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{3CBAE6AF-30E4-4D91-8712-8CFE2FBE362C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeBuddy.Application", "src\BikeBuddy.Application\BikeBuddy.Application.csproj", "{08F4150B-1765-4655-BFF2-6DDF102950AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +37,10 @@ Global
 		{3CBAE6AF-30E4-4D91-8712-8CFE2FBE362C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CBAE6AF-30E4-4D91-8712-8CFE2FBE362C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CBAE6AF-30E4-4D91-8712-8CFE2FBE362C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08F4150B-1765-4655-BFF2-6DDF102950AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08F4150B-1765-4655-BFF2-6DDF102950AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08F4150B-1765-4655-BFF2-6DDF102950AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08F4150B-1765-4655-BFF2-6DDF102950AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,6 +49,7 @@ Global
 		{E1B49F90-4DF3-4DC0-9D43-30266B93B526} = {A4B5BFC3-74C0-4575-ADCD-25C1AC89A327}
 		{BFE758F2-C6EF-475B-9BCC-0B898187F3BD} = {A4B5BFC3-74C0-4575-ADCD-25C1AC89A327}
 		{27161FA6-6B5C-4FF1-808D-41CD851B2EFE} = {A4B5BFC3-74C0-4575-ADCD-25C1AC89A327}
+		{08F4150B-1765-4655-BFF2-6DDF102950AE} = {A4B5BFC3-74C0-4575-ADCD-25C1AC89A327}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DB107654-F3B8-4698-AC0F-49C3A8FB0BFC}
