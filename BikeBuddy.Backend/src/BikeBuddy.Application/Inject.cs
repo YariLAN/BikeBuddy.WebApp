@@ -1,4 +1,6 @@
 ﻿using BikeBuddy.Application.Services.Auth.Login;
+using BikeBuddy.Application.Services.Auth.Logout;
+using BikeBuddy.Application.Services.Auth.Refresh;
 using BikeBuddy.Application.Services.Auth.Register;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -31,6 +33,8 @@ public static class Inject
 
         services.AddTransient<IRegisterService, RegisterService>();
         services.AddTransient<ILoginService, LoginService>();
+        services.AddTransient<IRefreshService, RefreshService>();
+        services.AddTransient<ILogoutService, LogoutService>();
 
         return services;
     }

@@ -23,6 +23,9 @@ public class RefreshService : IRefreshService
             httpContext.Request.Cookies["refresh"]
         );
 
+        if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
+            return "Forbidden";
+
         var principal = _jwtProvider.GetPrincipalFromAccessToken(accessToken);
 
         if (principal is null)
@@ -32,15 +35,11 @@ public class RefreshService : IRefreshService
         if (!userId.HasValue)
             return "Invalid Access Token";
 
-        var dbRefreshToken = await _refreshTokensRepository.Get(userId.Value, cancellationToken);
+        var dbRefreshToken = await _refreshTokensRepository.Get(userId.Value, refreshToken, cancellationToken);
         if (dbRefreshToken is null)
             return "Forbidden";
 
-        if (!refreshToken!.Equals(dbRefreshToken.RefreshToken))
-        {
-            return "Invalid Refresh Token";
-        }
-        else if (dbRefreshToken.ExpiresAt < DateTime.UtcNow)
+        if (dbRefreshToken.ExpiresAt < DateTime.UtcNow)
         {
             httpContext.Response.Cookies.Delete("refresh");
 
@@ -51,7 +50,7 @@ public class RefreshService : IRefreshService
         var newRefreshToken = _jwtProvider.GenerateRefreshToken();
 
         var result = await _refreshTokensRepository.Create(
-            UserRefreshTokenMapper.ToMap(Guid.NewGuid(), userId.Value, refreshToken, expiresAt.AddHours(12)), cancellationToken);
+            UserRefreshTokenMapper.ToMap(Guid.NewGuid(), userId.Value, newRefreshToken, expiresAt.AddHours(12)), cancellationToken);
 
         await _refreshTokensRepository.Delete(userId.Value, dbRefreshToken.RefreshToken, cancellationToken);
 

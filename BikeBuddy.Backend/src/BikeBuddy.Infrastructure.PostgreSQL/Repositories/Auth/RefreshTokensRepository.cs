@@ -32,10 +32,10 @@ public class RefreshTokensRepository(ApplicationDbContext context) : IRefreshTok
         return true;
     }
 
-    public async Task<UserRefreshToken?> Get(Guid userId, CancellationToken token)
+    public async Task<UserRefreshToken?> Get(Guid userId, string tokenValue, CancellationToken token)
     {
         return await context.RefreshTokens
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.UserId == userId, token);
+            .FirstOrDefaultAsync(x => x.UserId == userId && x.RefreshToken.Equals(tokenValue), token);
     }
 }
