@@ -20,7 +20,7 @@ public class AuthUser
 
     public UserProfile UserProfile { get; private set; }
 
-    public UserRefreshToken RefreshToken { get; private set; }
+    public List<UserRefreshToken> RefreshTokens { get; private set; } = [];
 
     private AuthUser() { }
 

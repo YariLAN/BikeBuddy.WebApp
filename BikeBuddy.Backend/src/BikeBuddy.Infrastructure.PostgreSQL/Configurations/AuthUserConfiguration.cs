@@ -29,8 +29,8 @@ public class AuthUserConfiguration : IEntityTypeConfiguration<AuthUser>
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(x => x.RefreshToken)
-            .WithOne()
+        builder.HasMany(x => x.RefreshTokens)
+            .WithOne(x => x.AuthUser)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
