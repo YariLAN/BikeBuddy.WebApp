@@ -1,6 +1,4 @@
-﻿
-using BikeBuddy.Domain.Models.AuthControl;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
 
 namespace BikeBuddy.Application.Services.Auth.Logout;

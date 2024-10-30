@@ -1,6 +1,7 @@
 ﻿using BikeBuddy.Application.Services.Auth;
 using BikeBuddy.Infrastructure.Repositories.Auth;
 using BikeBuddy.Infrastructure.Services.Auth;
+using BikeBuddy.Infrastructure.Services.Auth.Google;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BikeBuddy.Infrastructure;
@@ -16,6 +17,8 @@ public static class Inject
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtProvider, JwtProvider>();
+
+        services.AddTransient<IGoogleService, GoogleService>();
 
         return services;
     }

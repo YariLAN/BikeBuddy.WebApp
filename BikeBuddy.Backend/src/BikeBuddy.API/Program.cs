@@ -15,6 +15,8 @@ builder.Services.AddAuthentication(builder.Configuration);
 builder.Services.AddInfrastructure();
 builder.Services.AddApplication(builder.Configuration);
 
+builder.Services.AddCors("CorsPolicy");
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -22,6 +24,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 

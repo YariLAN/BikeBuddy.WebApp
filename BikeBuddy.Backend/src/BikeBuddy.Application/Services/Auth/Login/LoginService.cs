@@ -41,14 +41,12 @@ public class LoginService : ILoginService
                 new Claim(ClaimTypes.Name, user.UserName!)
             };
 
-            var expiresAtAccess = DateTime.UtcNow.AddMinutes(3);             
-            
-            var expiresAtRefresh = expiresAtAccess.AddHours(12);
-
-            var (accessToken, refreshToken) = (
-                _jwtProvider.GenerateAccessToken(authClaims, expiresAtAccess),
+            var ( (accessToken, expiresAt), refreshToken) = (
+                _jwtProvider.GenerateAccessToken(authClaims),
                 _jwtProvider.GenerateRefreshToken()
             );
+
+            var expiresAtRefresh = expiresAt.AddHours(240);
 
             httpContext.Response.Cookies.Append("refresh", refreshToken);
 
@@ -58,7 +56,7 @@ public class LoginService : ILoginService
             if (!result)
                 return "Не удалось сохранить refresToken";
 
-            return new AuthResponse(accessToken, expiresAtAccess);
+            return new AuthResponse(accessToken, expiresAt);
         }
 
         return new();

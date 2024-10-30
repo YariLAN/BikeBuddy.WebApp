@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BikeBuddy.API.Shared.Extensions;
 
-public static class ApiExtensions
+public static class AddServicesExtensions
 {
     public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
@@ -61,5 +61,21 @@ public static class ApiExtensions
                 }
             });
         });
+    }
+
+    public static IServiceCollection AddCors(this IServiceCollection services, string nameCors)
+    {
+        services.AddCors(opt =>
+        {
+            opt.AddPolicy(name: nameCors, builder =>
+            {
+                builder.WithOrigins()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
+
+        return services;
     }
 }
