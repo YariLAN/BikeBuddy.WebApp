@@ -1,23 +1,47 @@
 import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
 import { AppSidebar } from './components/my/app-sidebar';
+import { Header } from './pages/header';
+import { Footer } from './pages/footer';
+import { HeroSection } from './pages/main/hero-section';
+import { FeaturesSection } from './pages/main/feature-section';
+
+import { useState } from 'react';
+import { useIsMobile } from './hooks/use-mobile';
 
 export default function App() {
+
+  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
+  const isMobile = useIsMobile()
+
+  const toggleSidebar = () => {
+    setIsSideBarOpen(prev => !prev)
+  }
+
+
   return (
-    <SidebarProvider>
-      {/* Боковая панель открывается при наведении */}
-      <div>
-        {<AppSidebar />}
-      </div>
+    <div>
+      <Header />
       
-      <main>
-        <div>
+      {/* Sidebar section */}
+      <div className="flex">
+        <SidebarProvider>
+          <div className="flex">
+            <AppSidebar />
             <SidebarTrigger 
-                className='mt-2 ml-2 w-100' 
-                style={{ backgroundColor: "#A1FFDC" }}
+              onClick={toggleSidebar}
+              className={ `top-2 fixed ${isSideBarOpen && !isMobile ? 'left-64' : 'left-3'}  translate-x-1/2 z-0`}
+              style={{ backgroundColor: "#A1FFDC" }}
             />
-            {/* Основной контент */}
-        </div>
-      </main>
-    </SidebarProvider>
+          </div>
+        </SidebarProvider>
+
+        {/* Main content */}
+        <main className='flex-grow'>
+          <HeroSection />
+          <FeaturesSection />
+          <Footer />
+        </main>
+      </div>
+    </div>
   );
 }

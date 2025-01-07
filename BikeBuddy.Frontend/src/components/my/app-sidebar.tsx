@@ -13,7 +13,7 @@ import {
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
    
 // Menu items.
-const items = [
+  const items = [
     {
       title: "Home",
       url: "#",
@@ -41,6 +41,9 @@ const items = [
     },
   ]
 
+  const mainItems = items.filter(x => x.title != "Settings")
+  const settingItem = items[items.length-1]
+
   export function AppSidebar() {
     return (
       <Sidebar>
@@ -54,7 +57,7 @@ const items = [
           <SidebarGroupLabel>Главная</SidebarGroupLabel>
             <SidebarGroupContent>
                 <SidebarMenu >
-                    {items.map((item) => (
+                    {mainItems.map((item) => (
                         <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
                             <a href={item.url}>
@@ -71,10 +74,11 @@ const items = [
         <SidebarFooter style={{ backgroundColor: "#c4ffe9" }}>
             <SidebarGroup>
                 <SidebarMenu>
-                    <SidebarMenuItem key={items[items.length-1].title}>
+                    <SidebarMenuItem key={settingItem.title}>
                         <SidebarMenuButton asChild>
-                            <a href={items[items.length-1].url}>
-                            <span>{items[items.length-1].title}</span>
+                            <a href={settingItem.url}>
+                            <Settings></Settings>
+                            <span>{settingItem.title}</span>
                             </a>
                         </SidebarMenuButton>
                         </SidebarMenuItem>

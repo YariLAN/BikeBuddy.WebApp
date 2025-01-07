@@ -69,10 +69,9 @@ public static class AddServicesExtensions
         {
             opt.AddPolicy(name: nameCors, builder =>
             {
-                builder.WithOrigins()
+                builder.AllowAnyOrigin()
                     .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+                    .AllowAnyMethod();
             });
         });
 
