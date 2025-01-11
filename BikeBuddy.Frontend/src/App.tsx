@@ -7,9 +7,11 @@ import { FeaturesSection } from './pages/main/feature-section';
 
 import { useState } from 'react';
 import { useIsMobile } from './hooks/use-mobile';
+import useAuthStore from './stores/auth';
 
 export default function App() {
 
+  const authStore = useAuthStore()
   const [isSideBarOpen, setIsSideBarOpen] = useState(true);
   const isMobile = useIsMobile()
 
@@ -22,8 +24,8 @@ export default function App() {
     <div>
       <Header />
       
-      {/* Sidebar section */}
       <div className="flex">
+      { authStore.isAuthenticated && 
         <SidebarProvider>
           <div className="flex">
             <AppSidebar />
@@ -34,11 +36,16 @@ export default function App() {
             />
           </div>
         </SidebarProvider>
+      }
 
         {/* Main content */}
         <main className='flex-grow'>
-          <HeroSection />
-          <FeaturesSection />
+        { !authStore.isAuthenticated && (
+          <>
+            <HeroSection />
+            <FeaturesSection />
+          </>
+        )}
           <Footer />
         </main>
       </div>

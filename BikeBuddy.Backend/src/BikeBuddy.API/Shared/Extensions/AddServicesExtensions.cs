@@ -1,4 +1,4 @@
-﻿using BikeBuddy.Application;
+﻿using BikeBuddy.Application.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -69,9 +69,10 @@ public static class AddServicesExtensions
         {
             opt.AddPolicy(name: nameCors, builder =>
             {
-                builder.AllowAnyOrigin()
+                builder.WithOrigins("https://localhost:5173")
                     .AllowAnyHeader()
-                    .AllowAnyMethod();
+                    .AllowAnyMethod()
+                    .AllowCredentials();
             });
         });
 

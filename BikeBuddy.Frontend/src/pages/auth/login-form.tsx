@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import axios from 'axios'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,6 +11,8 @@ import { AlertCircle, LogIn, X } from 'lucide-react'
 import * as yup from 'yup'
 import { ValidationService } from '@/core/services/ValidationService';
 import { apiService } from '@/core/services/ApiService'
+import JwtService from '@/core/services/JwtService'
+import useAuthStore, { AuthResponse } from '@/stores/auth'
 
 type LoginFormProps = { onClose: () => void; }
 
@@ -27,6 +28,8 @@ export default function LoginForm({ onClose }: LoginFormProps) {
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isLoading, setIsLoading] = useState(false)
   const [loginStatus, setLoginStatus] = useState<string | null>(null)
+
+  const authStore = useAuthStore()
 
   const validateField = useCallback(async (field: string, value: string) => {
     await validationService.validateField(field, value, setErrors)
@@ -46,15 +49,16 @@ export default function LoginForm({ onClose }: LoginFormProps) {
     }
 
     try {
-      const response = await apiService.post('/auth/login', { login, password })
+      const response = await apiService.post<AuthResponse>('/auth/login', { login, password }, true); 
       setLoginStatus('Вход выполнен успешно!')
-
       console.log('Login successful:', response.data)
-       // Здесь можно добавить логику для сохранения токена, перенаправления пользователя и т.д.
-       
+      JwtService.saveToken(response.data.accessToken);
+      
+      authStore.login()
+
+      onClose()
     } catch (error : any) {
       setLoginStatus(`Ошибка входа: ${error.message}`)
-      console.error('Login error:', error)
     } finally {
       setIsLoading(false)
     }

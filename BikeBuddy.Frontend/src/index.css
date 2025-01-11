@@ -68,6 +68,10 @@ button:focus-visible {
   box-shadow: 2px 2px 10px 10px #c4ffe9;
 }
 
+.swal2-popup {
+  font-size: 12px !important;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

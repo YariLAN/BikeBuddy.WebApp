@@ -1,5 +1,7 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
-import { config } from 'process';
+import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import JwtService from './JwtService';
+import { AuthResponse } from '@/stores/auth';
+import { LOCAL_BASE_URL } from '../constants';
 
 type ApiResponse<T> = {
     data: T;
@@ -12,8 +14,14 @@ type ApiError = {
     status: number;
 }
 
+interface CustomInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
+    retry? : boolean
+}
+
 export class ApiService {
     private api: AxiosInstance;
+    private isRefreshing = false;
+    private refreshSubscribers: ((token: string) => void)[] = [];
 
     constructor(baseURL: string) {
         this.api = axios.create({
@@ -25,14 +33,53 @@ export class ApiService {
 
         this.api.interceptors.response.use(
             (response) => response,
-            (error: AxiosError) => this.handleError(error)
+            async (error: AxiosError) => {
+                const originalRequest = error.config as CustomInternalAxiosRequestConfig;
+
+                if (error.response?.status === 401 && originalRequest && !originalRequest.retry) {
+                    if (this.isRefreshing) {
+                        return new Promise(resolve => {
+                            this.subscribeTokenRefresh(token => {
+                                originalRequest.headers.Authorization = `Bearer ${token}`;
+                                resolve(this.api(originalRequest));
+                            });
+                        });
+                    }
+
+                    originalRequest.retry = true;
+                    this.isRefreshing = true;
+
+                    try {
+                        const newToken = await this.refreshToken();
+                        this.onRefreshed(newToken);
+                        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                        return this.api(originalRequest);
+                    } catch (refreshError) {
+                        return Promise.reject(refreshError);
+                    } finally {
+                        this.isRefreshing = false;
+                    }
+                }
+
+                this.handleError(error)
+            }
         )
 
         this.api.interceptors.request.use(
-            (config) => {
-                const token = localStorage.getItem('token');
+            async (config) => {
+                const token = JwtService.getToken();
                 if (token && config.headers) {
-                    config.headers.Authorization = `Bearer ${token}`;
+                    if (JwtService.isTokenExpired(token) && config.url !== '/auth/refresh') {
+                        try {
+                            const newToken = await this.refreshToken()
+                            config.headers.Authorization = `Bearer ${newToken}`;
+                        }
+                        catch (error) {
+                            return Promise.reject(error);
+                        }
+                    } else {
+                        config.headers.Authorization = `Bearer ${token}`;
+                    }
                 }               
                 return config;
             },
@@ -40,35 +87,50 @@ export class ApiService {
         )
     }
 
-    private handleError(error: AxiosError): Promise<never> {
+    private onRefreshed(token: string) {
+        this.refreshSubscribers.forEach(callback => callback(token));
+        this.refreshSubscribers = [];
+    }
+
+    private subscribeTokenRefresh(callback: (token: string) => void) {
+        this.refreshSubscribers.push(callback);
+    }
+
+    private async refreshToken(): Promise<string> {
+        try {
+            const response = await this.api.post<AuthResponse>('/auth/refresh', {}, { withCredentials: true });
+            const newToken = response.data.accessToken;
+            JwtService.saveToken(newToken);
+            return newToken;
+        } catch (error) {
+            JwtService.destroyToken();
+            window.location.href = '/';
+            return Promise.reject(error);
+        }
+    }
+    
+    private async handleError(error: AxiosError): Promise<never> {
+        console.error("Ошибка: ", error)
+
         const apiError: ApiError = {
             message: 'Произошла ошибка',
             status: error.response?.status || 500
         };
 
         if (error.response) {
-            const response = error.response.data as any;
+            const response = error.response.data as string;
 
-            // Проверяем различные возможные форматы сообщения об ошибке
-            apiError.message = response?.error?.message ||
-                               response?.error ||
-                               response?.message ||
-                               response || 'Произошла ошибка при выполнении запроса';
-
-            if (error.response?.status === 401) {
-                // Можно добавить логику для обновления токена или выхода пользователя
-            }
+            apiError.message = (response.length <= 250) ? response : 'Произошла ошибка при выполнении запроса';
         } else if (error.request) {
             apiError.message = 'Сервер не отвечает';
         } else {
-            apiError.message = error.message || 'Ошибка при выполнении запроса';
+            apiError.message = 'Ошибка при выполнении запроса';
         }
-
         return Promise.reject(apiError);
     }
 
     // Остальные методы остаются без изменений...
-    private async get<T>(url: string): Promise<ApiResponse<T>> {
+    async get<T>(url: string): Promise<ApiResponse<T>> {
         const response: AxiosResponse = await this.api.get(url);
         return {
             data: response.data,
@@ -76,15 +138,15 @@ export class ApiService {
         };
     }
 
-    async post<T>(url: string, data: any): Promise<ApiResponse<T>> {
-        const response: AxiosResponse = await this.api.post(url, data);
+    async post<T>(url: string, data: any = null, withCredentials: boolean = false): Promise<ApiResponse<T>> {
+        const response: AxiosResponse = await this.api.post(url, data, { withCredentials: withCredentials });
         return {
             data: response.data,
             status: response.status,
         };
     }
 
-    private async put<T>(url: string, data: any): Promise<ApiResponse<T>> {
+    async put<T>(url: string, data: any): Promise<ApiResponse<T>> {
         const response: AxiosResponse = await this.api.put(url, data);
         return {
             data: response.data,
@@ -92,7 +154,7 @@ export class ApiService {
         };
     }
 
-    private async delete<T>(url: string): Promise<ApiResponse<T>> {
+    async delete<T>(url: string): Promise<ApiResponse<T>> {
         const response: AxiosResponse = await this.api.delete(url);
         return {
             data: response.data,
@@ -101,4 +163,4 @@ export class ApiService {
     }
 }
 
-export const apiService = new ApiService("https://localhost:7187/");
+export const apiService = new ApiService(LOCAL_BASE_URL);

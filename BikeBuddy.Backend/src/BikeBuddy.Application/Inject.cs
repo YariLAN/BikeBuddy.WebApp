@@ -1,4 +1,5 @@
-﻿using BikeBuddy.Application.Services.Auth.Login;
+﻿using BikeBuddy.Application.Options;
+using BikeBuddy.Application.Services.Auth.Login;
 using BikeBuddy.Application.Services.Auth.Logout;
 using BikeBuddy.Application.Services.Auth.Refresh;
 using BikeBuddy.Application.Services.Auth.Register;

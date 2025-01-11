@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.Auth;
 using BikeBuddy.Application.Mappers.Auth;
+using BikeBuddy.Application.Options;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
 
@@ -54,7 +55,7 @@ public class RefreshService : IRefreshService
 
         await _refreshTokensRepository.Delete(userId.Value, dbRefreshToken.RefreshToken, cancellationToken);
 
-        httpContext.Response.Cookies.Append("refresh", newRefreshToken, new() { HttpOnly = true });
+        httpContext.Response.Cookies.Append("refresh", newRefreshToken, OptionsExtensions.CookieOptions);
 
         return new AuthResponse(token, expiresAt);
     }

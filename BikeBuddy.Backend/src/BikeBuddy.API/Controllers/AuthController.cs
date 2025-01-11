@@ -76,7 +76,7 @@ namespace BikeBuddy.API.Controllers
             var result = await refreshService.ExecuteAsync(HttpContext, cancellationToken);
 
             if (result.IsFailure)
-                return Forbid();
+                return Unauthorized();
 
             return Ok(result.Value);
         }

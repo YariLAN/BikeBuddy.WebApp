@@ -1,4 +1,4 @@
-﻿using BikeBuddy.Application;
+﻿using BikeBuddy.Application.Options;
 using BikeBuddy.Application.Services.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
@@ -37,6 +37,7 @@ public class JwtProvider : IJwtProvider
 
     public (string, DateTime) GenerateAccessToken(IEnumerable<Claim> authClaims)
     {
+        // Убрать AddMinutes на AddHours
         var expiresAt = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiresHours);
         var token = GenerateAccessToken(authClaims, expiresAt);
 

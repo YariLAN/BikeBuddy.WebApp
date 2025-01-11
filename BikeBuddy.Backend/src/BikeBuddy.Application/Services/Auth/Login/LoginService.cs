@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.Auth;
 using BikeBuddy.Application.Mappers.Auth;
+using BikeBuddy.Application.Options;
 using BikeBuddy.Domain.Models.AuthControl;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
@@ -48,7 +49,7 @@ public class LoginService : ILoginService
 
             var expiresAtRefresh = expiresAt.AddHours(240);
 
-            httpContext.Response.Cookies.Append("refresh", refreshToken);
+            httpContext.Response.Cookies.Append("refresh", refreshToken, OptionsExtensions.CookieOptions);
 
             var result = await _refreshTokensRepository.Create(
                 UserRefreshTokenMapper.ToMap(Guid.NewGuid(), user.Id, refreshToken, expiresAtRefresh), token);
