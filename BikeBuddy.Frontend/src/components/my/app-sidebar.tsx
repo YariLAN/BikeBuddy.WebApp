@@ -10,38 +10,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
   } from "@/components/ui/sidebar"
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
-   
-// Menu items.
-  const items = [
-    {
-      title: "Home",
-      url: "#",
-      icon: Home,
-    },
-    {
-      title: "Inbox",
-      url: "#",
-      icon: Inbox,
-    },
-    {
-      title: "Calendar",
-      url: "#",
-      icon: Calendar,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: Search,
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
-    },
-  ]
+import { items, names } from "./menu-items"
+import { Settings } from "lucide-react"
 
-  const mainItems = items.filter(x => x.title != "Settings")
+  const mainItems = items.filter(x => x.title != names.Setting)
   const settingItem = items[items.length-1]
 
   export function AppSidebar() {
