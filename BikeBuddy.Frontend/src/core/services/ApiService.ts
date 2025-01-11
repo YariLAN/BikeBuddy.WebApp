@@ -61,7 +61,7 @@ export class ApiService {
                     }
                 }
 
-                this.handleError(error)
+                return this.handleError(error)
             }
         )
 
@@ -140,10 +140,7 @@ export class ApiService {
 
     async post<T>(url: string, data: any = null, withCredentials: boolean = false): Promise<ApiResponse<T>> {
         const response: AxiosResponse = await this.api.post(url, data, { withCredentials: withCredentials });
-        return {
-            data: response.data,
-            status: response.status,
-        };
+        return response as ApiResponse<T>
     }
 
     async put<T>(url: string, data: any): Promise<ApiResponse<T>> {

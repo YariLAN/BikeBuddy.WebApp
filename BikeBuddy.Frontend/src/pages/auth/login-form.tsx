@@ -10,9 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { AlertCircle, LogIn, X } from 'lucide-react'
 import * as yup from 'yup'
 import { ValidationService } from '@/core/services/ValidationService';
-import { apiService } from '@/core/services/ApiService'
-import JwtService from '@/core/services/JwtService'
-import useAuthStore, { AuthResponse } from '@/stores/auth'
+import useAuthStore from '@/stores/auth'
 
 type LoginFormProps = { onClose: () => void; }
 
@@ -49,16 +47,12 @@ export default function LoginForm({ onClose }: LoginFormProps) {
     }
 
     try {
-      const response = await apiService.post<AuthResponse>('/auth/login', { login, password }, true); 
+      await authStore.login(login, password)      
       setLoginStatus('Вход выполнен успешно!')
-      console.log('Login successful:', response.data)
-      JwtService.saveToken(response.data.accessToken);
-      
-      authStore.login()
 
       onClose()
     } catch (error : any) {
-      setLoginStatus(`Ошибка входа: ${error.message}`)
+      setLoginStatus(`Ошибка: ${error.message}`)
     } finally {
       setIsLoading(false)
     }

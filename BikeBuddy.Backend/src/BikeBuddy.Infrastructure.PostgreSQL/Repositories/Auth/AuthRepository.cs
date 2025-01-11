@@ -10,14 +10,18 @@ public class AuthRepository(ApplicationDbContext context) : IAuthRepository
     {
         await context.Users.AddAsync(user, token);
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(token);
 
         return user.Id;
     }
 
-    public Task<AuthUser> GetAsync(Guid id, CancellationToken token)
+    public async Task<AuthUser?> GetAsync(Guid id, CancellationToken token)
     {
-        throw new NotImplementedException();
+        var user = await context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, token);
+
+        return user;
     }
 
     public async Task<AuthUser?> GetByEmailAsync(string email, CancellationToken token)
@@ -45,5 +49,20 @@ public class AuthRepository(ApplicationDbContext context) : IAuthRepository
             .FirstOrDefaultAsync(x => x.UserName == username, token);
 
         return user;
+    }
+
+    public async Task<bool> UpdateLastLoginAtAsync(Guid userId, CancellationToken token)
+    {
+        var user = await GetAsync(userId, token);
+
+        if (user is null)
+            return false;
+
+        user.UpdateLastLoginAt();
+
+        context.Users.Update(user);
+        await context.SaveChangesAsync(token);
+
+        return true;
     }
 }

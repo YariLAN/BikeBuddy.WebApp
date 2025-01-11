@@ -1,4 +1,4 @@
-import { Bike, Inbox,  PersonStandingIcon, Search, Settings, Ticket } from "lucide-react"
+import { Bike, Mails,  PersonStandingIcon, Search, Settings, Ticket, Users, } from "lucide-react"
    
 export const names = {
     Setting: "Настройки"
@@ -19,12 +19,12 @@ export const items = [
   {
     title: "Чаты",
     url: "#",
-    icon: Inbox,
+    icon: Mails,
   },
   {
     title: "Друзья",
     url: "#",
-    icon: PersonStandingIcon,
+    icon: Users,
   },
   {
     title: "Поиск",

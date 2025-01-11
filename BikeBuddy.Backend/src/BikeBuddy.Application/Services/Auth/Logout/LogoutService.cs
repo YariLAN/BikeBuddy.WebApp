@@ -6,12 +6,14 @@ namespace BikeBuddy.Application.Services.Auth.Logout;
 public class LogoutService : ILogoutService
 {
     private readonly IRefreshTokensRepository _refreshTokensRepository;
+    private readonly IAuthRepository _authRepository;
     private readonly IJwtProvider _jwtProvider;
 
-    public LogoutService(IRefreshTokensRepository refreshTokensRepository, IJwtProvider jwtProvider)
+    public LogoutService(IRefreshTokensRepository refreshTokensRepository, IJwtProvider jwtProvider, IAuthRepository authRepository)
     {
         _refreshTokensRepository = refreshTokensRepository;
         _jwtProvider = jwtProvider;
+        _authRepository = authRepository;
     }
 
     public async Task<Result<bool, string>> ExecuteAsync(HttpContext httpContext, CancellationToken cancellationToken)
@@ -32,6 +34,11 @@ public class LogoutService : ILogoutService
         var userId = _jwtProvider.GetUserIdFromClaims(principal);
         if (!userId.HasValue)
             return "Invalid Access Token";
+
+        var isUpdate = await _authRepository.UpdateLastLoginAtAsync(userId.Value, cancellationToken);
+
+        if (!isUpdate)
+            return "User is not found";
 
         var result = await _refreshTokensRepository.Delete(userId.Value, refreshToken, cancellationToken);
 

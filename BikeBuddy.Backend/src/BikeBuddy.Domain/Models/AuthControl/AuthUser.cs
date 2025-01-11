@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualBasic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace BikeBuddy.Domain.Models.AuthControl;
 
@@ -45,5 +47,10 @@ public class AuthUser
         DateTime? lastLogin = null)
     {
         return new AuthUser(id, email, username, password, isVerified, createdAt, lastLogin);
+    }
+
+    public void UpdateLastLoginAt()
+    {
+        LastLoginAt = DateTime.UtcNow;
     }
 }

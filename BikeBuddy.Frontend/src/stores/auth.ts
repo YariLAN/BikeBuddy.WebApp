@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware'
 
 interface AuthState {
   isAuthenticated: boolean;
-  login: () => void;
+  login: (login: string, password: string) => void;
   logout: () => void;
 }
 
@@ -13,7 +13,17 @@ const useAuthStore = create(
   persist<AuthState>(
     (set) => ({
       isAuthenticated: false,
-      login: () => set({ isAuthenticated: true}),
+      login: async (login, password) => {
+        try {
+          const response = await apiService.post<AuthResponse>('/auth/login', { login, password }, true); 
+          console.log('Login: ', response.data)
+
+          JwtService.saveToken(response.data.accessToken);
+          set({ isAuthenticated: true})
+        } catch (err: any) {
+          throw new Error(err.message)
+        }
+      },
       logout: async () => {
         try {
           const response = await apiService.post<boolean>('/auth/logout', {}, true);
@@ -23,8 +33,8 @@ const useAuthStore = create(
             JwtService.destroyToken()
             set({ isAuthenticated: false });
           }
-        } catch (err) {
-          console.log(err)
+        } catch (err: any) {
+          throw new Error(err.message)
         }
       },
     }),
