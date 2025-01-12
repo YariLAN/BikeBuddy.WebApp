@@ -26,12 +26,13 @@ export function Header() {
       title: "Вы действительно хотите выйти?",
       showConfirmButton: true,
       showCancelButton: true,
+      icon: "question",
       confirmButtonText: "Подтвердить",
       cancelButtonText: "Отмена",
       width: 450,
       customClass: {
         confirmButton: "btn btn-danger",
-        popup: "swal2-popup"
+        popup: "swal-alert-info"
       }
     }).then((result) => {
       if (result.isConfirmed) {

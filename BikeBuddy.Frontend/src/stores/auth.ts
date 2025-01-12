@@ -7,6 +7,7 @@ interface AuthState {
   isAuthenticated: boolean;
   login: (login: string, password: string) => void;
   logout: () => void;
+  register: (email: string, username: string, password: string) => void;
 }
 
 const useAuthStore = create(
@@ -37,6 +38,14 @@ const useAuthStore = create(
           throw new Error(err.message)
         }
       },
+      register: async (email, username, password) => {
+        try {
+          const response = await apiService.post<AuthResponse>('/auth/register', { email, username, password }, true);
+          console.log("Register: ", response.data)
+        } catch (err: any) {
+          throw new Error(err.message)
+        }
+      }
     }),
     {
       name: "auth-storage"

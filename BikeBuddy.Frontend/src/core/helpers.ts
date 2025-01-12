@@ -1,4 +1,4 @@
-import Swal from "sweetalert2";
+import Swal, { SweetAlertIcon } from "sweetalert2";
 
 function errorText(err : Object): string{
     if (typeof err === 'object' && err !== null && 'data' in err  && 'status' in err) {
@@ -44,18 +44,19 @@ export function alertExpectedError(message : string){
     })
 }
 
-export function alertInfo(text : string, title: string){
+export function alertInfo(text : string, title: string, type: SweetAlertIcon){
     Swal.fire({
       title: title || "Сообщение",
       html: text,
-      buttonsStyling: false,
+      icon: type,
+      buttonsStyling: true,
       confirmButtonText: "Закрыть",
       customClass: {
         confirmButton: "btn btn-danger",
         popup: "swal-alert-info"
       }
-    })
-  }
+  })
+}
 
   export default {
     errorText,

@@ -9,6 +9,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { AlertCircle, X } from "lucide-react"
 import * as yup from 'yup'
 import { ValidationService } from '@/core/services/ValidationService'
+import useAuthStore from '@/stores/auth'
+import { alertInfo } from '@/core/helpers'
 
 type RegsiterProps = { onClose: () => void; }
 
@@ -24,33 +26,44 @@ export default function RegisterForm({ onClose }: RegsiterProps) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [registerStatus, setRegisterStatus] = useState<string | null>(null)
 
   const validateField = useCallback(async (field: string, value: string) => {
     await validationService.validateField(field, value, setErrors)
   }, [])
 
+  const authStore = useAuthStore()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
 
     const validateResult = await validationService.validateForm({ email, username, password })
 
     if (!validateResult.isValid) {
       setErrors(validateResult.errors)
+      setIsLoading(false)
       return
     }
 
     try {
-      // Здесь будет логика отправки данных на сервер
-      console.log('Registration data:', { email, username, password })
-      setErrors({})
-    } catch (error) {
+      await authStore.register(email, username, password)
 
+      setRegisterStatus('Регистрация выполнена успешно!')
+      onClose()
+
+      alertInfo("Вы успешно зарегистрировались! Не забудьте проверить почту", "Поздравляем!", 'success')
+    } catch (error: any) {
+      setRegisterStatus(`Ошибка: ${error.message}`)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
     <TooltipProvider>
-      <Card className="w-[350px]">
+      <Card className="w-[430px]">
         <CardHeader className="relative">
             <Button
               variant="outline"
@@ -143,8 +156,15 @@ export default function RegisterForm({ onClose }: RegsiterProps) {
                 </div>
               </div>
             </div>
+            {registerStatus && (
+              <div className={`mt-4 p-2 rounded ${registerStatus.includes('успешно') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                {registerStatus}
+              </div>
+            )}
             <CardFooter className="flex justify-between mt-4 px-0">
-              <Button type="submit">Зарегистрироваться</Button>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Выполняется вход...' : 'Зарегистрироваться'}
+              </Button>
             </CardFooter>
           </form>
         </CardContent>
