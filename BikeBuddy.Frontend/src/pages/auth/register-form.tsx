@@ -163,7 +163,7 @@ export default function RegisterForm({ onClose }: RegsiterProps) {
             )}
             <CardFooter className="flex justify-between mt-4 px-0">
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Выполняется вход...' : 'Зарегистрироваться'}
+                {isLoading ? 'Выполняется...' : 'Зарегистрироваться'}
               </Button>
             </CardFooter>
           </form>

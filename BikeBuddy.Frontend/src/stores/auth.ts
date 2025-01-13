@@ -18,7 +18,7 @@ const useAuthStore = create(
         try {
           const response = await apiService.post<AuthResponse>('/auth/login', { login, password }, true); 
           console.log('Login: ', response.data)
-
+          
           JwtService.saveToken(response.data.accessToken);
           set({ isAuthenticated: true})
         } catch (err: any) {

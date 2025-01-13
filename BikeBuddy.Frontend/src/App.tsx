@@ -8,6 +8,9 @@ import { FeaturesSection } from './pages/main/feature-section';
 import { useState } from 'react';
 import { useIsMobile } from './hooks/use-mobile';
 import useAuthStore from './stores/auth';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import ProfilePage from './pages/profile/profile-page';
+import JwtService from './core/services/JwtService';
 
 export default function App() {
 
@@ -19,12 +22,20 @@ export default function App() {
     setIsSideBarOpen(prev => !prev)
   }
 
+  const ProtectedProfileRoute = () => {
+    const decoded = JwtService.decodeToken()
+    
+    if (!authStore.isAuthenticated || !decoded?.nameId) {
+      return <Navigate to="/" replace />
+    }
+    return <ProfilePage userId={decoded.nameId} />
+  }
 
   return (
-    <div>
+    <div className='min-h-screen flex flex-col'>
       <Header />
       
-      <div className="flex">
+      <div className="flex flex-1">
       { authStore.isAuthenticated && 
         <SidebarProvider>
           <div className="flex">
@@ -39,13 +50,28 @@ export default function App() {
       }
 
         {/* Main content */}
-        <main className='flex-grow'>
-        { !authStore.isAuthenticated && (
-          <>
-            <HeroSection />
-            <FeaturesSection />
-          </>
-        )}
+        <main className="flex-1 flex flex-col">
+          <div className="flex-1">
+            <Routes>
+              <Route 
+                path="/" 
+                element={
+                  !authStore.isAuthenticated ? (
+                    <>
+                      <HeroSection />
+                      <FeaturesSection />
+                    </>
+                  ) : null
+                } 
+              />
+              <Route 
+                path="/profile/:userId" 
+                element={
+                  <ProtectedProfileRoute />
+                } 
+              />
+            </Routes>
+          </div>
           <Footer />
         </main>
       </div>
