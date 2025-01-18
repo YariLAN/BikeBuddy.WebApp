@@ -1,7 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.Auth;
 using BikeBuddy.Application.Mappers.Auth;
-using BikeBuddy.Application.Options;
-using BikeBuddy.Domain.Models.AuthControl;
+using BikeBuddy.Application.Services.Common;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
@@ -14,17 +13,20 @@ public class LoginService : ILoginService
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtProvider _jwtProvider;
     private readonly IRefreshTokensRepository _refreshTokensRepository;
+    private readonly ICookieProvider _cookieProvider;
 
     public LoginService(
-        IAuthRepository authRepository, 
-        IJwtProvider jwtProvider, 
+        IAuthRepository authRepository,
+        IJwtProvider jwtProvider,
         IPasswordHasher passwordHasher,
-        IRefreshTokensRepository refreshTokensRepository)
+        IRefreshTokensRepository refreshTokensRepository,
+        ICookieProvider cookieProvider)
     {
         _authRepository = authRepository;
         _jwtProvider = jwtProvider;
         _passwordHasher = passwordHasher;
         _refreshTokensRepository = refreshTokensRepository;
+        _cookieProvider = cookieProvider;
     }
 
     public async Task<Result<AuthResponse, string>> ExecuteAsync(LoginRequest request, HttpContext httpContext, CancellationToken token)
@@ -49,7 +51,7 @@ public class LoginService : ILoginService
 
             var expiresAtRefresh = expiresAt.AddHours(240);
 
-            httpContext.Response.Cookies.Append("refresh", refreshToken, OptionsExtensions.CookieOptions);
+            httpContext.Response.Cookies.Append("refresh", refreshToken, _cookieProvider.CreateCookieOptions(expiresAtRefresh));
 
             var result = await _refreshTokensRepository.Create(
                 UserRefreshTokenMapper.ToMap(Guid.NewGuid(), user.Id, refreshToken, expiresAtRefresh), token);

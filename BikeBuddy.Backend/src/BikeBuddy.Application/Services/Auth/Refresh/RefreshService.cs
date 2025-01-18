@@ -1,6 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.Auth;
 using BikeBuddy.Application.Mappers.Auth;
-using BikeBuddy.Application.Options;
+using BikeBuddy.Application.Services.Common;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
 
@@ -10,11 +10,16 @@ public class RefreshService : IRefreshService
 {
     private readonly IRefreshTokensRepository _refreshTokensRepository;
     private readonly IJwtProvider _jwtProvider;
+    private readonly ICookieProvider _cookieProvider;
 
-    public RefreshService(IRefreshTokensRepository refreshTokensRepository, IJwtProvider jwtProvider)
+    public RefreshService(
+        IRefreshTokensRepository refreshTokensRepository, 
+        IJwtProvider jwtProvider, 
+        ICookieProvider cookieProvider)
     {
         _refreshTokensRepository = refreshTokensRepository;
         _jwtProvider = jwtProvider;
+        _cookieProvider = cookieProvider;
     }
 
     public async Task<Result<AuthResponse, string>> ExecuteAsync(HttpContext httpContext, CancellationToken cancellationToken)
@@ -50,12 +55,13 @@ public class RefreshService : IRefreshService
         var (token, expiresAt) = _jwtProvider.GenerateAccessToken(principal.Claims);
         var newRefreshToken = _jwtProvider.GenerateRefreshToken();
 
+        var expiresAtRefresh = expiresAt.AddHours(240);
         var result = await _refreshTokensRepository.Create(
-            UserRefreshTokenMapper.ToMap(Guid.NewGuid(), userId.Value, newRefreshToken, expiresAt.AddHours(12)), cancellationToken);
+            UserRefreshTokenMapper.ToMap(Guid.NewGuid(), userId.Value, newRefreshToken, expiresAtRefresh), cancellationToken);
 
         await _refreshTokensRepository.Delete(userId.Value, dbRefreshToken.RefreshToken, cancellationToken);
 
-        httpContext.Response.Cookies.Append("refresh", newRefreshToken, OptionsExtensions.CookieOptions);
+        httpContext.Response.Cookies.Append("refresh", newRefreshToken, _cookieProvider.CreateCookieOptions(expiresAtRefresh));
 
         return new AuthResponse(token, expiresAt);
     }
