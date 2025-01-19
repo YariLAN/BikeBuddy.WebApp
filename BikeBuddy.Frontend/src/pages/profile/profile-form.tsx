@@ -167,7 +167,7 @@ export default function ProfileForm() {
   )
 
   return (
-    <div className="w-full p-12">
+    <div className="w-full p-16">
       <form onSubmit={onSubmit} className="space-y-10">
         {/* Данные аккаунта */}
         <div className="space-y-4">

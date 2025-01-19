@@ -21,8 +21,10 @@ export default function ProfilePage( {userId: propsUserId } :ProfilePageProps) {
     }, [userId, navigate]) 
 
     return (
-        <div className="container py-10">
-            <ProfileForm />
+        <div className="container mx-auto px-4 py-10">
+            <div className="bg-background rounded-lg shadow">
+                <ProfileForm />
+            </div>
         </div>
     )
 }
