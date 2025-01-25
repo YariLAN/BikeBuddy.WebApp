@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.Auth;
 using BikeBuddy.Application.Mappers.Auth;
+using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 
 namespace BikeBuddy.Application.Services.Auth.Register;
@@ -17,17 +18,17 @@ public class RegisterService : IRegisterService
         _passwordHasher = passwordHasher;
     }
 
-    public async Task<Result<Guid, string>> ExecuteAsync(RegisterRequest request, CancellationToken token)
+    public async Task<Result<Guid, Error>> ExecuteAsync(RegisterRequest request, CancellationToken token)
     {
         var user = await _authRepository.GetByEmailAsync(request.Email, token);
         
         if (user is not null)
-            return $"Пользователь с такой почтой {request.Email} уже существует";
+            return Error.Conflict($"Пользователь с такой почтой {request.Email} уже существует");
 
         user = await _authRepository.GetByUsernameAsync(request.UserName, token);
 
         if (user is not null)
-            return $"Пользователь с ником {request.UserName} уже существует";
+            return Error.Conflict($"Пользователь с ником {request.UserName} уже существует");
 
         var passwordHash = _passwordHasher.Generate(request.Password);
 

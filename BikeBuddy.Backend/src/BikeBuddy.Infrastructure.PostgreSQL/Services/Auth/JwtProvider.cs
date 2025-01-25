@@ -38,7 +38,7 @@ public class JwtProvider : IJwtProvider
     public (string, DateTime) GenerateAccessToken(IEnumerable<Claim> authClaims)
     {
         // Убрать AddMinutes на AddHours
-        var expiresAt = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiresHours);
+        var expiresAt = DateTime.UtcNow.AddHours(_jwtOptions.ExpiresHours);
         var token = GenerateAccessToken(authClaims, expiresAt);
 
         return (token, expiresAt);

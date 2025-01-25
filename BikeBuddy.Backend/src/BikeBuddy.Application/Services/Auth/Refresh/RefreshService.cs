@@ -1,6 +1,7 @@
 ﻿using BikeBuddy.Application.DtoModels.Auth;
 using BikeBuddy.Application.Mappers.Auth;
 using BikeBuddy.Application.Services.Common;
+using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
 
@@ -22,7 +23,7 @@ public class RefreshService : IRefreshService
         _cookieProvider = cookieProvider;
     }
 
-    public async Task<Result<AuthResponse, string>> ExecuteAsync(HttpContext httpContext, CancellationToken cancellationToken)
+    public async Task<Result<AuthResponse, Error>> ExecuteAsync(HttpContext httpContext, CancellationToken cancellationToken)
     {
         var (accessToken, refreshToken) = (
             httpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", ""),
@@ -30,26 +31,26 @@ public class RefreshService : IRefreshService
         );
 
         if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
-            return "Forbidden";
+            return Error.UnAuthorized("Forbidden");
 
         var principal = _jwtProvider.GetPrincipalFromAccessToken(accessToken);
 
         if (principal is null)
-            return "Invalid Access Token";
+            return Error.UnAuthorized("Invalid Access Token");
 
         var userId = _jwtProvider.GetUserIdFromClaims(principal);
         if (!userId.HasValue)
-            return "Invalid Access Token";
+            return Error.UnAuthorized("Invalid Access Token");
 
         var dbRefreshToken = await _refreshTokensRepository.Get(userId.Value, refreshToken, cancellationToken);
         if (dbRefreshToken is null)
-            return "Forbidden";
+            return Error.NotFound("Regresh Token is not found");
 
         if (dbRefreshToken.ExpiresAt < DateTime.UtcNow)
         {
             httpContext.Response.Cookies.Delete("refresh");
 
-            return "Refresh Token expires";
+            return Error.UnAuthorized("Refresh Token expires");
         }
 
         var (token, expiresAt) = _jwtProvider.GenerateAccessToken(principal.Claims);

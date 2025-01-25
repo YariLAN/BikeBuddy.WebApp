@@ -1,7 +1,8 @@
 ﻿using BikeBuddy.Application.Services.Auth;
 using BikeBuddy.Application.Services.Common;
-
+using BikeBuddy.Application.Services.Profile;
 using BikeBuddy.Infrastructure.Repositories.Auth;
+using BikeBuddy.Infrastructure.Repositories.Profile;
 using BikeBuddy.Infrastructure.Services.Auth;
 using BikeBuddy.Infrastructure.Services.Auth.Google;
 using BikeBuddy.Infrastructure.Services.Common;
@@ -18,6 +19,8 @@ public static class Inject
 
         services.AddTransient<IAuthRepository, AuthRepository>();
         services.AddTransient<IRefreshTokensRepository, RefreshTokensRepository>();
+
+        services.AddTransient<IUserProfileRepository, UserProfileRepository>();
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtProvider, JwtProvider>();

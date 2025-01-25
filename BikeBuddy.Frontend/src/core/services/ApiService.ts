@@ -3,10 +3,10 @@ import JwtService from './JwtService';
 import { AuthResponse } from '@/stores/auth';
 import { LOCAL_BASE_URL } from '../constants';
 
-type ApiResponse<T> = {
-    data: T;
+export type ApiResponse<T> = {
+    data?: T;
     status: number;
-    message?: string;
+    error?: string;
 }
 
 type ApiError = {
@@ -118,9 +118,9 @@ export class ApiService {
         };
 
         if (error.response) {
-            const response = error.response.data as string;
+            const response = error.response.data as ApiError;
 
-            apiError.message = (response.length <= 250) ? response : 'Произошла ошибка при выполнении запроса';
+            apiError.message = (response.message.length <= 250) ? response.message : 'Произошла ошибка при выполнении запроса';
         } else if (error.request) {
             apiError.message = 'Сервер не отвечает';
         } else {
@@ -131,11 +131,15 @@ export class ApiService {
 
     // Остальные методы остаются без изменений...
     async get<T>(url: string): Promise<ApiResponse<T>> {
-        const response: AxiosResponse = await this.api.get(url);
-        return {
-            data: response.data,
-            status: response.status,
-        };
+        try {
+            const response: AxiosResponse = await this.api.get(url);
+            return {
+                data: response.data,
+                status: response.status,
+            };
+        } catch (err : any) {
+            return {error: err.message, status: err.status } 
+        }
     }
 
     async post<T>(url: string, data: any = null, withCredentials: boolean = false): Promise<ApiResponse<T>> {

@@ -16,7 +16,9 @@ type RegsiterProps = { onClose: () => void; }
 
 const schema = yup.object().shape({
   email: yup.string().email('Неверный формат email').required('Email обязателен'),
-  username: yup.string().min(3, 'Логин пользователя должке содержать минимум 3 символа').required('Логин пользователя обязателен'),
+  username: yup.string().min(3, 'Логин пользователя должке содержать минимум 3 символа')
+    .required('Логин пользователя обязателен')
+    .matches(/^[a-zA-Z0-9а-яА-Я_-]+$/, 'Логин может содержать только буквы, цифры, нижнее подчеркивание и дефис'),
   password: yup.string().min(6, 'Пароль должен содержать минимум 6 символов').required('Пароль обязателен'),
 })
 const validationService = new ValidationService(schema)

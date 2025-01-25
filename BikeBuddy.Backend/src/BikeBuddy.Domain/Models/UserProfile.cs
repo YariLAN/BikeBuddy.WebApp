@@ -44,4 +44,18 @@ public class UserProfile
     {
         return new UserProfile(id, userId, surname, name, middleName, birthDay, address);
     }
+
+    public void Update(
+        string surname,
+        string name,
+        string middleName,
+        DateTime? birthDay,
+        Address address)
+    {
+        Surname = surname;
+        Name = name;
+        MiddleName = middleName;
+        BirthDay = birthDay;
+        Address = address;
+    }
 }

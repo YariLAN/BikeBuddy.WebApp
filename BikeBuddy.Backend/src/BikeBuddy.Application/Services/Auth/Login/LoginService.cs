@@ -1,6 +1,7 @@
 ﻿using BikeBuddy.Application.DtoModels.Auth;
 using BikeBuddy.Application.Mappers.Auth;
 using BikeBuddy.Application.Services.Common;
+using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
@@ -29,13 +30,13 @@ public class LoginService : ILoginService
         _cookieProvider = cookieProvider;
     }
 
-    public async Task<Result<AuthResponse, string>> ExecuteAsync(LoginRequest request, HttpContext httpContext, CancellationToken token)
+    public async Task<Result<AuthResponse, Error>> ExecuteAsync(LoginRequest request, HttpContext httpContext, CancellationToken token)
     {
         var user = await _authRepository.GetByEmailOrUsernamesAsync(request.Login, token);
 
         if (user is null || !_passwordHasher.Verify(request.Password, user.PasswordHash))
         {
-            return "Неверный логин или пароль";
+            return Error.Validation("Неверный логин или пароль");
         }
         else if (!httpContext.User.Identity!.IsAuthenticated)
         {
@@ -57,7 +58,7 @@ public class LoginService : ILoginService
                 UserRefreshTokenMapper.ToMap(Guid.NewGuid(), user.Id, refreshToken, expiresAtRefresh), token);
 
             if (!result)
-                return "Не удалось сохранить refresToken";
+                return Error.Failure("Не удалось сохранить refresToken");
 
             return new AuthResponse(accessToken, expiresAt);
         }

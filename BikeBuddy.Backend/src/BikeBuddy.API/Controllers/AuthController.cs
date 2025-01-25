@@ -1,16 +1,11 @@
-﻿using BikeBuddy.Application.DtoModels.Auth;
+﻿using BikeBuddy.API.Shared.Extensions;
+using BikeBuddy.Application.DtoModels.Auth;
 using BikeBuddy.Application.Services.Auth.Login;
 using BikeBuddy.Application.Services.Auth.Logout;
 using BikeBuddy.Application.Services.Auth.Refresh;
 using BikeBuddy.Application.Services.Auth.Register;
-using BikeBuddy.Infrastructure.Services.Auth.Google;
-using Google.Apis.Auth;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity.Data;
+using BikeBuddy.Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
-
-using Auth = BikeBuddy.Application.DtoModels.Auth;
 
 namespace BikeBuddy.API.Controllers
 {
@@ -21,18 +16,15 @@ namespace BikeBuddy.API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponse>> Login(
             [FromServices] ILoginService loginService,
-            [FromBody] Auth.LoginRequest loginRequest,
+            [FromBody] LoginRequest loginRequest,
             CancellationToken token)
         {
             if (HttpContext.User.Identity!.IsAuthenticated)
-                return Conflict();
+                return Error.Conflict("Уже авторизованы").ToResponse();
 
             var result = await loginService.ExecuteAsync(loginRequest, HttpContext, token);
 
-            if (result.IsFailure)
-                return BadRequest(result.Error);
-
-            return Ok(result.Value);
+            return result.ToResponse();
         }
 
         [HttpPost("logout")]
@@ -41,20 +33,17 @@ namespace BikeBuddy.API.Controllers
             CancellationToken token)
         {
             if (!HttpContext.User.Identity!.IsAuthenticated)
-                return Conflict();
+                return Error.Conflict("Уже авторизованы").ToResponse();
 
             var result = await logoutService.ExecuteAsync(HttpContext, token);
 
-            if (result.IsFailure)
-                return BadRequest(result.Error);
-
-            return Ok(result.Value);
+            return result.ToResponse();
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<Guid>> RegisterAsync(
             [FromServices] IRegisterService registerService,
-            [FromBody] Auth.RegisterRequest request,
+            [FromBody] RegisterRequest request,
             CancellationToken cancellationToken)
         {
             if (HttpContext.User.Identity!.IsAuthenticated)
@@ -62,10 +51,7 @@ namespace BikeBuddy.API.Controllers
 
             var result = await registerService.ExecuteAsync(request, cancellationToken);
 
-            if (result.IsFailure)
-                return BadRequest(result.Error);
-
-            return Ok(result.Value);
+            return result.ToResponse();
         }
 
         [HttpPost("refresh")]
@@ -75,10 +61,7 @@ namespace BikeBuddy.API.Controllers
         {
             var result = await refreshService.ExecuteAsync(HttpContext, cancellationToken);
 
-            if (result.IsFailure)
-                return Unauthorized();
-
-            return Ok(result.Value);
+            return result.ToResponse();
         }
 
         //[HttpPost("login/signin_google")]

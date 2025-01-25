@@ -18,7 +18,6 @@ import { useNavigate } from 'react-router-dom'
 import JwtService from "@/core/services/JwtService"
 import { alertError } from "@/core/helpers"
 
-
 export function Header() {
   const authStore = useAuthStore()
   const [isOpenLoginForm, setIsOpenLoginForm] = useState(false)
@@ -27,11 +26,12 @@ export function Header() {
   const navigate = useNavigate()
 
   const hasNotifications = false;
-
-  const handleProfileClick = () => {
+  
+  const handleProfileClick = async () => {
     const decoded = JwtService.decodeToken()
     if (decoded?.nameId) {
       navigate(`/profile/${decoded.nameId}`)
+
     } else (error: any) => {
       console.error('User ID not found in token')
       alertError(error)
