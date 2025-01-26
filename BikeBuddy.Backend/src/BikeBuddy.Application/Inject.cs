@@ -3,6 +3,7 @@ using BikeBuddy.Application.Services.Auth.Login;
 using BikeBuddy.Application.Services.Auth.Logout;
 using BikeBuddy.Application.Services.Auth.Refresh;
 using BikeBuddy.Application.Services.Auth.Register;
+using BikeBuddy.Application.Services.Profile.CreateProfileService;
 using BikeBuddy.Application.Services.Profile.GetProfileService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -33,12 +34,15 @@ public static class Inject
                 };
             });
 
+        // Auth
         services.AddTransient<IRegisterService, RegisterService>();
         services.AddTransient<ILoginService, LoginService>();
         services.AddTransient<IRefreshService, RefreshService>();
         services.AddTransient<ILogoutService, LogoutService>();
 
+        // Profile
         services.AddTransient<IGetProfileService, GetProfileService>();
+        services.AddTransient<ICreateProfileService, CreateProfileService>();
 
         return services;
     }

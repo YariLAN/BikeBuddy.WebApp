@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { CalendarIcon, Loader2, AlertCircle } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Tooltip,
   TooltipContent,
@@ -23,27 +24,49 @@ import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 import { ValidationService } from "@/core/services/ValidationService"
 import { profileSchema } from "@/core/validations/profile"
+import useProfileStore, { UserProfileResponse } from "@/stores/profile"
+import JwtService from "@/core/services/JwtService"
+import { alertInfo } from "@/core/helpers"
 
-const defaultValues = {
-  email: "user@example.com",
-  username: "user123",
-  lastName: "Иванов",
-  firstName: "Иван",
-  middleName: "Иванович",
-  birthDate: new Date("1990-01-01"),
-  address: "г. Москва, ул. Примерная, д. 1",
+interface ProfileDataProps {
+  profile : UserProfileResponse,
 }
 
 const validationService = new ValidationService(profileSchema)
 
-export default function ProfileForm() {
-  const [formData, setFormData] = useState(defaultValues)
+
+
+
+export default function ProfileForm({ profile } : ProfileDataProps) {
+  const userData = JwtService.decodeToken()
+  const getFormData = () => ({
+    email: userData?.email || "",
+    username: userData?.name || "",
+    lastName: profile.surname || "",
+    firstName: profile.name || "",
+    middleName: profile.middleName || "",
+    birthDate: profile.birthDay,
+    address: profile.address ? `${profile.address.country}, ${profile.address.city}` : ""
+  })
+
+  const [formData, setFormData] = useState(getFormData())
+  
+  useEffect(() => {
+    setFormData(getFormData())
+  }, [profile])
+
+
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [isUpdatingUsername, setIsUpdatingUsername] = useState(false)
   const [usernameChanged, setUsernameChanged] = useState(false)
-  const [originalUsername] = useState(defaultValues.username)
+  const [originalUsername] = useState(userData?.name)
+
+  const [avatarUrl, setAvatarUrl] = useState<string>("")
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+
+  const profileStore = useProfileStore()
 
   const validateField = useCallback(async (field: string, value: any) => {
     await validationService.validateField(field, value, setErrors)
@@ -61,7 +84,7 @@ export default function ProfileForm() {
   const handleUpdateUsername = async () => {
     setIsUpdatingUsername(true)
     
-    const validateResult = await validationService.validateField('username', formData.username, setErrors)
+    const validateResult = await validationService.validateField('username', formData.username || "", setErrors)
     
     if (!validateResult) {
       setIsUpdatingUsername(false)
@@ -93,13 +116,47 @@ export default function ProfileForm() {
     }
 
     try {
-      // Здесь будет отправка данных на сервер
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log("Form data:", formData)
+      if (profile.id.length <= 0) {
+        let result = await profileStore.createProfile({
+          userId: userData!.nameId, 
+          surname: formData.lastName, 
+          name: formData.firstName, 
+          middleName: formData.middleName,
+          birthDay: formData.birthDate,
+          address: formData.address
+        })
+
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        console.log("Form data:", formData)
+  
+        if (result.data) {
+          alertInfo("", "Данные профиля успешно сохранены", 'success')
+        }
+      }
     } catch (error) {
       console.error("Error submitting form:", error)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingAvatar(true)
+    try {
+      // Здесь будет загрузка файла на сервер
+      // Временно создаем URL для превью
+      const objectUrl = URL.createObjectURL(file)
+      setAvatarUrl(objectUrl)
+
+      // Очистка URL после использования
+      return () => URL.revokeObjectURL(objectUrl)
+    } catch (error) {
+      console.error("Error uploading avatar:", error)
+    } finally {
+      setIsUploadingAvatar(false)
     }
   }
 
@@ -108,7 +165,8 @@ export default function ProfileForm() {
     label: string,
     tooltip: string,
     disabled?: boolean,
-    showUpdateButton?: boolean
+    showUpdateButton?: boolean,
+    placeholder? : string
   ) => (
     <div className="space-y-2">
       <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -124,6 +182,7 @@ export default function ProfileForm() {
               errors[name] ? 'pr-10 border-red-500' : 'pr-10',
               disabled && 'bg-muted'
             )}
+            placeholder={placeholder}
           />
           {errors[name] ? (
             <TooltipProvider>
@@ -169,6 +228,64 @@ export default function ProfileForm() {
   return (
     <div className="w-full p-16">
       <form onSubmit={onSubmit} className="space-y-10">
+
+        {/* Аватар */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Фото профиля</h3>
+          <Separator />
+
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              <Avatar className="h-48 w-48">
+                <AvatarImage src={avatarUrl} alt="Фото профиля" className="object-cover"/>
+                <AvatarFallback>{formData.username!.slice(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              {isUploadingAvatar && (
+                <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-full">
+                  <Loader2 className="h-10 w-10 animate-spin" />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-48"
+                  onClick={() => document.getElementById("avatar")?.click()}
+                  disabled={isUploadingAvatar}
+                >
+                  Изменить фото
+                </Button>
+                <div>
+                  <span className="text-xs text-muted-foreground">
+                    JPG, PNG или GIF. Максимум 2MB.
+                  </span>
+                </div>
+                <input
+                  id="avatar"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                  disabled={isUploadingAvatar}
+                />
+              </div>            
+              {avatarUrl && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="text-secondary"
+                  onClick={() => setAvatarUrl("")}
+                >
+                  Удалить фото
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Данные аккаунта */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Данные аккаунта</h3>
@@ -188,7 +305,7 @@ export default function ProfileForm() {
           <div className="grid grid-cols-3 gap-6">
             {renderFormField('lastName', 'Фамилия', 'Обязательное поле')}
             {renderFormField('firstName', 'Имя', 'Обязательное поле')}
-            {renderFormField('middleName', 'Отчество', 'Необязательное поле')}
+            {renderFormField('middleName', 'Отчество', 'Необязательное поле', false, false, "при наличие")}
           </div>
 
           <div className="grid grid-cols-2 gap-6">
@@ -234,7 +351,7 @@ export default function ProfileForm() {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <AlertCircle className="h-4 w-4 text-red-500 absolute right-3 top-1/2 transform -translate-y-1/2" />
+                        <AlertCircle className="h-4 w-4 text-red-500 absolute right-9 top-1/2 transform -translate-y-1/2" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>{errors.birthDate}</p>
@@ -250,7 +367,10 @@ export default function ProfileForm() {
         </div>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit"
+            variant="ghost"
+            className="text-secondary"
+            disabled={isSubmitting}>
             {isSubmitting && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}

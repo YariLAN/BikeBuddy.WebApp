@@ -35,6 +35,7 @@ export function alertExpectedError(message : string){
     Swal.fire({
       title: "Ошибка",
       text: message,
+      icon: 'error',
       buttonsStyling: true,
       confirmButtonText: "Закрыть",
       customClass: {

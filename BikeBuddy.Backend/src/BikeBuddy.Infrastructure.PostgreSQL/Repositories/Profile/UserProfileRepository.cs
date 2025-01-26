@@ -8,11 +8,17 @@ public class UserProfileRepository(ApplicationDbContext context) : IUserProfileR
 {
     public async Task<Guid?> CreateAsync(UserProfile profile, CancellationToken cancellationToken)
     {
-        await context.Profiles.AddAsync(profile, cancellationToken);
+        try
+        {
+            await context.Profiles.AddAsync(profile, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
 
-        await context.SaveChangesAsync(cancellationToken);
-
-        return profile.Id;
+            return profile.Id;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public async Task<UserProfile?> GetByUserIdAsync(Guid id, CancellationToken cancellationToken)

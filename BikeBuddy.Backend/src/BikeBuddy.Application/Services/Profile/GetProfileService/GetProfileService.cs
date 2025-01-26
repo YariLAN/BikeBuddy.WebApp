@@ -14,6 +14,6 @@ public class GetProfileService(IUserProfileRepository _userProfileRepository) : 
         if (dbProfile is null)
             return Error.NotFound("Профиль не найден");
 
-        return UserProfileResponseMapper.ToMap(dbProfile);
+        return UserProfileMapper.ToMap(dbProfile);
     }
 }

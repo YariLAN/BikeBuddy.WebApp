@@ -24,6 +24,7 @@ export const destroyToken = (): void => {
 
 type TokenPayload = {
   exp: number;
+  email : string;
   nameId: string;
   name: string;
 }
@@ -47,6 +48,7 @@ export const decodeToken = (token: string | null = getToken()): TokenPayload | n
     const { 
       ["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]: nameId, 
       ["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]: name, 
+      ["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]: email, 
       ...rest 
     } = parsedPayload;
 
@@ -55,6 +57,7 @@ export const decodeToken = (token: string | null = getToken()): TokenPayload | n
       ...rest,
       nameId,
       name,
+      email
     };
   } catch (error) {
     console.error('Ошибка при декодировании токена:', error);

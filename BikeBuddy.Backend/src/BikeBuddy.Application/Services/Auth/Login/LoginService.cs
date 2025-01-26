@@ -42,6 +42,7 @@ public class LoginService : ILoginService
         {
             List<Claim> authClaims = new() {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName!)
             };
 

@@ -1,5 +1,6 @@
 import { ApiResponse, apiService } from "@/core/services/ApiService";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface UserProfileResponse {
     id : string,
@@ -7,7 +8,16 @@ export interface UserProfileResponse {
     name : string,
     middleName : string,
     birthDay? : Date,
-    address : Address
+    address? : Address
+}
+
+export interface UserProfileRequest {
+    userId : string,
+    surname : string,
+    name : string,
+    middleName : string,
+    birthDay? : Date,
+    address? : string
 }
 
 export interface Address {
@@ -16,14 +26,31 @@ export interface Address {
 }
 
 interface ProfileState {
+    isProfileFilled: boolean;
     getProfile: (userId: string) => Promise<ApiResponse<UserProfileResponse>>;
+    createProfile: (request : UserProfileRequest) => Promise<ApiResponse<boolean>>;
 }
 
-const useProfileStore = create<ProfileState>(
-    (set) => ({
-        getProfile: async (userId : string) => {
-            return await apiService.get<UserProfileResponse>(`/profile/${userId}`)     
-        },
-    })
+const useProfileStore = create(
+    persist<ProfileState>(
+        (set) => ({
+            isProfileFilled: false,
+            getProfile: async (userId : string) => {
+                let result = await apiService.get<UserProfileResponse>(`/profile/${userId}`)   
+                
+                set({ isProfileFilled : !result.error})
+                return result
+            },
+            createProfile: async (request : UserProfileRequest) => {
+                let result = await apiService.post<boolean>(`/profile/${request.userId}`, request, true)
+
+                if (result.data) { set({isProfileFilled : true})}
+                return result
+            },
+        }),
+        {
+            name: "profile-storage"
+        }
+    )
 )
 export default useProfileStore

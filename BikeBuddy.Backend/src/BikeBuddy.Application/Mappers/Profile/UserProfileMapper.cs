@@ -3,7 +3,7 @@ using BikeBuddy.Domain.Models;
 
 namespace BikeBuddy.Application.Mappers.Profile;
 
-public class UserProfileResponseMapper
+public class UserProfileMapper
 {
     public static UserProfileResponse ToMap(UserProfile profile)
     {
@@ -14,5 +14,18 @@ public class UserProfileResponseMapper
             profile.MiddleName,
             profile.BirthDay,
             profile.Address);
+    }
+
+    public static UserProfile ToMap(UserProfileRequest request, Address address)
+    {
+        return UserProfile.Create(
+            Guid.NewGuid(), 
+            request.UserId, 
+            request.Surname, 
+            request.Name, 
+            request.MiddleName, 
+            request.BirthDay, 
+            address
+        );
     }
 }
