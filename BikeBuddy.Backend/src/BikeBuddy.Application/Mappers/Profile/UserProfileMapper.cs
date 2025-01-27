@@ -13,7 +13,7 @@ public class UserProfileMapper
             profile.Name,
             profile.MiddleName,
             profile.BirthDay,
-            profile.Address);
+            profile.Address.ToString());
     }
 
     public static UserProfile ToMap(UserProfileRequest request, Address address)

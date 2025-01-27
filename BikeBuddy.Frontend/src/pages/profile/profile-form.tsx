@@ -26,7 +26,9 @@ import { ValidationService } from "@/core/services/ValidationService"
 import { profileSchema } from "@/core/validations/profile"
 import useProfileStore, { UserProfileResponse } from "@/stores/profile"
 import JwtService from "@/core/services/JwtService"
-import { alertInfo } from "@/core/helpers"
+import { alertExpectedError, alertInfo } from "@/core/helpers"
+import { getFormData, mapFormDataToRequest } from "@/core/mappers/profile-mapper"
+import { ApiResponse } from "@/core/services/ApiService"
 
 interface ProfileDataProps {
   profile : UserProfileResponse,
@@ -34,27 +36,14 @@ interface ProfileDataProps {
 
 const validationService = new ValidationService(profileSchema)
 
-
-
-
 export default function ProfileForm({ profile } : ProfileDataProps) {
   const userData = JwtService.decodeToken()
-  const getFormData = () => ({
-    email: userData?.email || "",
-    username: userData?.name || "",
-    lastName: profile.surname || "",
-    firstName: profile.name || "",
-    middleName: profile.middleName || "",
-    birthDate: profile.birthDay,
-    address: profile.address ? `${profile.address.country}, ${profile.address.city}` : ""
-  })
 
-  const [formData, setFormData] = useState(getFormData())
+  const [formData, setFormData] = useState(getFormData(userData!, profile))
   
   useEffect(() => {
-    setFormData(getFormData())
+    setFormData(getFormData(userData!, profile))
   }, [profile])
-
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -116,26 +105,22 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
     }
 
     try {
+      let result : ApiResponse<boolean>
       if (profile.id.length <= 0) {
-        let result = await profileStore.createProfile({
-          userId: userData!.nameId, 
-          surname: formData.lastName, 
-          name: formData.firstName, 
-          middleName: formData.middleName,
-          birthDay: formData.birthDate,
-          address: formData.address
-        })
-
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        console.log("Form data:", formData)
-  
-        if (result.data) {
-          alertInfo("", "Данные профиля успешно сохранены", 'success')
-        }
+        result = await profileStore.createProfile(mapFormDataToRequest(formData, userData!.nameId))
       }
-    } catch (error) {
-      console.error("Error submitting form:", error)
-    } finally {
+      else {
+        result = await profileStore.updateProfile(mapFormDataToRequest(formData, userData!.nameId))
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      if (result!.data) {
+        alertInfo("", "Данные профиля успешно сохранены", 'success')
+      }
+      else if (result.error) { alertExpectedError(result.error)}
+    } 
+    finally {
       setIsSubmitting(false)
     }
   }
@@ -362,7 +347,7 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
               </div>
             </div>
 
-            {renderFormField('address', 'Адрес', 'Необязательное поле')}
+            {renderFormField('address', 'Адрес', 'Необязательное поле', false, false, "Введите в формате: Страна, Город")}
           </div>
         </div>
 

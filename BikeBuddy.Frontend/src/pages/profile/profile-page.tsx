@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import JwtService from "@/core/services/JwtService";
 import useProfileStore, { UserProfileResponse } from "@/stores/profile";
 import { Warning } from "@/components/my/warning";
-import { alertExpectedError } from "@/core/helpers";
 
 interface ProfilePageProps {
     userId?: string
@@ -34,9 +33,7 @@ export default function ProfilePage( {userId: propsUserId } : ProfilePageProps) 
             }
             else {
                 let pr = await profileStore.getProfile(decoded.nameId)
-                if (pr.error) {
-                    alertExpectedError(pr.error)
-                } else {
+                if (!pr.error) {
                     setProfileDetails(pr.data!)
                 }
             }

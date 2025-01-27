@@ -1,5 +1,7 @@
 ﻿using BikeBuddy.Application.Services.Profile;
 using BikeBuddy.Domain.Models;
+using BikeBuddy.Domain.Shared;
+using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace BikeBuddy.Infrastructure.Repositories.Profile;
@@ -30,21 +32,26 @@ public class UserProfileRepository(ApplicationDbContext context) : IUserProfileR
         return profile;
     }
 
-    public async Task<bool> UpdateAsync(UserProfile profile, CancellationToken cancellationToken)
+    public async Task<Result<bool, Error>> UpdateAsync(UserProfile profile, CancellationToken cancellationToken)
     {
-        var exitingProfile = await context.Profiles
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == profile.Id, cancellationToken);
-
-        if (exitingProfile is null)
-            return false;
-
-        exitingProfile.Update(profile.Surname, profile.Name, profile.MiddleName, profile.BirthDay, profile.Address);
-
-        context.Profiles.Update(exitingProfile);
-
-        await context.SaveChangesAsync(cancellationToken);
-
-        return true;
+        try
+        {
+            var exitingProfile = await GetByUserIdAsync(profile.UserId, cancellationToken);
+    
+            if (exitingProfile is null)
+                return false;
+    
+            exitingProfile.Update(profile.Surname, profile.Name, profile.MiddleName, profile.BirthDay?.ToUTC(), profile.Address);
+    
+            context.Profiles.Update(exitingProfile);
+    
+            await context.SaveChangesAsync(cancellationToken);
+    
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return Error.Failure(ex.Message);
+        }
     }
 }

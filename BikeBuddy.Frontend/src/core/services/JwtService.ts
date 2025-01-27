@@ -22,7 +22,7 @@ export const destroyToken = (): void => {
   window.localStorage.removeItem(ID_TOKEN_KEY);
 };
 
-type TokenPayload = {
+export type TokenPayload = {
   exp: number;
   email : string;
   nameId: string;

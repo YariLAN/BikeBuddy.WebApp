@@ -1,4 +1,6 @@
 ﻿using BikeBuddy.Domain.Models;
+using BikeBuddy.Domain.Shared;
+using CSharpFunctionalExtensions;
 
 namespace BikeBuddy.Application.Services.Profile;
 
@@ -8,5 +10,5 @@ public interface IUserProfileRepository
 
     Task<Guid?> CreateAsync(UserProfile profile, CancellationToken cancellationToken);
 
-    Task<bool> UpdateAsync(UserProfile profile, CancellationToken cancellationToken);
+    Task<Result<bool, Error>> UpdateAsync(UserProfile profile, CancellationToken cancellationToken);
 }

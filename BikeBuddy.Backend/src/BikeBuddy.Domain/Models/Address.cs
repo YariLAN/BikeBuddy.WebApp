@@ -30,12 +30,17 @@ public record Address
         var parts = address.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         if (parts.Length != 2)
-            Error.Validation("Address string must contain exactly one comma separating the city and country.");
+            return Error.Validation("Адресная строка состоит только из страны и города.");
 
-        var city = parts[0];
-        var country = parts[1];
+        var country = parts[0];
+        var city = parts[1];
 
         return Create(city, country);
+    }
+
+    public override string ToString()
+    {
+        return $"{Country}, {City}".Trim(new[] { ',', ' ' });
     }
 
     public static Address New() => Create("", "");

@@ -8,7 +8,7 @@ export interface UserProfileResponse {
     name : string,
     middleName : string,
     birthDay? : Date,
-    address? : Address
+    address? : string
 }
 
 export interface UserProfileRequest {
@@ -29,6 +29,7 @@ interface ProfileState {
     isProfileFilled: boolean;
     getProfile: (userId: string) => Promise<ApiResponse<UserProfileResponse>>;
     createProfile: (request : UserProfileRequest) => Promise<ApiResponse<boolean>>;
+    updateProfile: (request : UserProfileRequest) => Promise<ApiResponse<boolean>>;
 }
 
 const useProfileStore = create(
@@ -47,6 +48,10 @@ const useProfileStore = create(
                 if (result.data) { set({isProfileFilled : true})}
                 return result
             },
+            updateProfile : async (request : UserProfileRequest) => {
+                let result = await apiService.put<boolean>(`/profile/${request.userId}`, request)
+                return result
+            }
         }),
         {
             name: "profile-storage"

@@ -148,11 +148,15 @@ export class ApiService {
     }
 
     async put<T>(url: string, data: any): Promise<ApiResponse<T>> {
-        const response: AxiosResponse = await this.api.put(url, data);
-        return {
-            data: response.data,
-            status: response.status,
-        };
+        try {
+            const response: AxiosResponse = await this.api.put(url, data);
+            return {
+                data: response.data,
+                status: response.status,
+            };
+        } catch (err : any) {
+            return {error: err.message, status: err.status } 
+        }
     }
 
     async delete<T>(url: string): Promise<ApiResponse<T>> {

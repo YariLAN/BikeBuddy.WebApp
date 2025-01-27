@@ -10,10 +10,10 @@ public static class ResponseExtensions
     {
         var statusCode = error.Type switch
         {
-            ErrorType.Validation => StatusCodes.Status400BadRequest,
-            ErrorType.Conflict => StatusCodes.Status409Conflict,
-            ErrorType.NotFound => StatusCodes.Status404NotFound,
-            ErrorType.Failure => StatusCodes.Status500InternalServerError,
+            ErrorType.Validation   => StatusCodes.Status400BadRequest,
+            ErrorType.Conflict     => StatusCodes.Status409Conflict,
+            ErrorType.NotFound     => StatusCodes.Status404NotFound,
+            ErrorType.Failure      => StatusCodes.Status500InternalServerError,
             ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
 
             _ => StatusCodes.Status500InternalServerError,
