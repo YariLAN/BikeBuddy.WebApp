@@ -72,6 +72,14 @@ button:focus-visible {
   font-size: 12px !important;
 }
 
+.geoapify-autocomplete-input {
+  background: white;
+}
+
+.rdp-button_reset {
+  background: rgba(255, 255, 255, 0.664);
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

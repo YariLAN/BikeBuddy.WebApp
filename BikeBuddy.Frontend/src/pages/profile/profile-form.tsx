@@ -29,6 +29,8 @@ import JwtService from "@/core/services/JwtService"
 import { alertExpectedError, alertInfo } from "@/core/helpers"
 import { getFormData, mapFormDataToRequest } from "@/core/mappers/profile-mapper"
 import { ApiResponse } from "@/core/services/ApiService"
+import '@geoapify/geocoder-autocomplete/styles/round-borders.css';
+import { GeoapifyContext, GeoapifyGeocoderAutocomplete } from '@geoapify/react-geocoder-autocomplete';
 
 interface ProfileDataProps {
   profile : UserProfileResponse,
@@ -151,7 +153,7 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
     tooltip: string,
     disabled?: boolean,
     showUpdateButton?: boolean,
-    placeholder? : string
+    placeholder? : string,
   ) => (
     <div className="space-y-2">
       <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -293,7 +295,7 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
             {renderFormField('middleName', 'Отчество', 'Необязательное поле', false, false, "при наличие")}
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none">
                 Дата рождения
@@ -347,9 +349,22 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
               </div>
             </div>
 
-            {renderFormField('address', 'Адрес', 'Необязательное поле', false, false, "Введите в формате: Страна, Город")}
+            <div className="mt-8">
+              <GeoapifyContext
+                className="bg-white"
+                apiKey="6d39e2f3b643416d9ebdb8ddb6acb511">
+                  <GeoapifyGeocoderAutocomplete
+                    lang="ru"
+                    placeholder="Enter address here"
+                    value={formData.address}                 
+                  />
+              </GeoapifyContext>
+            </div>
+
           </div>
         </div>
+
+
 
         <div className="flex justify-end">
           <Button type="submit"

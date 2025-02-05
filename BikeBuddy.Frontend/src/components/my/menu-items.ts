@@ -1,14 +1,15 @@
 import { Bike, Mails,  PersonStandingIcon, Search, Settings, Ticket, Users, } from "lucide-react"
    
 export const names = {
+    Events: "События",
     Setting: "Настройки"
 }
 
 // Menu items.
 export const items = [
   {
-    title: "События",
-    url: "#",
+    title: names.Events,
+    url: "/events",
     icon: Ticket,
   },
   {

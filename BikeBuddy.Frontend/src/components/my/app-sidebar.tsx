@@ -12,6 +12,7 @@ import {
   } from "@/components/ui/sidebar"
 import { items, names } from "./menu-items"
 import { Settings } from "lucide-react"
+import { Link } from "react-router-dom"
 
   const mainItems = items.filter(x => x.title != names.Setting)
   const settingItem = items[items.length-1]
@@ -32,10 +33,10 @@ import { Settings } from "lucide-react"
                     {mainItems.map((item) => (
                         <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
-                            <a href={item.url}>
+                          <Link to={item.url}>
                             <item.icon />
                             <span>{item.title}</span>
-                            </a>
+                          </Link>
                         </SidebarMenuButton>
                         </SidebarMenuItem>
                     ))}

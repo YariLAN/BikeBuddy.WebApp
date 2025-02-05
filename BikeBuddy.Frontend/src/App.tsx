@@ -10,7 +10,10 @@ import { useIsMobile } from './hooks/use-mobile';
 import useAuthStore from './stores/auth';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import ProfilePage from './pages/profile/profile-page';
+import EventsPage from './pages/events/event-page'
+
 import JwtService from './core/services/JwtService';
+import { items } from './components/my/menu-items';
 
 export default function App() {
 
@@ -66,8 +69,16 @@ export default function App() {
               />
               <Route 
                 path="/profile/:userId" 
+                element={<ProtectedProfileRoute />} 
+              />
+              <Route 
+                path={items[0].url}
+                element={authStore.isAuthenticated ? <EventsPage /> : <Navigate to="/" replace />} 
+              />
+              <Route 
+                path={`${items[0].url}/create`}
                 element={
-                  <ProtectedProfileRoute />
+                  authStore.isAuthenticated ? <div>Форма создания события (будет добавлена позже)</div> : <Navigate to="/" replace />
                 } 
               />
             </Routes>

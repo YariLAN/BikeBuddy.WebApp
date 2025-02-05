@@ -10,6 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/free-regular-svg-icons": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@geoapify/react-geocoder-autocomplete": "^2.0.1",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -32,8 +38,9 @@
     "react-input-mask": "^2.0.4",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.1",
+    "react-share-icons": "^1.1.2",
     "redux": "^5.0.1",
-    "sweetalert2": "^11.15.10",
+    "sweetalert2": "^11.6.13",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "yup": "^1.6.1",

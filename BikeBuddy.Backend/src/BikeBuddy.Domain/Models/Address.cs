@@ -32,15 +32,15 @@ public record Address
         if (parts.Length != 2)
             return Error.Validation("Адресная строка состоит только из страны и города.");
 
-        var country = parts[0];
-        var city = parts[1];
+        var city = parts[0];
+        var country = parts[1];
 
         return Create(city, country);
     }
 
     public override string ToString()
     {
-        return $"{Country}, {City}".Trim(new[] { ',', ' ' });
+        return $"{City}, {Country}".Trim(new[] { ',', ' ' });
     }
 
     public static Address New() => Create("", "");
