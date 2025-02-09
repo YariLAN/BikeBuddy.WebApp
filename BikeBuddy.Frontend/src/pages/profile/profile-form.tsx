@@ -47,6 +47,8 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
     setFormData(getFormData(userData!, profile))
   }, [profile])
 
+  const apiKey = import.meta.env.VITE_NEXT_PUBLIC_GEOAPIFY_API_KEY
+
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -352,19 +354,24 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
             <div className="mt-8">
               <GeoapifyContext
                 className="bg-white"
-                apiKey="6d39e2f3b643416d9ebdb8ddb6acb511">
+                apiKey={apiKey}>
                   <GeoapifyGeocoderAutocomplete
                     lang="ru"
-                    placeholder="Enter address here"
-                    value={formData.address}                 
+                    placeholder="Введите адрес здесь"
+                    value={formData.address}    
+                    onUserInput={(value) => {formData.address = value}}            
+                    placeSelect={(value) => {
+                      formData.address = `${value.properties.city}, ${value.properties.country}`;
+                    }} 
+                    postprocessHook={(value) => {
+                      return `${value.properties.city}, ${value.properties.country}` 
+                    }}
                   />
               </GeoapifyContext>
             </div>
 
           </div>
         </div>
-
-
 
         <div className="flex justify-end">
           <Button type="submit"

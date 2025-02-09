@@ -14,6 +14,7 @@ import EventsPage from './pages/events/event-page'
 
 import JwtService from './core/services/JwtService';
 import { items } from './components/my/menu-items';
+import CreateEventPage from './pages/events/create-event-page';
 
 export default function App() {
 
@@ -78,7 +79,7 @@ export default function App() {
               <Route 
                 path={`${items[0].url}/create`}
                 element={
-                  authStore.isAuthenticated ? <div>Форма создания события (будет добавлена позже)</div> : <Navigate to="/" replace />
+                  authStore.isAuthenticated ? <CreateEventPage /> : <Navigate to="/" replace />
                 } 
               />
             </Routes>
