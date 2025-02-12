@@ -16,11 +16,11 @@ public class UserProfileMapper
             profile.Address.ToString());
     }
 
-    public static UserProfile ToMap(UserProfileRequest request, Address address)
+    public static UserProfile ToMap(Guid userId, UserProfileRequest request, Address address)
     {
         return UserProfile.Create(
-            Guid.NewGuid(), 
-            request.UserId, 
+            Guid.NewGuid(),
+            userId, 
             request.Surname, 
             request.Name, 
             request.MiddleName, 

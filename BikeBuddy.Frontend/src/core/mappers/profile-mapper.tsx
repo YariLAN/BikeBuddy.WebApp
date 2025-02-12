@@ -1,8 +1,7 @@
 import { UserProfileRequest, UserProfileResponse } from "@/stores/profile";
 import { TokenPayload } from "../services/JwtService";
 
-export const mapFormDataToRequest = (data: any, userId: string): UserProfileRequest => ({
-  userId,
+export const mapFormDataToRequest = (data: any) : UserProfileRequest => ({
   surname: data.lastName,
   name: data.firstName,
   middleName: data.middleName,

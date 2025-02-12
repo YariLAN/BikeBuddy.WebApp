@@ -8,14 +8,14 @@ namespace BikeBuddy.Application.Services.Profile.UpdateProfileService;
 
 public class UpdateProfileService(IUserProfileRepository userProfileRepository) : IUpdateProfileService
 {
-    public async Task<Result<bool, Error>> ExecuteAsync(UserProfileRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool, Error>> ExecuteAsync(Guid userId, UserProfileRequest request, CancellationToken cancellationToken)
     {
         var addressResult = Address.Create(request.Address);
 
         if (addressResult.IsFailure)
             return addressResult.Error;
 
-        var dbProfile = UserProfileMapper.ToMap(request, addressResult.Value);
+        var dbProfile = UserProfileMapper.ToMap(userId, request, addressResult.Value);
 
         var result = await userProfileRepository.UpdateAsync(dbProfile, cancellationToken);
 

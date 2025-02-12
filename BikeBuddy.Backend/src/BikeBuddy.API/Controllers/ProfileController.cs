@@ -28,10 +28,11 @@ public class ProfileController : ControllerBase
     [HttpPost("{userId:guid}")]
     public async Task<ActionResult<bool>> CreateUserProfile(
         [FromServices] ICreateProfileService createProfileService,
+        [FromRoute] string userId, 
         [FromBody] UserProfileRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await createProfileService.ExecuteAsync(request, cancellationToken);
+        var result = await createProfileService.ExecuteAsync(Guid.Parse(userId), request, cancellationToken);
 
         return result.ToResponse();
     }     
@@ -39,10 +40,11 @@ public class ProfileController : ControllerBase
     [HttpPut("{userId:guid}")]
     public async Task<ActionResult<bool>> UpdateUserProfile(
         [FromServices] IUpdateProfileService updateProfileService,
+        [FromRoute] string userId,
         [FromBody] UserProfileRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await updateProfileService.ExecuteAsync(request, cancellationToken);
+        var result = await updateProfileService.ExecuteAsync(Guid.Parse(userId), request, cancellationToken);
 
         return result.ToResponse();
     }

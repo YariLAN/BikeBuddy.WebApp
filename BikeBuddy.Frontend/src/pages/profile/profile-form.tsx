@@ -111,10 +111,10 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
     try {
       let result : ApiResponse<boolean>
       if (profile.id.length <= 0) {
-        result = await profileStore.createProfile(mapFormDataToRequest(formData, userData!.nameId))
+        result = await profileStore.createProfile(userData!.nameId, mapFormDataToRequest(formData))
       }
       else {
-        result = await profileStore.updateProfile(mapFormDataToRequest(formData, userData!.nameId))
+        result = await profileStore.updateProfile(userData!.nameId, mapFormDataToRequest(formData))
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000))

@@ -6,5 +6,5 @@ namespace BikeBuddy.Application.Services.Profile.CreateProfileService;
 
 public interface ICreateProfileService
 {
-    Task<Result<bool, Error>> ExecuteAsync(UserProfileRequest request, CancellationToken cancellationToken);
+    Task<Result<bool, Error>> ExecuteAsync(Guid userId, UserProfileRequest request, CancellationToken cancellationToken);
 }

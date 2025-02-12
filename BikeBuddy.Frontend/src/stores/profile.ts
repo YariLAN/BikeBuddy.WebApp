@@ -12,7 +12,6 @@ export interface UserProfileResponse {
 }
 
 export interface UserProfileRequest {
-    userId : string,
     surname : string,
     name : string,
     middleName : string,
@@ -28,8 +27,8 @@ export interface Address {
 interface ProfileState {
     isProfileFilled: boolean;
     getProfile: (userId: string) => Promise<ApiResponse<UserProfileResponse>>;
-    createProfile: (request : UserProfileRequest) => Promise<ApiResponse<boolean>>;
-    updateProfile: (request : UserProfileRequest) => Promise<ApiResponse<boolean>>;
+    createProfile: (userId : string, request : UserProfileRequest) => Promise<ApiResponse<boolean>>;
+    updateProfile: (userId : string, request : UserProfileRequest) => Promise<ApiResponse<boolean>>;
 }
 
 const useProfileStore = create(
@@ -42,14 +41,14 @@ const useProfileStore = create(
                 set({ isProfileFilled : !result.error})
                 return result
             },
-            createProfile: async (request : UserProfileRequest) => {
-                let result = await apiService.post<boolean>(`/profile/${request.userId}`, request, true)
+            createProfile: async (userId : string, request : UserProfileRequest) => {
+                let result = await apiService.post<boolean>(`/profile/${userId}`, request, true)
 
                 if (result.data) { set({isProfileFilled : true})}
                 return result
             },
-            updateProfile : async (request : UserProfileRequest) => {
-                let result = await apiService.put<boolean>(`/profile/${request.userId}`, request)
+            updateProfile : async (userId : string, request : UserProfileRequest) => {
+                let result = await apiService.put<boolean>(`/profile/${userId}`, request)
                 return result
             }
         }),

@@ -12,7 +12,7 @@ import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Feature } from 'ol'
 import { LineString, Point, } from 'ol/geom'
-import { Style, Stroke, Circle, Fill } from 'ol/style'
+import { Style, Stroke, Icon } from 'ol/style'
 
 interface RouteMapProps {
   onRouteChange?: (route: {
@@ -33,7 +33,7 @@ export function RouteMap({ onRouteChange }: RouteMapProps) {
       source: new VectorSource(),
       style: new Style({
         stroke: new Stroke({
-          color: 'black',
+          color: 'blue',
           width: 3
         })
       })
@@ -43,14 +43,13 @@ export function RouteMap({ onRouteChange }: RouteMapProps) {
     new VectorLayer({
       source: new VectorSource(),
       style: new Style({
-        image: new Circle({
-          radius: 7,
-          fill: new Fill({ color: '#4CAF50' }),
-          stroke: new Stroke({
-            color: '#FFF',
-            width: 2
-          })
-        })
+        image: new Icon({
+          src: "/marker.svg",
+          width: 35,
+          height: 45,
+          anchor: [0.5, 1],
+        }),
+        zIndex: 12 
       })
     })
   )
