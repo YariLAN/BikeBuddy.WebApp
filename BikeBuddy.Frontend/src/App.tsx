@@ -54,7 +54,7 @@ export default function App() {
       }
 
         {/* Main content */}
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 w-full flex flex-col">
           <div className="flex-1">
             <Routes>
               <Route 

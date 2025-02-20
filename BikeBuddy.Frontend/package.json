@@ -10,12 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@geoapify/react-geocoder-autocomplete": "^2.0.1",
+    "@geoapify/route-directions": "^1.0.5",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -30,6 +33,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
+    "graphhopper-js-api-client": "^7.6.1",
     "lucide-react": "^0.456.0",
     "ol": "^10.4.0",
     "ol-mapbox-style": "^12.4.1",

@@ -25,7 +25,8 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { RouteMap } from "@/components/my/map"
+import { RouteMap } from "@/components/my/map/map"
+import { RouteMapContainer } from "@/components/my/map/route-map-container"
 
 const validationService = new ValidationService(eventSchema)
 
@@ -62,6 +63,7 @@ export default function CreateEventPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log(e)
     setIsSubmitting(true)
 
     const validateResult = await validationService.validateForm(formData)
@@ -114,7 +116,7 @@ export default function CreateEventPage() {
   )
 
   return (
-    <div className="container mx-auto lg:px-5 sm:px-16 py-8">
+    <div className="container mx-auto px-5 py-8">
       <h1 className="text-3xl font-bold mb-8">Создание события</h1>
       
       <form onSubmit={onSubmit} className="space-y-8">
@@ -131,23 +133,19 @@ export default function CreateEventPage() {
         )}
 
         {/* Карта */}
-        <Card className="w-full aspect-video">
-          <CardContent className="p-0">
-            <RouteMap 
-                onRouteChange={({ startAddress, endAddress, distance, duration }) => {
-                    setFormData(prev => ({
-                    ...prev,
-                    startAddress,
-                    endAddress,
-                    distance,
-                    endDateTime: prev.startDateTime 
-                        ? new Date(prev.startDateTime.getTime() + duration * 60000)
-                        : undefined
-                    }))
-                }}
-            />
-          </CardContent>
-        </Card>
+        <RouteMapContainer 
+            onRouteChange={({ startAddress, endAddress, distance, duration }) => {
+                setFormData(prev => ({
+                ...prev,
+                startAddress,
+                endAddress,
+                distance,
+                endDateTime: prev.startDateTime 
+                    ? new Date(prev.startDateTime.getTime() + duration * 60000)
+                    : undefined
+                }))
+            }}
+        />
 
         {/* Описание */}
         {renderFormField(
