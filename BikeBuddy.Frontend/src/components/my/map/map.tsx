@@ -297,6 +297,8 @@ export function RouteMap({ markers, onMarkersChange, onRouteChange }: RouteMapPr
   const [mouseCoordinates, setMouseCoordinates] = useState<[number, number] | null>(null)
   const apiKey = import.meta.env.VITE_NEXT_PUBLIC_GEOAPIFY_API_KEY
 
+  const isUpdating = useRef(false);
+
   const [routeLayer] = useState(
     new VectorLayer({
       source: new VectorSource(),
@@ -332,26 +334,39 @@ export function RouteMap({ markers, onMarkersChange, onRouteChange }: RouteMapPr
     const modify = new Modify({ source: markersLayer.getSource()! })
     map.addInteraction(modify)
 
-    const updatePonterFunc = (event: any) => {
-      const feature = event.features.getArray()[0]
-      const geometry = feature.getGeometry() as Point
-      const coordinates = transform(geometry.getCoordinates(), "EPSG:3857", "EPSG:4326") as [number, number]
-        
-      const id = feature.get("id")
-      const markerIndex = markers.findIndex((m) => m.id === id)
-      
-      if (markerIndex !== -1) {
-        const newMarkers = [...markers]
-        newMarkers[markerIndex] = {
-          ...newMarkers[markerIndex],
-          coordinates,
+    const updatePointerFunc = async (event: any) => {
+      if (isUpdating.current) return;
+      isUpdating.current = true;
+  
+      try {
+        const feature = event.features.getArray()[0];
+        const geometry = feature.getGeometry() as Point;
+        const coordinates = transform(geometry.getCoordinates(), "EPSG:3857", "EPSG:4326") as [number, number];
+  
+        // Обновление адреса
+        const address = await getAddress(coordinates);
+  
+        const id = feature.get("id");
+        const markerIndex = markers.findIndex((m) => m.id === id);
+  
+        if (markerIndex !== -1) {
+          const newMarkers = [...markers];
+          newMarkers[markerIndex] = {
+            ...newMarkers[markerIndex],
+            address,
+            coordinates,
+          };
+          onMarkersChange(newMarkers);
         }
-        onMarkersChange(newMarkers)
+      } catch (error) {
+        console.error("Ошибка при обновлении маркера:", error);
+      } finally {
+        isUpdating.current = false;
       }
-    }
+    };
 
     // Обработчик для обновления маршрута при изменении позиции метки
-    modify.on("modifyend", updatePonterFunc)
+    modify.on("modifyend", updatePointerFunc)
 
     markersLayer.getSource()?.clear()
 
@@ -364,12 +379,24 @@ export function RouteMap({ markers, onMarkersChange, onRouteChange }: RouteMapPr
       markersLayer.getSource()?.addFeature(feature)
     })
 
-    if (markers.length >= 2) {
-      calculateRoute(markers.map((m) => m.coordinates))
-    } else {
-      routeLayer.getSource()?.clear()
-    }
+    const calculateRouteAsync = async () => {
+      if (markers.length >= 2) {
+        try {
+          await calculateRoute(markers.map((m) => m.coordinates));
+        } catch (error) {
+          console.error("Ошибка при расчете маршрута:", error);
+        }
+      } else {
+        routeLayer.getSource()?.clear();
+      }
+    };
+  
+    // Вызов асинхронной функции
+    calculateRouteAsync();
     
+    return () => {
+      map.removeInteraction(modify);
+    };
   }, [markers, map, markersLayer])
 
   useEffect(() => {
@@ -380,7 +407,7 @@ export function RouteMap({ markers, onMarkersChange, onRouteChange }: RouteMapPr
       layers: [
         new TileLayer({
           source: new XYZ({
-            url: `https://maps.geoapify.com/v1/tile/klokantech-basic/{z}/{x}/{y}.png?apiKey=${apiKey}`,
+            url: `https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}@2x.png?apiKey=${apiKey}`,
           }),
         }),
         routeLayer,

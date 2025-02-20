@@ -48,11 +48,11 @@ interface MarkerListProps {
 
 export function MarkerList({ markers, onDelete, onReorder }: MarkerListProps) {
   return (
-    <div className="lg:w-80 sm:w-auto bg-background border-l flex flex-col h-full">
+    <div className="lg:w-96 sm:w-auto bg-background border-l flex flex-col h-full">
       <div className="p-4 border-b">
         <h2 className="font-semibold">Маршрутные точки</h2>
       </div>
-      <div className="p-4 space-y-2 overflow-y-auto flex-1">
+      <div className="p-4 space-y-2 overflow-y-auto flex-1" style={{ minHeight: "200px", maxHeight: "calc(100vh - 200px)" }}>
         <SortableContext items={markers.map((m) => m.id)} strategy={verticalListSortingStrategy}>
           {markers.map((marker) => (
             <MarkerItem key={marker.id} id={marker.id} address={marker.address} onDelete={onDelete} />

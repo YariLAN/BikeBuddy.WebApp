@@ -58,7 +58,7 @@ export function RouteMapContainer({ onRouteChange }: RouteMapContainerProps) {
   }
 
   return (
-    <div className="flex h-full lg:flex-row sm:flex-col">
+    <div className="flex lg:h-[630px] sm:h-full lg:flex-row sm:flex-col">
       <div className="flex-1">
         <RouteMap onRouteChange={onRouteChange} markers={markers} onMarkersChange={setMarkers} />
       </div>
