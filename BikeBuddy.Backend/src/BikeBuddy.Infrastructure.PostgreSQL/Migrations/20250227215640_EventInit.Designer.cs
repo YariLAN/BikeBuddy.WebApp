@@ -3,6 +3,7 @@ using System;
 using BikeBuddy.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BikeBuddy.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250227215640_EventInit")]
+    partial class EventInit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -142,7 +145,7 @@ namespace BikeBuddy.Infrastructure.Migrations
                         .HasColumnName("end_address");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_date");
 
                     b.Property<string>("Name")
@@ -158,7 +161,7 @@ namespace BikeBuddy.Infrastructure.Migrations
                         .HasColumnName("start_address");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_date");
 
                     b.Property<string>("Status")
@@ -194,7 +197,7 @@ namespace BikeBuddy.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<DateTime?>("BirthDay")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("birth_day");
 
                     b.Property<string>("MiddleName")

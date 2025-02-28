@@ -1,4 +1,6 @@
-﻿using System.Security.Claims;
+﻿using BikeBuddy.Domain.Shared;
+using CSharpFunctionalExtensions;
+using System.Security.Claims;
 
 namespace BikeBuddy.Application.Services.Auth;
 
@@ -13,4 +15,6 @@ public interface IJwtProvider
     ClaimsPrincipal? GetPrincipalFromAccessToken(string accessToken);
 
     Guid? GetUserIdFromClaims(ClaimsPrincipal claimsPrincipal);
+
+    Result<Guid, Error> GetUserIdFromAccessToken(string accessToken);
 }

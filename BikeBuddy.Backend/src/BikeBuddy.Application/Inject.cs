@@ -3,6 +3,7 @@ using BikeBuddy.Application.Services.Auth.Login;
 using BikeBuddy.Application.Services.Auth.Logout;
 using BikeBuddy.Application.Services.Auth.Refresh;
 using BikeBuddy.Application.Services.Auth.Register;
+using BikeBuddy.Application.Services.Event.CreateEventService;
 using BikeBuddy.Application.Services.Profile.CreateProfileService;
 using BikeBuddy.Application.Services.Profile.GetProfileService;
 using BikeBuddy.Application.Services.Profile.UpdateProfileService;
@@ -45,6 +46,8 @@ public static class Inject
         services.AddTransient<IGetProfileService, GetProfileService>();
         services.AddTransient<ICreateProfileService, CreateProfileService>();
         services.AddTransient<IUpdateProfileService, UpdateProfileService>();
+
+        services.AddTransient<ICreateEventService, CreateEventService>();
 
         return services;
     }

@@ -33,14 +33,10 @@ public class RefreshService : IRefreshService
         if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
             return Error.UnAuthorized("Forbidden");
 
-        var principal = _jwtProvider.GetPrincipalFromAccessToken(accessToken);
+        var userId = _jwtProvider.GetUserIdFromAccessToken(accessToken);
 
-        if (principal is null)
-            return Error.UnAuthorized("Invalid Access Token");
-
-        var userId = _jwtProvider.GetUserIdFromClaims(principal);
-        if (!userId.HasValue)
-            return Error.UnAuthorized("Invalid Access Token");
+        if (!userId.IsFailure)
+            return userId.Error;
 
         var dbRefreshToken = await _refreshTokensRepository.Get(userId.Value, refreshToken, cancellationToken);
         if (dbRefreshToken is null)
@@ -52,6 +48,11 @@ public class RefreshService : IRefreshService
 
             return Error.UnAuthorized("Refresh Token expires");
         }
+
+        var principal = _jwtProvider.GetPrincipalFromAccessToken(accessToken);
+
+        if (principal is null)
+            return Error.UnAuthorized("Invalid Access Token");
 
         var (token, expiresAt) = _jwtProvider.GenerateAccessToken(principal.Claims);
         var newRefreshToken = _jwtProvider.GenerateRefreshToken();

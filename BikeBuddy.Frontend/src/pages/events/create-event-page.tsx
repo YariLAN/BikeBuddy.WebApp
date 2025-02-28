@@ -47,6 +47,7 @@ export default function CreateEventPage() {
     endDateTime: undefined,
     distance: undefined,
     bikeType: undefined,
+    count_members: undefined,
     images: [],
   })
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
@@ -154,6 +155,7 @@ export default function CreateEventPage() {
           'Подробно опишите событие',
           <Textarea
             value={formData.description || ''}
+            maxLength={400}
             onChange={(e) => handleInputChange('description', e.target.value)}
             className={cn(
               "min-h-[150px]",
@@ -272,6 +274,20 @@ export default function CreateEventPage() {
             </Select>
           )}
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {renderFormField(
+            'count_members',
+            'Количество участников заезда (включая вас)',
+            'Введите число участников',
+            <Input
+              type="number"
+              value={formData.count_members || 1}
+              
+            />
+          )}
+        </div>
+
 
         {/* Загрузка изображений */}
         <div className="space-y-2">

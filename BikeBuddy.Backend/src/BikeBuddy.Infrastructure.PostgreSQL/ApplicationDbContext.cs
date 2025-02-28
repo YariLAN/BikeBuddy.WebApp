@@ -1,5 +1,6 @@
-﻿using BikeBuddy.Domain.Models;
-using BikeBuddy.Domain.Models.AuthControl;
+﻿using BikeBuddy.Domain.Models.AuthControl;
+using BikeBuddy.Domain.Models.EventControl;
+using BikeBuddy.Domain.Models.ProfileControl;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,8 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<UserRefreshToken> RefreshTokens { get; set; }
 
+    public DbSet<Event> Events { get; set; }
+
     public ApplicationDbContext(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -27,7 +30,7 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql(_configuration.GetConnectionString(DATABASE));
+        optionsBuilder.UseNpgsql("Server=localhost;Port=5445;Database=BikeBuddyDb;User Id=postgres;Password=postgres;");
 
         optionsBuilder.UseSnakeCaseNamingConvention();
 

@@ -1,4 +1,4 @@
-﻿using BikeBuddy.Domain.Models;
+﻿using BikeBuddy.Domain.Models.ProfileControl;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 

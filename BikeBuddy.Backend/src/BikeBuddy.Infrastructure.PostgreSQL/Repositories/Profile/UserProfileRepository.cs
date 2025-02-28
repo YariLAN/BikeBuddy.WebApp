@@ -1,5 +1,5 @@
 ﻿using BikeBuddy.Application.Services.Profile;
-using BikeBuddy.Domain.Models;
+using BikeBuddy.Domain.Models.ProfileControl;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;

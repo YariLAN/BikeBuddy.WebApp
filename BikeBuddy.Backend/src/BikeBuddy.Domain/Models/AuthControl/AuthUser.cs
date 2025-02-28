@@ -1,6 +1,5 @@
-﻿using Microsoft.VisualBasic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using BikeBuddy.Domain.Models.EventControl;
+using BikeBuddy.Domain.Models.ProfileControl;
 
 namespace BikeBuddy.Domain.Models.AuthControl;
 
@@ -23,6 +22,8 @@ public class AuthUser
     public UserProfile UserProfile { get; private set; }
 
     public List<UserRefreshToken> RefreshTokens { get; private set; } = [];
+
+    public List<Event> Events { get; private set; } = [];
 
     private AuthUser() { }
 

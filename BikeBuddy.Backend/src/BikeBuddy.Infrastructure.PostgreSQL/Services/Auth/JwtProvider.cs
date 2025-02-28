@@ -1,5 +1,7 @@
 ﻿using BikeBuddy.Application.Options;
 using BikeBuddy.Application.Services.Auth;
+using BikeBuddy.Domain.Shared;
+using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -77,5 +79,19 @@ public class JwtProvider : IJwtProvider
         var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? claimsPrincipal.FindFirstValue("userId");
 
         return userId is not null ? new Guid(userId) : null;
+    }
+
+    public Result<Guid, Error> GetUserIdFromAccessToken(string accessToken)
+    {
+        var principal = GetPrincipalFromAccessToken(accessToken);
+
+        if (principal is null)
+            return Error.UnAuthorized("Invalid Access Token");
+
+        var userId = GetUserIdFromClaims(principal);
+        if (!userId.HasValue)
+            return Error.UnAuthorized("Invalid Access Token");
+
+        return userId.Value;
     }
 }

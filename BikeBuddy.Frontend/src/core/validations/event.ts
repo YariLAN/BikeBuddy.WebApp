@@ -33,6 +33,10 @@ export const eventSchema = yup.object({
     .string()
     .oneOf(['road', 'mtb', 'hybrid', 'any'], "Некорректный тип велосипеда")
     .required("Тип велосипеда обязателен"),
+  count_members: yup
+    .number()
+    .min(1, "Участников не может быть ноль")
+    .required("Число участников заезда обязательно"),
   images: yup
     .array()
     .of(yup.string())
