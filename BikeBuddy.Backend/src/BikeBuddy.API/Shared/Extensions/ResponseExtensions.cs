@@ -32,4 +32,12 @@ public static class ResponseExtensions
 
         return new OkObjectResult(result.Value);
     }
+
+    public static ActionResult ToValidationResponse(this List<Error> errors)
+    {
+        return new ObjectResult(errors[0])
+        {
+            StatusCode = StatusCodes.Status400BadRequest,
+        };
+    }
 }

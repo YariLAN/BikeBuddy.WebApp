@@ -1,6 +1,7 @@
 using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application;
 using BikeBuddy.Infrastructure;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,11 @@ builder.Services.AddAuthentication(builder.Configuration);
 
 builder.Services.AddInfrastructure();
 builder.Services.AddApplication(builder.Configuration);
+
+builder.Services.AddFluentValidationAutoValidation(configuration =>
+{
+    configuration.OverrideDefaultResultFactoryWith<CustomValidationResultFactory>();
+});
 
 builder.Services.AddCors("CorsPolicy");
 

@@ -3,6 +3,8 @@
 
 public record Error
 {
+    const string SEPARATOR = "||";
+
     public string Message { get; }
 
     public ErrorType Type { get; }
@@ -36,6 +38,28 @@ public record Error
     public static Error UnAuthorized(string message)
     {
         return new Error(message, ErrorType.Unauthorized);
+    }
+
+    public string Serialize()
+    {
+        return string.Join(SEPARATOR, Message, Type);
+    }
+
+    public static Error Deserialize(string serialized)
+    {
+        var parts = serialized.Split(SEPARATOR);
+
+        if (parts.Length < 2)
+        {
+            throw new ArgumentException("Invalid serialized format");
+        }
+
+        if (Enum.TryParse<ErrorType>(parts[1], out var type) == false)
+        {
+            throw new ArgumentException("Invalid serialized format");
+        }
+
+        return new Error(parts[0], type);
     }
 }
 

@@ -3,6 +3,7 @@ using BikeBuddy.Application.DtoModels.Profile;
 using BikeBuddy.Application.Services.Profile.CreateProfileService;
 using BikeBuddy.Application.Services.Profile.GetProfileService;
 using BikeBuddy.Application.Services.Profile.UpdateProfileService;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,7 @@ public class ProfileController : ControllerBase
     [HttpPost("{userId:guid}")]
     public async Task<ActionResult<bool>> CreateUserProfile(
         [FromServices] ICreateProfileService createProfileService,
+        [FromServices] IValidator<UserProfileRequest> validator,
         [FromRoute] string userId, 
         [FromBody] UserProfileRequest request,
         CancellationToken cancellationToken)
@@ -40,6 +42,7 @@ public class ProfileController : ControllerBase
     [HttpPut("{userId:guid}")]
     public async Task<ActionResult<bool>> UpdateUserProfile(
         [FromServices] IUpdateProfileService updateProfileService,
+        [FromServices] IValidator<UserProfileRequest> validator,
         [FromRoute] string userId,
         [FromBody] UserProfileRequest request,
         CancellationToken cancellationToken)

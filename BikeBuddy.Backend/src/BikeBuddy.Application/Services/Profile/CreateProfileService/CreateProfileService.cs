@@ -11,12 +11,7 @@ public class CreateProfileService(IUserProfileRepository userProfileRepository, 
 {
     public async Task<Result<bool, Error>> ExecuteAsync(Guid userId, UserProfileRequest request, CancellationToken cancellationToken)
     {
-        // Proccess - Validation
-
         var addressResult = Address.Create(request.Address);
-
-        if (addressResult.IsFailure)
-            return addressResult.Error;
 
         var user = authRepository.GetAsync(userId, cancellationToken);
 

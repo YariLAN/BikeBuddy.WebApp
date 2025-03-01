@@ -13,24 +13,14 @@ public class CreateEventService(
 {
     public async Task<Result<Guid, Error>> ExecuteAsync(CreateEventRequest request, CancellationToken cancellationToken)
     {
-        // Validation
-
-        var points = request.Points.Select(p => Point.Create(p.Lat, p.Lon));
-
-        if (points.Any(x => x.IsFailure))
-            return points.FirstOrDefault(x => x.IsFailure)!.Error;
-
-        if (points.Count() <= 0)
-            return Error.Validation("Маршрут не построен");
-
-        // Validation
+        var points = request.Points.Select(p => Point.Create(p.Lat, p.Lon)).Select(x => x.Value);
 
         var userId = await authRepository.GetAsync(request.UserId, cancellationToken);
 
         if (userId is null)
-            return Error.NotFound("Пользователь не найден");
+            return Errors.General.NotFound(request.UserId);
 
-        var dbEvent = EventMapper.ToMap(request);
+        var dbEvent = EventMapper.ToMap(request, points);
 
         var eventResult = await eventRepository.CreateAsync(dbEvent, cancellationToken);
 

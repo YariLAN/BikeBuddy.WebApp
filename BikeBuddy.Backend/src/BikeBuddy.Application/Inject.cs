@@ -7,6 +7,7 @@ using BikeBuddy.Application.Services.Event.CreateEventService;
 using BikeBuddy.Application.Services.Profile.CreateProfileService;
 using BikeBuddy.Application.Services.Profile.GetProfileService;
 using BikeBuddy.Application.Services.Profile.UpdateProfileService;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,7 +48,10 @@ public static class Inject
         services.AddTransient<ICreateProfileService, CreateProfileService>();
         services.AddTransient<IUpdateProfileService, UpdateProfileService>();
 
+        // Event
         services.AddTransient<ICreateEventService, CreateEventService>();
+
+        services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
 
         return services;
     }

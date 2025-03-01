@@ -5,7 +5,7 @@ namespace BikeBuddy.Application.Mappers.Event;
 
 internal class EventMapper
 {
-    public static Domain.Models.EventControl.Event ToMap(CreateEventRequest request)
+    public static Domain.Models.EventControl.Event ToMap(CreateEventRequest request, IEnumerable<Point> points)
     {
         return Domain.Models.EventControl.Event.Create(
             id: Guid.NewGuid(),
@@ -19,7 +19,7 @@ internal class EventMapper
             endAddress: request.EndAddress,
             startDate: request.StartDate,
             endDate: request.EndDate,
-            details: EventDetails.Create(request.Points),
+            details: EventDetails.Create(points),
             status: request.Status,
             createdBy: request.UserId);
     }
