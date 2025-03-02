@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { ValidationService } from "@/core/services/ValidationService"
 import { eventSchema, type EventFormData } from "@/core/validations/event"
 import { Button } from "@/components/ui/button"
@@ -23,33 +23,47 @@ import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
-import { Card, CardContent } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { RouteMap } from "@/components/my/map/map"
-import { RouteMapContainer } from "@/components/my/map/route-map-container"
+import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
+import { BicycleType, EventType } from "@/core/models/event-models"
 
 const validationService = new ValidationService(eventSchema)
 
 const bikeTypes = [
-  { value: 'road', label: 'Шоссейный' },
-  { value: 'mtb', label: 'Горный' },
-  { value: 'hybrid', label: 'Гибрид' },
-  { value: 'any', label: 'Любой' },
+  { value: BicycleType.Default,  label: 'Городской' },
+  { value: BicycleType.Road,     label: 'Шоссейный' },
+  { value: BicycleType.Mountain, label: 'Горный' },
+  { value: BicycleType.BMX,      label: 'BMX' },
+  { value: BicycleType.Any,      label: 'Любой' },
 ]
 
+const eventTypes = [
+  { value: EventType.Solo,      label: 'Индивидуальный' },
+  { value: EventType.Group,     label: 'Групповой' },
+  { value: EventType.Leisure,   label: 'Прогулка' },
+  { value: EventType.Race,      label: 'Веломарафон' },
+  { value: EventType.Challenge, label: 'Вызов' },
+  { value: EventType.Training,  label: 'Тренировка'},
+  { value: EventType.Tour,      label: 'Путешествие'}
+]
+
+
 export default function CreateEventPage() {
+  const routeMapRef = useRef<RouteMapContainerRef>(null)
   const [formData, setFormData] = useState<Partial<EventFormData>>({
     title: '',
     description: '',
+    type: undefined,
+    bikeType: undefined,
     startAddress: '',
     endAddress: '',
     startDateTime: undefined,
     endDateTime: undefined,
     distance: undefined,
-    bikeType: undefined,
     count_members: undefined,
     images: [],
   })
+  
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -76,7 +90,15 @@ export default function CreateEventPage() {
     }
 
     try {
-      // Здесь будет отправка данных на сервер
+      const mapImage = await routeMapRef.current?.exportMap()
+
+      const dataToSubmit = {
+        ...formData,
+        mapImage,
+      }
+
+      console.log(mapImage)
+      
       await new Promise(resolve => setTimeout(resolve, 1000))
       console.log("Form data:", formData)
     } catch (error) {
@@ -90,7 +112,8 @@ export default function CreateEventPage() {
     name: string,
     label: string,
     tooltip: string,
-    component: React.ReactNode
+    component: React.ReactNode,
+    positionTooltip: string = "right-3"
   ) => (
     <div className="space-y-2">
       <label className="text-sm font-medium leading-none">
@@ -99,7 +122,7 @@ export default function CreateEventPage() {
       <div className="relative">
         {component}
         {errors[name] && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+          <div className={`absolute ${positionTooltip} top-1/2 transform -translate-y-1/2`}>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -135,6 +158,7 @@ export default function CreateEventPage() {
 
         {/* Карта */}
         <RouteMapContainer 
+            ref={routeMapRef}
             onRouteChange={({ startAddress, endAddress, distance, duration }) => {
                 setFormData(prev => ({
                 ...prev,
@@ -158,11 +182,87 @@ export default function CreateEventPage() {
             maxLength={400}
             onChange={(e) => handleInputChange('description', e.target.value)}
             className={cn(
+              "max-h-[200px]",
               "min-h-[150px]",
               errors.description && "border-red-500"
             )}
           />
         )}
+
+        {/* Тип заезда и тип велосипеда */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {renderFormField(
+            'type',
+            'Тип заезда',
+            'Выберите рекомендуемый тип велосипеда',
+            <Select
+              value={formData.type?.toString()}
+              onValueChange={(value) => handleInputChange('type', value)}
+            >
+              <SelectTrigger className={errors.bikeType ? 'border-red-500' : ''}>
+                <SelectValue placeholder="Выберите тип" />
+              </SelectTrigger>
+              <SelectContent>
+                {eventTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value.toString()}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>,
+            'right-8'
+          )}
+
+          {renderFormField(
+            'bikeType',
+            'Тип велосипеда',
+            'Выберите рекомендуемый тип велосипеда',
+            <Select
+              value={formData.bikeType?.toString()}
+              onValueChange={(value) => handleInputChange('bikeType', value)}
+            >
+              <SelectTrigger className={errors.bikeType ? 'border-red-500' : ''}>
+                <SelectValue placeholder="Выберите тип велосипеда" />
+              </SelectTrigger>
+              <SelectContent>
+                {bikeTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value.toString()}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>,
+            'right-8'
+          )}
+        </div>
+
+        {/* Дистанция и кол-во участников */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {renderFormField(
+            'count_members',
+            'Количество участников заезда (включая вас)',
+            'Введите число участников',
+            <Input
+              type="number"
+              value={formData.count_members}
+              onChange={(e) => handleInputChange('count_members', Number(e.target.value))}
+            />,
+            'right-8'
+          )}
+
+          {renderFormField(
+            'distance',
+            'Длина маршрута',
+            'Рассчитывается автоматически',
+            <Input
+              type="number"
+              value={formData.distance || ''}
+              disabled
+              className="bg-muted"
+            />
+          )}
+
+        </div>
 
         {/* Адреса и время */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -238,56 +338,6 @@ export default function CreateEventPage() {
             )}
           </div>
         </div>
-
-        {/* Дистанция и тип велосипеда */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {renderFormField(
-            'distance',
-            'Длина маршрута',
-            'Рассчитывается автоматически',
-            <Input
-              type="number"
-              value={formData.distance || ''}
-              disabled
-              className="bg-muted"
-            />
-          )}
-
-          {renderFormField(
-            'bikeType',
-            'Тип велосипеда',
-            'Выберите рекомендуемый тип велосипеда',
-            <Select
-              value={formData.bikeType}
-              onValueChange={(value) => handleInputChange('bikeType', value)}
-            >
-              <SelectTrigger className={errors.bikeType ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Выберите тип велосипеда" />
-              </SelectTrigger>
-              <SelectContent>
-                {bikeTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {renderFormField(
-            'count_members',
-            'Количество участников заезда (включая вас)',
-            'Введите число участников',
-            <Input
-              type="number"
-              value={formData.count_members || 1}
-              
-            />
-          )}
-        </div>
-
 
         {/* Загрузка изображений */}
         <div className="space-y-2">

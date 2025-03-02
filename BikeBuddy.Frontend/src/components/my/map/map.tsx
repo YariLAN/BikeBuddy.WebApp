@@ -252,7 +252,7 @@
 "use client"
 
 import "ol/ol.css"
-import { useEffect, useRef, useState } from "react"
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { Map } from "ol"
 import View from "ol/View"
 import TileLayer from "ol/layer/Tile"
@@ -267,6 +267,10 @@ import { Select } from "ol/interaction"
 import Modify from "ol/interaction/Modify"
 import { click } from "ol/events/condition"
 import { CoordinatesDisplay } from "./coordinates-display"
+
+export interface RouteMapRef {
+  exportMap: () => Promise<string | null>
+}
 
 interface RouteMapProps {
   markers: Array<{
@@ -291,7 +295,8 @@ interface RouteMapProps {
 
 let nextId = 1
 
-export function RouteMap({ markers, onMarkersChange, onRouteChange }: RouteMapProps) {
+export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap({ markers, onMarkersChange, onRouteChange }, ref) 
+{
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<Map | null>(null)
   const [mouseCoordinates, setMouseCoordinates] = useState<[number, number] | null>(null)
@@ -311,10 +316,32 @@ export function RouteMap({ markers, onMarkersChange, onRouteChange }: RouteMapPr
     }),
   )
 
-  const [markersLayer] = useState(
-    new VectorLayer({
-      source: new VectorSource(),
-      style: new Style({
+  const getMarkerStyle = (index: number, total: number) => {
+    if (index === 0) {
+      // Start marker
+      return new Style({
+        image: new Icon({
+          src: "/start-marker.svg",
+          width: 35,
+          height: 45,
+          anchor: [0.5, 1],
+        }),
+        zIndex: 13,
+      })
+    } else if (index === total - 1 && total > 1) {
+      // End marker
+      return new Style({
+        image: new Icon({
+          src: "/end-marker.svg",
+          width: 35,
+          height: 45,
+          anchor: [0.5, 1],
+        }),
+        zIndex: 13,
+      })
+    } else {
+      // Intermediate markers
+      return new Style({
         image: new Icon({
           src: "/marker.svg",
           width: 35,
@@ -322,7 +349,18 @@ export function RouteMap({ markers, onMarkersChange, onRouteChange }: RouteMapPr
           anchor: [0.5, 1],
         }),
         zIndex: 12,
-      }),
+      })
+    }
+  }
+
+  const [markersLayer] = useState(
+    new VectorLayer({
+      source: new VectorSource(),
+      style: (feature) => {
+        const id = feature.get("id")
+        const index = markers.findIndex((m) => m.id === id)
+        return getMarkerStyle(index, markers.length)
+      },
     }),
   )
 
@@ -408,6 +446,7 @@ export function RouteMap({ markers, onMarkersChange, onRouteChange }: RouteMapPr
         new TileLayer({
           source: new XYZ({
             url: `https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}@2x.png?apiKey=${apiKey}`,
+            crossOrigin: 'anonymous',
           }),
         }),
         routeLayer,
@@ -538,6 +577,40 @@ export function RouteMap({ markers, onMarkersChange, onRouteChange }: RouteMapPr
     }
   }, [map, markers, onMarkersChange, getAddress])
 
+  const exportMap = () => {
+    if (!map) return null
+
+    return new Promise((resolve) => {
+      map.once("rendercomplete", () => {
+        const canvas = document.createElement("canvas")
+        const size = map.getSize()
+        if (!size) return resolve(null)
+
+        canvas.width = size[0]
+        canvas.height = size[1]
+
+        const mapCanvas = map.getViewport().querySelector("canvas")
+        if (!mapCanvas) return resolve(null)
+
+        const context = canvas.getContext("2d")
+        if (!context) return resolve(null)
+
+        context.drawImage(mapCanvas, 0, 0)
+
+        // base64 image
+        const imageData = canvas.toDataURL("image/png")
+        resolve(imageData)
+      })
+
+      // Trigger a map render
+      map.renderSync()
+    })
+  }
+
+  useImperativeHandle(ref, () => ({
+    exportMap,
+  }))
+
   return (
     <div
       ref={mapRef}
@@ -547,6 +620,4 @@ export function RouteMap({ markers, onMarkersChange, onRouteChange }: RouteMapPr
       <CoordinatesDisplay coordinates={mouseCoordinates} />
     </div>
   )
-}
-
-
+})

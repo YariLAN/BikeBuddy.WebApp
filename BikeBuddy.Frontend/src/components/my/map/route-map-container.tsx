@@ -2,8 +2,8 @@
 
 import { DndContext, type DragEndEvent, closestCenter } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
-import { useState, useCallback } from "react"
-import { RouteMap } from "./map"
+import { useState, useCallback, useRef, useImperativeHandle, forwardRef } from "react"
+import { RouteMap, RouteMapRef } from "./map"
 import { MarkerList } from "./marker-list"
 
 interface RouteMapContainerProps {
@@ -13,9 +13,15 @@ interface RouteMapContainerProps {
     distance: number
     duration: number
   }) => void
+  onExport?: (imageData: string) => void
 }
 
-export function RouteMapContainer({ onRouteChange }: RouteMapContainerProps) {
+export interface RouteMapContainerRef {
+  exportMap: () => Promise<string | null>
+}
+
+export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContainerProps>(function RouteMapContainer( { onRouteChange, onExport }, ref) {
+  const mapRef = useRef<RouteMapRef>(null)
   const [markers, setMarkers] = useState<
     Array<{
       id: number
@@ -23,6 +29,13 @@ export function RouteMapContainer({ onRouteChange }: RouteMapContainerProps) {
       coordinates: [number, number]
     }>
   >([])
+
+  // Forward the exportMap method through useImperativeHandle
+  useImperativeHandle(ref, () => ({
+    exportMap: async () => {
+      return (await mapRef.current?.exportMap()) || null
+    },
+  }))
 
   const handleMarkersUpdate = useCallback(
     (newMarkers: typeof markers) => {
@@ -32,8 +45,8 @@ export function RouteMapContainer({ onRouteChange }: RouteMapContainerProps) {
         onRouteChange?.({
           startAddress: first.address,
           endAddress: last.address,
-          distance: 0, // Это будет обновлено через RouteMap
-          duration: 0, // Это будет обновлено через RouteMap
+          distance: 0,
+          duration: 0,
         })
       }
     },
@@ -46,7 +59,6 @@ export function RouteMapContainer({ onRouteChange }: RouteMapContainerProps) {
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
-    
     const { active, over } = event
     if (!over || active.id === over.id) return
 
@@ -60,7 +72,7 @@ export function RouteMapContainer({ onRouteChange }: RouteMapContainerProps) {
   return (
     <div className="flex lg:h-[630px] sm:h-full lg:flex-row sm:flex-col">
       <div className="flex-1">
-        <RouteMap onRouteChange={onRouteChange} markers={markers} onMarkersChange={setMarkers} />
+        <RouteMap ref={mapRef} onRouteChange={onRouteChange} markers={markers} onMarkersChange={setMarkers} />
       </div>
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <MarkerList
@@ -74,5 +86,5 @@ export function RouteMapContainer({ onRouteChange }: RouteMapContainerProps) {
       </DndContext>
     </div>
   )
-}
+})
 

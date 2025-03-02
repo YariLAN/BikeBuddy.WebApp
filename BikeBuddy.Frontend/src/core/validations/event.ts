@@ -1,4 +1,9 @@
 import * as yup from "yup"
+import { BicycleType, EventType } from "../models/event-models"
+
+const typeValues = Object.values(EventType).filter((value) => typeof value === 'number');
+
+const bicycleTypeValues = Object.values(BicycleType).filter((value) => typeof value === 'number');
 
 export const eventSchema = yup.object({
   title: yup
@@ -30,12 +35,16 @@ export const eventSchema = yup.object({
     .min(1, "Минимальная дистанция 1 км")
     .required("Дистанция обязательна"),
   bikeType: yup
-    .string()
-    .oneOf(['road', 'mtb', 'hybrid', 'any'], "Некорректный тип велосипеда")
+    .number()
+    .oneOf(bicycleTypeValues, "Некорректный тип велосипеда")
     .required("Тип велосипеда обязателен"),
+  type: yup
+    .number()
+    .oneOf(typeValues, "Некорректный тип заезда")
+    .required(),
   count_members: yup
     .number()
-    .min(1, "Участников не может быть ноль")
+    .min(1, "Участников не может быть ноль или меньше")
     .required("Число участников заезда обязательно"),
   images: yup
     .array()

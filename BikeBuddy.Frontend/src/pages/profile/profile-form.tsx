@@ -149,6 +149,21 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
     }
   }
 
+  function suggestionsFilter(suggestions : any[]) {
+    const processedCity = [];
+
+    const filtered = suggestions.filter(value => {
+      if (!value.properties.city) {
+        return false;
+      } else {
+        processedCity.push(value.properties.street);
+        return true;
+      }
+    })
+
+    return filtered;
+  }
+
   const renderFormField = (
     name: string,
     label: string,
@@ -361,11 +376,12 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
                     value={formData.address}    
                     onUserInput={(value) => {formData.address = value}}            
                     placeSelect={(value) => {
-                      formData.address = `${value.properties.city}, ${value.properties.country}`;
+                      formData.address =`${value.properties.city}, ${value.properties.country}`;
                     }} 
                     postprocessHook={(value) => {
-                      return `${value.properties.city}, ${value.properties.country}` 
+                      return `${value.properties.city}, ${value.properties.country}`; 
                     }}
+                    suggestionsFilter={suggestionsFilter}
                   />
               </GeoapifyContext>
             </div>
