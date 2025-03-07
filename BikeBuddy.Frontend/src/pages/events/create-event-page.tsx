@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
-import { BicycleType, EventType } from "@/core/models/event-models"
+import { BicycleType, EventType, Marker, markerToPoint } from "@/core/models/event-models"
 
 const validationService = new ValidationService(eventSchema)
 
@@ -62,6 +62,8 @@ export default function CreateEventPage() {
     distance: undefined,
     count_members: undefined,
     images: [],
+    points: [],
+    mapImageDataUrl: ''
   })
   
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
@@ -90,14 +92,10 @@ export default function CreateEventPage() {
     }
 
     try {
-      const mapImage = await routeMapRef.current?.exportMap()
-
-      const dataToSubmit = {
-        ...formData,
-        mapImage,
-      }
-
-      console.log(mapImage)
+      const mapExport = await routeMapRef.current?.exportMap()
+      
+      formData.mapImageDataUrl = mapExport?.imageData
+      formData.points = mapExport?.markers.map(m => markerToPoint(m))
       
       await new Promise(resolve => setTimeout(resolve, 1000))
       console.log("Form data:", formData)
@@ -111,7 +109,7 @@ export default function CreateEventPage() {
   const renderFormField = (
     name: string,
     label: string,
-    tooltip: string,
+    _tooltip: string,
     component: React.ReactNode,
     positionTooltip: string = "right-3"
   ) => (

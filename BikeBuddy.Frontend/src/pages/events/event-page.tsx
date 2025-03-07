@@ -49,7 +49,7 @@ const tempEvents = [
     participants: 12,
     distance: "10 км",
     description: "Романтическая вечерняя прогулка по освещенным паркам и набережным города.",
-    image: "/Снимок экрана 2025-02-02 025449.jpg",
+    image: "/example_map.png",
   },
   {
     id: 5,

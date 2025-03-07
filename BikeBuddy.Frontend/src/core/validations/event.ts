@@ -1,5 +1,5 @@
 import * as yup from "yup"
-import { BicycleType, EventType } from "../models/event-models"
+import { BicycleType, EventType, Point } from "../models/event-models"
 
 const typeValues = Object.values(EventType).filter((value) => typeof value === 'number');
 
@@ -52,4 +52,7 @@ export const eventSchema = yup.object({
     .max(5, "Максимум 5 изображений")
 })
 
-export type EventFormData = yup.InferType<typeof eventSchema>
+export type EventFormData = yup.InferType<typeof eventSchema> & {
+  points: Point[]
+  mapImageDataUrl: string | null; 
+};

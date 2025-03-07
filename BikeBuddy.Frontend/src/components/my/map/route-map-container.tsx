@@ -5,6 +5,7 @@ import { arrayMove } from "@dnd-kit/sortable"
 import { useState, useCallback, useRef, useImperativeHandle, forwardRef } from "react"
 import { RouteMap, RouteMapRef } from "./map"
 import { MarkerList } from "./marker-list"
+import { Marker } from "@/core/models/event-models"
 
 interface RouteMapContainerProps {
   onRouteChange?: (route: {
@@ -13,11 +14,17 @@ interface RouteMapContainerProps {
     distance: number
     duration: number
   }) => void
-  onExport?: (imageData: string) => void
+  onExport?: (
+    imageData: string,
+    markers: Array<Marker>,
+  ) => void
 }
 
 export interface RouteMapContainerRef {
-  exportMap: () => Promise<string | null>
+  exportMap: () => Promise<{
+    imageData: string | null
+    markers: Array<Marker>
+  }>
 }
 
 export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContainerProps>(function RouteMapContainer( { onRouteChange, onExport }, ref) {
@@ -33,7 +40,8 @@ export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContai
   // Forward the exportMap method through useImperativeHandle
   useImperativeHandle(ref, () => ({
     exportMap: async () => {
-      return (await mapRef.current?.exportMap()) || null
+      const result = await mapRef.current?.exportMap()
+      return result || { imageData: null, markers: [] }
     },
   }))
 

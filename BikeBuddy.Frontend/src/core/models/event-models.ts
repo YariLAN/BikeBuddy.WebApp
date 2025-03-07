@@ -23,11 +23,19 @@ export enum EventType {
     Tour = 6
 }
 
+export interface Marker {
+    id : number,
+    address: string,
+    coordinates: [number, number]
+} 
+
 export interface Point {
     Lat : string,
     Lon : string
 } 
 
-export interface Event {
-    
-}
+// Преобразование Marker в Point
+export const markerToPoint = (marker: Marker): Point => ({
+    Lat: marker.coordinates[0].toString(),
+    Lon: marker.coordinates[1].toString(),
+});

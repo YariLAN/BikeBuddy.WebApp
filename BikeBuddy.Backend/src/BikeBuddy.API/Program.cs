@@ -13,7 +13,7 @@ builder.Services.AddCustomSwaggerGen();
 
 builder.Services.AddAuthentication(builder.Configuration);
 
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
 
 builder.Services.AddFluentValidationAutoValidation(configuration =>
