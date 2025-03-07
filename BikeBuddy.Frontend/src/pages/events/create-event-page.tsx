@@ -26,6 +26,8 @@ import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
 import { BicycleType, EventType, Marker, markerToPoint } from "@/core/models/event-models"
+import useEventStore from "@/stores/event"
+import { alertExpectedError } from "@/core/helpers"
 
 const validationService = new ValidationService(eventSchema)
 
@@ -63,12 +65,14 @@ export default function CreateEventPage() {
     count_members: undefined,
     images: [],
     points: [],
-    mapImageDataUrl: ''
+    mapImageFile: null
   })
   
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-
+  
+  const eventStore = useEventStore()
+  
   const validateField = async (field: string, value: any) => {
     await validationService.validateField(field, value, setErrors)
   }
@@ -91,12 +95,21 @@ export default function CreateEventPage() {
       return
     }
 
+    
     try {
       const mapExport = await routeMapRef.current?.exportMap()
       
-      formData.mapImageDataUrl = mapExport?.imageData
       formData.points = mapExport?.markers.map(m => markerToPoint(m))
+      formData.mapImageFile = mapExport?.blobImage
       
+      var file = new File([mapExport!.blobImage!], 'map.png', {type : mapExport!.blobImage!.type })
+      const formFile = new FormData();
+      formFile.append("file", file)
+      
+      var resultUpload = await eventStore.uploadMap("9dbb31c7-7de9-4209-ab8b-7b8b932ca783", formFile)
+
+      if (resultUpload.error) { alertExpectedError(resultUpload.error) }
+
       await new Promise(resolve => setTimeout(resolve, 1000))
       console.log("Form data:", formData)
     } catch (error) {

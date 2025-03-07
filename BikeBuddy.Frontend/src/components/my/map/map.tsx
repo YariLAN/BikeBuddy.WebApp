@@ -17,11 +17,12 @@ import Modify from "ol/interaction/Modify"
 import { click } from "ol/events/condition"
 import { CoordinatesDisplay } from "./coordinates-display"
 import { Marker } from "@/core/models/event-models"
+import { convertDataUrlToBlob } from "@/lib/utils"
 
 
 export interface RouteMapRef {
   exportMap: () => Promise<{
-    imageData: string | null
+    blobImage: Blob | null
     markers: Array<Marker>
   }>
 }
@@ -345,9 +346,10 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
 
         // base64 image
         const imageData = canvas.toDataURL("image/png")
-        
+        const blobImage = convertDataUrlToBlob(imageData)
+
         resolve({
-          imageData,
+          blobImage,
           markers,
         })
       })

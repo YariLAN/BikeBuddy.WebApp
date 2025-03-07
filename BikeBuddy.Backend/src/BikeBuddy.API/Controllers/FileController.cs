@@ -8,18 +8,18 @@ namespace BikeBuddy.API.Controllers
     [ApiController]
     public class FileController : ControllerBase
     {
-        private const string NAME_MAP_IMAGE = "map.png";
+        private const string MAP_IMAGE_FILENAME = "map.png";
 
         [HttpPost("{eventId}/upload-route")]
-        public async Task<ActionResult<string>> UploadPhotoOfRoute(
-            [FromRoute] string eventId,
-            [FromServices] IFileProvider _fileProvider,
-            [FromBody] string dataUrl,
+        public async Task<ActionResult<string>> UploadImageOfRoute(
+            [FromRoute] Guid eventId,
+            IFormFile file,
+            [FromServices] IFileProvider fileProvider,
             CancellationToken cancellationToken)
         {
-            var resultUpload = await _fileProvider.UploadFileAsync(dataUrl, "event-images", $"{eventId}/{NAME_MAP_IMAGE}", cancellationToken);
+            var resutUpload = await fileProvider.UploadFileAsync(file, "event-images", $"{eventId}/{MAP_IMAGE_FILENAME}", cancellationToken);
 
-            return resultUpload.ToResponse();
+            return resutUpload.ToResponse();
         }
     }
 }

@@ -54,5 +54,5 @@ export const eventSchema = yup.object({
 
 export type EventFormData = yup.InferType<typeof eventSchema> & {
   points: Point[]
-  mapImageDataUrl: string | null; 
+  mapImageFile: Blob | null; 
 };

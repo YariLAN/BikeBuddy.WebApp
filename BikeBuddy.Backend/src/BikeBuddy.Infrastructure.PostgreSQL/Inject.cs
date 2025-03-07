@@ -36,15 +36,18 @@ public static class Inject
     {
         services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.MINIO));
 
+        var minioOptions = configuration.GetSection(MinioOptions.MINIO).Get<MinioOptions>()
+                           ?? throw new ApplicationException("Missing minio configuration");
+
         services.AddMinio(options =>
         {
             var minioOptions = configuration.GetSection(MinioOptions.MINIO).Get<MinioOptions>()
                                ?? throw new ApplicationException("Missing minio configuration");
 
-            options.WithEndpoint(minioOptions.Endpoint);
-
-            options.WithCredentials(minioOptions.AccessKey, minioOptions.SecretKey);
-            options.WithSSL(minioOptions.WithSsl);
+            options.WithEndpoint(minioOptions.Endpoint)
+                   .WithCredentials(minioOptions.AccessKey, minioOptions.SecretKey)
+                   .WithSSL(minioOptions.WithSsl)
+                   .Build();
         });
 
         services.AddTransient<IFileProvider, MinioProvider>();

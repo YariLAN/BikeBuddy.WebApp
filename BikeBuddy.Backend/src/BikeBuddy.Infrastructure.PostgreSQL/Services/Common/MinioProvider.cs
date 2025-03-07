@@ -1,6 +1,8 @@
 ﻿using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Domain.Shared;
+using BikeBuddy.Infrastructure.Extensions;
 using CSharpFunctionalExtensions;
+using Microsoft.AspNetCore.Http;
 using Minio;
 using Minio.DataModel.Args;
 
@@ -36,6 +38,16 @@ public class MinioProvider : IFileProvider
             return fileBytesResult.Error;
 
         return await UploadFileAsync(fileBytesResult.Value, bucketName, objectName, cancellationToken);
+    }
+
+    public async Task<Result<string, Error>> UploadFileAsync(IFormFile file, string bucketName, string objectName, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+            return Error.Validation("File is empty");
+
+        var fileData = await file.ToByteArrayAsync();
+
+        return await UploadFileAsync(fileData, bucketName, objectName, cancellationToken);
     }
 
     public Task<List<string>> UploadFilesAsync(List<(byte[] fileData, string objectName)> files, string bucketName)

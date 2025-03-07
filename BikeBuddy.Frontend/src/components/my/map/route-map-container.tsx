@@ -22,7 +22,7 @@ interface RouteMapContainerProps {
 
 export interface RouteMapContainerRef {
   exportMap: () => Promise<{
-    imageData: string | null
+    blobImage: Blob | null
     markers: Array<Marker>
   }>
 }
@@ -41,7 +41,7 @@ export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContai
   useImperativeHandle(ref, () => ({
     exportMap: async () => {
       const result = await mapRef.current?.exportMap()
-      return result || { imageData: null, markers: [] }
+      return result || { blobImage: null, markers: [] }
     },
   }))
 

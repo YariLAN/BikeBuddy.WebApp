@@ -147,6 +147,29 @@ export class ApiService {
         return response as ApiResponse<T>
     }
 
+    async file_post<T>(
+        url: string, 
+        data: any = null, 
+        withCredentials: boolean = false, 
+        contentType: string = 'multipart/form-data'): Promise<ApiResponse<T>> 
+    {
+        try {
+            const response: AxiosResponse = await this.api.post(url, data, { 
+                withCredentials: withCredentials,
+                headers: {
+                    'Content-Type' : contentType
+                }
+            });
+            return {
+                data: response.data,
+                status: response.status,
+            };
+        }
+        catch (err : any) {
+            return {error: err.message, status: err.status }
+        }
+    }
+
     async put<T>(url: string, data: any): Promise<ApiResponse<T>> {
         try {
             const response: AxiosResponse = await this.api.put(url, data);
