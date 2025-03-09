@@ -21,3 +21,12 @@ export function convertDataUrlToBlob(dataUrl: string) : Blob {
 
   return new Blob([byteArray], { type: mediaType });
 }
+
+export function convertBlobToFormData(fileBlob: Blob, fileName: string) {
+  var file = new File([fileBlob], fileName, {type : fileBlob.type })
+
+  const formFile = new FormData();
+  formFile.append("file", file)
+
+  return formFile
+}

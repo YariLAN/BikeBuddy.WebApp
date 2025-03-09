@@ -1,3 +1,20 @@
+
+export interface CreateEventRequest {
+    name: string,
+    description : string,
+    type : EventType,
+    bicycleType : BicycleType,
+    countMembers : number,
+    distance : number,
+    startAddress : string,
+    endAddress : string,
+    startDate : Date,
+    endDate : Date,
+    userId : string,
+    points : Point[]
+    status : EventStatus
+}
+
 export enum EventStatus {
 	Opened = 0,
 	Closed = 1,

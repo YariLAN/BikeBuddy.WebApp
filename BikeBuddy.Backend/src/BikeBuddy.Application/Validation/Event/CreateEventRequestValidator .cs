@@ -7,16 +7,16 @@ namespace BikeBuddy.Application.Validation.Event;
 
 public class CreateEventRequestValidation : AbstractValidator<CreateEventRequest>
 {
-    [Obsolete]
     public CreateEventRequestValidation()
     {
         ClassLevelCascadeMode = CascadeMode.StopOnFirstFailure;
 
         RuleFor(e => e.Name)
-            .MaximumLength(Constants.LOW_TEXT_LENGTH)
-            .WithError(Errors.General.ValueIsInvalidLength("Name"))
+            .NotNull()
             .NotEmpty()
-            .WithError(Errors.General.ValueIsEmpty("Name"));
+            .WithError(Errors.General.ValueIsEmpty("Name"))
+            .MaximumLength(Constants.LOW_TEXT_LENGTH)
+            .WithError(Errors.General.ValueIsInvalidLength("Name"));
 
         RuleFor(e => e.Description)
             .MaximumLength(Constants.HIGH_TEXT_LENGTH)

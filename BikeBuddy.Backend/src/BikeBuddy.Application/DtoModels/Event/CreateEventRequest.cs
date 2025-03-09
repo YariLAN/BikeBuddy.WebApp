@@ -8,11 +8,13 @@ public record CreateEventRequest(
     EventType Type,
     BicycleType BicycleType,
     int CountMembers,
-    int Distance,
+    double Distance,
     string StartAddress,
     string EndAddress,
     DateTime StartDate,
     DateTime EndDate,
     Guid UserId,
-    IEnumerable<Point> Points,
+    IEnumerable<PointDto> Points,
     EventStatus Status);
+
+public record PointDto(string Lat, string Lon);

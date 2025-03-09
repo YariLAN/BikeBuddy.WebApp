@@ -25,9 +25,10 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
-import { BicycleType, EventType, Marker, markerToPoint } from "@/core/models/event-models"
+import { BicycleType, CreateEventRequest, EventStatus, EventType, Marker, markerToPoint } from "@/core/models/event-models"
 import useEventStore from "@/stores/event"
-import { alertExpectedError } from "@/core/helpers"
+import { alertExpectedError, alertInfo } from "@/core/helpers"
+import JwtService from "@/core/services/JwtService"
 
 const validationService = new ValidationService(eventSchema)
 
@@ -53,19 +54,20 @@ const eventTypes = [
 export default function CreateEventPage() {
   const routeMapRef = useRef<RouteMapContainerRef>(null)
   const [formData, setFormData] = useState<Partial<EventFormData>>({
-    title: '',
+    name: '',
     description: '',
     type: undefined,
-    bikeType: undefined,
+    bicycleType: undefined,
     startAddress: '',
     endAddress: '',
-    startDateTime: undefined,
-    endDateTime: undefined,
+    startDate: undefined,
+    endDate: undefined,
     distance: undefined,
-    count_members: undefined,
-    images: [],
+    countMembers: undefined,
     points: [],
-    mapImageFile: null
+    status: EventStatus.Opened
+    // images: [],
+    // mapImageFile: null
   })
   
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
@@ -77,8 +79,13 @@ export default function CreateEventPage() {
     await validationService.validateField(field, value, setErrors)
   }
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const handleInputChange = (field: keyof Partial<EventFormData>, value: any) => {
+    if (field == 'type' || field == 'bicycleType') {
+      setFormData(prev => ({ ...prev, [field]: Number(value) }))
+    } 
+    else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
     validateField(field, value)
   }
 
@@ -95,25 +102,32 @@ export default function CreateEventPage() {
       return
     }
 
-    
     try {
-      const mapExport = await routeMapRef.current?.exportMap()
-      
-      formData.points = mapExport?.markers.map(m => markerToPoint(m))
-      formData.mapImageFile = mapExport?.blobImage
-      
-      var file = new File([mapExport!.blobImage!], 'map.png', {type : mapExport!.blobImage!.type })
-      const formFile = new FormData();
-      formFile.append("file", file)
-      
-      var resultUpload = await eventStore.uploadMap("9dbb31c7-7de9-4209-ab8b-7b8b932ca783", formFile)
+      console.log("Form data:", formData)
 
-      if (resultUpload.error) { alertExpectedError(resultUpload.error) }
+      const mapExport = await routeMapRef.current?.exportMap()
+      formData.points = mapExport?.markers.map(m => markerToPoint(m))
+          
+      formData.userId = JwtService.decodeToken()?.nameId
+      var createEventResult = await eventStore.createEvent(formData as CreateEventRequest)
+
+      if (createEventResult.error) { 
+        alertExpectedError(createEventResult.error) 
+        return
+      }
+
+      var resultUpload = await eventStore.uploadMap(createEventResult.data!, mapExport!.blobImage!)
+
+      if (resultUpload.error) { 
+        alertExpectedError(resultUpload.error) 
+      }
+      else {
+        alertInfo("", "Заезд успешно создан", 'success')
+      }
 
       await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log("Form data:", formData)
-    } catch (error) {
-      console.error("Error submitting form:", error)
+    } catch (error: any) {
+      alertExpectedError(error.message)
     } finally {
       setIsSubmitting(false)
     }
@@ -157,13 +171,13 @@ export default function CreateEventPage() {
       <form onSubmit={onSubmit} className="space-y-8">
         {/* Название */}
         {renderFormField(
-          'title',
+          'name',
           'Название',
           'Введите название события',
           <Input
-            value={formData.title || ''}
-            onChange={(e) => handleInputChange('title', e.target.value)}
-            className={errors.title ? 'border-red-500' : ''}
+            value={formData.name || ''}
+            onChange={(e) => handleInputChange('name', e.target.value)}
+            className={errors.name ? 'border-red-500' : ''}
           />
         )}
 
@@ -176,8 +190,8 @@ export default function CreateEventPage() {
                 startAddress,
                 endAddress,
                 distance,
-                endDateTime: prev.startDateTime 
-                    ? new Date(prev.startDateTime.getTime() + duration * 60000)
+                endDate: prev.startDate 
+                    ? new Date(prev.startDate.getTime() + duration * 60000)
                     : undefined
                 }))
             }}
@@ -210,7 +224,7 @@ export default function CreateEventPage() {
               value={formData.type?.toString()}
               onValueChange={(value) => handleInputChange('type', value)}
             >
-              <SelectTrigger className={errors.bikeType ? 'border-red-500' : ''}>
+              <SelectTrigger className={errors.type ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Выберите тип" />
               </SelectTrigger>
               <SelectContent>
@@ -225,14 +239,14 @@ export default function CreateEventPage() {
           )}
 
           {renderFormField(
-            'bikeType',
+            'bicycleType',
             'Тип велосипеда',
             'Выберите рекомендуемый тип велосипеда',
             <Select
-              value={formData.bikeType?.toString()}
-              onValueChange={(value) => handleInputChange('bikeType', value)}
+              value={formData.bicycleType?.toString()}
+              onValueChange={(value) => handleInputChange('bicycleType', value)}
             >
-              <SelectTrigger className={errors.bikeType ? 'border-red-500' : ''}>
+              <SelectTrigger className={errors.bicycleType ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Выберите тип велосипеда" />
               </SelectTrigger>
               <SelectContent>
@@ -250,13 +264,13 @@ export default function CreateEventPage() {
         {/* Дистанция и кол-во участников */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {renderFormField(
-            'count_members',
+            'countMembers',
             'Количество участников заезда (включая вас)',
             'Введите число участников',
             <Input
               type="number"
-              value={formData.count_members}
-              onChange={(e) => handleInputChange('count_members', Number(e.target.value))}
+              value={formData.countMembers}
+              onChange={(e) => handleInputChange('countMembers', Number(e.target.value))}
             />,
             'right-8'
           )}
@@ -291,7 +305,7 @@ export default function CreateEventPage() {
             )}
 
             {renderFormField(
-              'startDateTime',
+              'startDate',
               'Начало события',
               'Выберите дату и время начала',
               <Popover>
@@ -300,13 +314,13 @@ export default function CreateEventPage() {
                     variant={"outline"}
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !formData.startDateTime && "text-muted-foreground",
-                      errors.startDateTime && "border-red-500"
+                      !formData.startDate && "text-muted-foreground",
+                      errors.startDate && "border-red-500"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.startDateTime ? (
-                      format(formData.startDateTime, "PPp", { locale: ru })
+                    {formData.startDate ? (
+                      format(formData.startDate, "PPp", { locale: ru })
                     ) : (
                       <span>Выберите дату и время</span>
                     )}
@@ -315,8 +329,8 @@ export default function CreateEventPage() {
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    selected={formData.startDateTime}
-                    onSelect={(date) => handleInputChange('startDateTime', date)}
+                    selected={formData.startDate}
+                    onSelect={(date) => handleInputChange('startDate', date)}
                     initialFocus
                   />
                 </PopoverContent>
@@ -338,11 +352,11 @@ export default function CreateEventPage() {
             )}
 
             {renderFormField(
-              'endDateTime',
+              'endDate',
               'Конец события',
               'Рассчитывается автоматически',
               <Input
-                value={formData.endDateTime ? format(formData.endDateTime, "PPp", { locale: ru }) : ''}
+                value={formData.endDate ? format(formData.endDate, "PPp", { locale: ru }) : ''}
                 disabled
                 className="bg-muted"
               />
@@ -363,9 +377,9 @@ export default function CreateEventPage() {
                   "aspect-square rounded-lg border-2 border-dashed",
                   "flex items-center justify-center",
                   "cursor-pointer hover:border-primary/50 transition-colors",
-                  index < (formData.images?.length || 0)
-                    ? "border-primary bg-primary/10"
-                    : "border-muted"
+                  // index < (formData.images?.length || 0)
+                  //   ? "border-primary bg-primary/10"
+                  //   : "border-muted"
                 )}
               >
                 <Upload className="h-6 w-6 text-muted-foreground" />

@@ -120,7 +120,7 @@ export class ApiService {
         if (error.response) {
             const response = error.response.data as ApiError;
 
-            apiError.message = (response.message.length <= 250) ? response.message : 'Произошла ошибка при выполнении запроса';
+            apiError.message = (response?.message?.length <= 250) ? response.message : 'Произошла ошибка при выполнении запроса';
         } else if (error.request) {
             apiError.message = 'Сервер не отвечает';
         } else {

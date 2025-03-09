@@ -14,7 +14,7 @@ internal class EventMapper
             type: request.Type,
             bicycleType: request.BicycleType,
             countMembers: request.CountMembers,
-            distance: request.Distance,
+            distance: (int)(request.Distance * 1000),
             startAddress: request.StartAddress,
             endAddress: request.EndAddress,
             startDate: request.StartDate,
