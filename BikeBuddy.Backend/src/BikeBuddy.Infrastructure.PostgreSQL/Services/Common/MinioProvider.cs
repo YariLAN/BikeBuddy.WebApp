@@ -5,6 +5,7 @@ using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
 using Minio;
 using Minio.DataModel.Args;
+using Minio.Exceptions;
 
 namespace BikeBuddy.Infrastructure.Services.Common;
 
@@ -40,6 +41,7 @@ public class MinioProvider : IFileProvider
         return await UploadFileAsync(fileBytesResult.Value, bucketName, objectName, cancellationToken);
     }
 
+
     public async Task<Result<string, Error>> UploadFileAsync(IFormFile file, string bucketName, string objectName, CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0)
@@ -50,30 +52,43 @@ public class MinioProvider : IFileProvider
         return await UploadFileAsync(fileData, bucketName, objectName, cancellationToken);
     }
 
+
     public Task<List<string>> UploadFilesAsync(List<(byte[] fileData, string objectName)> files, string bucketName)
     {
         throw new NotImplementedException();
     }
 
-    private async Task IfBucketsNotExistCreateBucket(IEnumerable<string> buckets, CancellationToken cancellationToken)
+    public async Task<Result<string, Error>> GetFileByFileNamesAsync(string fileName, string bucketName, CancellationToken cancellationToken)
     {
-        HashSet<string> bucketNames = [.. buckets];
-
-        foreach (var bucketName in bucketNames)
+        try
         {
-            var bucketExistArgs = new BucketExistsArgs().WithBucket(bucketName);
+            var statObjectArgs = new StatObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(fileName);
 
-            var isExist = await _minioClient.BucketExistsAsync(bucketExistArgs, cancellationToken);
-
-            if (!isExist)
+            try
             {
-                var makeBucketArgs = new MakeBucketArgs().WithBucket(bucketName);
-
-                await _minioClient.MakeBucketAsync(makeBucketArgs, cancellationToken);
+                await _minioClient.StatObjectAsync(statObjectArgs, cancellationToken);
             }
+            catch (MinioException)
+            {
+                return string.Empty;
+            }
+
+            var presignedUrl = await _minioClient.PresignedGetObjectAsync(
+                new PresignedGetObjectArgs()
+                    .WithBucket(bucketName)
+                    .WithObject(fileName)
+                    .WithExpiry(1800));
+
+            return presignedUrl;
+        }
+        catch (Exception ex)
+        {
+            return Error.Failure($"Failed to get image by file name: {ex.Message}");
         }
     }
-
+    
     private async Task<Result<string, Error>> PutObject(
         byte[] fileData,
         string bucketName,
@@ -109,5 +124,24 @@ public class MinioProvider : IFileProvider
         string base64Data = dataUrl.Split(',')[1];
 
         return Convert.FromBase64String(base64Data);
+    }
+
+    private async Task IfBucketsNotExistCreateBucket(IEnumerable<string> buckets, CancellationToken cancellationToken)
+    {
+        HashSet<string> bucketNames = [.. buckets];
+
+        foreach (var bucketName in bucketNames)
+        {
+            var bucketExistArgs = new BucketExistsArgs().WithBucket(bucketName);
+
+            var isExist = await _minioClient.BucketExistsAsync(bucketExistArgs, cancellationToken);
+
+            if (!isExist)
+            {
+                var makeBucketArgs = new MakeBucketArgs().WithBucket(bucketName);
+
+                await _minioClient.MakeBucketAsync(makeBucketArgs, cancellationToken);
+            }
+        }
     }
 }

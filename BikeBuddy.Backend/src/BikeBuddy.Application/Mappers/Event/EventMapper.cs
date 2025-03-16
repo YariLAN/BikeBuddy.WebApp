@@ -23,4 +23,23 @@ internal class EventMapper
             status: request.Status,
             createdBy: request.UserId);
     }
+
+    public static EventListResponse ToMap(Domain.Models.EventControl.Event dbEvent, string imageUrl)
+    {
+        return new EventListResponse(
+            dbEvent.Id,
+            dbEvent.Name,
+            dbEvent.Description,
+            dbEvent.Type,
+            dbEvent.BicycleType,
+            dbEvent.CountMembers,
+            ((double)dbEvent.Distance / 1000),
+            dbEvent.StartAddress,
+            dbEvent.EndAddress,
+            dbEvent.StartDate,
+            dbEvent.EndDate,
+            dbEvent.User.UserName,
+            dbEvent.Status,
+            imageUrl);
+    }
 }

@@ -1,6 +1,8 @@
 ﻿using BikeBuddy.API.Shared.Extensions;
+using BikeBuddy.Application.DtoModels.Common;
 using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Services.Event.CreateEventService;
+using BikeBuddy.Application.Services.Event.GetEventsService;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +15,7 @@ namespace BikeBuddy.API.Controllers
     [ApiController]
     public class EventController : ControllerBase
     {
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<ActionResult<Guid>> CreateEvent(
         [FromServices] ICreateEventService createEventService,
         [FromServices] IValidator<CreateEventRequest> validator,
@@ -21,6 +23,17 @@ namespace BikeBuddy.API.Controllers
         CancellationToken cancellationToken)
         {
             var result = await createEventService.ExecuteAsync(request, cancellationToken);
+
+            return result.ToResponse();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<PageData<EventListResponse>>> GetEventsAsync(
+            [FromServices] IGetEventsService getEventsService,
+            [FromBody] SearchFilterDto<EventFilterDto> request,
+            CancellationToken cancellationToken)
+        {
+            var result = await getEventsService.ExecuteAsync(request, cancellationToken);
 
             return result.ToResponse();
         }

@@ -4,6 +4,7 @@ using BikeBuddy.Application.Services.Auth.Logout;
 using BikeBuddy.Application.Services.Auth.Refresh;
 using BikeBuddy.Application.Services.Auth.Register;
 using BikeBuddy.Application.Services.Event.CreateEventService;
+using BikeBuddy.Application.Services.Event.GetEventsService;
 using BikeBuddy.Application.Services.Profile.CreateProfileService;
 using BikeBuddy.Application.Services.Profile.GetProfileService;
 using BikeBuddy.Application.Services.Profile.UpdateProfileService;
@@ -50,6 +51,7 @@ public static class Inject
 
         // Event
         services.AddTransient<ICreateEventService, CreateEventService>();
+        services.AddTransient<IGetEventsService, GetEventsService>();
 
         services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
 

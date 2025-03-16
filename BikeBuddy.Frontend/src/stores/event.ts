@@ -17,7 +17,7 @@ const useEventStore = create<EventState>(
             return result
         },
         createEvent: async (event: CreateEventRequest) => {
-            let result = await apiService.post<string>('/events/', event, true);
+            let result = await apiService.post<string>('/events/create', event, true);
             return result
         }
     })

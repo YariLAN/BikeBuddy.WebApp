@@ -1,10 +1,12 @@
-﻿using BikeBuddy.Domain.Models.EventControl.ValueObjects;
+﻿using BikeBuddy.Application.DtoModels.Profile;
+using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 
 namespace BikeBuddy.Application.DtoModels.Event;
 
-public record CreateEventRequest(
-    string Name, 
-    string Description, 
+public record EventResponse(
+    Guid eventId,
+    string Name,
+    string Description,
     EventType Type,
     BicycleType BicycleType,
     int CountMembers,
@@ -13,6 +15,6 @@ public record CreateEventRequest(
     string EndAddress,
     DateTime StartDate,
     DateTime EndDate,
-    Guid UserId,
+    UserProfileResponse Author,
     IEnumerable<PointDto> Points,
     EventStatus Status);
