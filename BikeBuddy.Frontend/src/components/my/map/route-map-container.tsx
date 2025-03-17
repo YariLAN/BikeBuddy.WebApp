@@ -5,7 +5,7 @@ import { arrayMove } from "@dnd-kit/sortable"
 import { useState, useCallback, useRef, useImperativeHandle, forwardRef } from "react"
 import { RouteMap, RouteMapRef } from "./map"
 import { MarkerList } from "./marker-list"
-import { Marker } from "@/core/models/event-models"
+import { Marker } from "@/core/models/event/event-models"
 
 interface RouteMapContainerProps {
   onRouteChange?: (route: {

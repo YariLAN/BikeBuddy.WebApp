@@ -1,5 +1,5 @@
 import * as yup from "yup"
-import { BicycleType, EventStatus, EventType, Point } from "../models/event-models"
+import { BicycleType, EventStatus, EventType, Point } from "../models/event/event-models"
 
 const typeValues = Object.values(EventType).filter((value) => typeof value === 'number');
 

@@ -16,7 +16,7 @@ import { Select } from "ol/interaction"
 import Modify from "ol/interaction/Modify"
 import { click } from "ol/events/condition"
 import { CoordinatesDisplay } from "./coordinates-display"
-import { Marker } from "@/core/models/event-models"
+import { Marker } from "@/core/models/event/event-models"
 import { convertDataUrlToBlob } from "@/lib/utils"
 
 

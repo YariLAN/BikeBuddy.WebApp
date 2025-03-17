@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
-import { BicycleType, CreateEventRequest, EventStatus, EventType, Marker, markerToPoint } from "@/core/models/event-models"
+import { BicycleType, CreateEventRequest, EventStatus, EventType, Marker, markerToPoint } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
 import { alertExpectedError, alertInfo } from "@/core/helpers"
 import JwtService from "@/core/services/JwtService"

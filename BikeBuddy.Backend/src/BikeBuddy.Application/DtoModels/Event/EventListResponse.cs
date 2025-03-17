@@ -16,4 +16,4 @@ public record EventListResponse(
     DateTime EndDate,
     string NameAuthor,
     EventStatus Status,
-    string ImageBase64);
+    string ImageUrl);
