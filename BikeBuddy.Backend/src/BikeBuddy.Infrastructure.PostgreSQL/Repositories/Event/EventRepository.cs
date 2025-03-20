@@ -47,6 +47,7 @@ public class EventRepository(ApplicationDbContext context) : IEventRepository
 
             return (
               await events
+                .OrderBy(x => x.CreatedAt)
                 .Skip(eventFilter.Offset)
                 .Take(eventFilter.Limit)
                 .ToListAsync(cancellationToken),

@@ -25,10 +25,11 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
-import { BicycleType, CreateEventRequest, EventStatus, EventType, Marker, markerToPoint } from "@/core/models/event/event-models"
+import { BicycleType, CreateEventRequest, EventStatus, EventType, markerToPoint } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
 import { alertExpectedError, alertInfo } from "@/core/helpers"
 import JwtService from "@/core/services/JwtService"
+import { useNavigate } from "react-router-dom"
 
 const validationService = new ValidationService(eventSchema)
 
@@ -52,6 +53,7 @@ const eventTypes = [
 
 
 export default function CreateEventPage() {
+  const navigate = useNavigate()
   const routeMapRef = useRef<RouteMapContainerRef>(null)
   const [formData, setFormData] = useState<Partial<EventFormData>>({
     name: '',
@@ -124,8 +126,9 @@ export default function CreateEventPage() {
       else {
         alertInfo("", "Заезд успешно создан", 'success')
       }
-
       await new Promise(resolve => setTimeout(resolve, 1000))
+
+      navigate('/events')
     } catch (error: any) {
       alertExpectedError(error.message)
     } finally {
