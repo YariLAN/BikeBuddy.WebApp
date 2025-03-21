@@ -1,15 +1,15 @@
 ﻿using BikeBuddy.Application.DtoModels.Profile;
 using BikeBuddy.Domain.Models.ProfileControl;
 
-namespace BikeBuddy.Application.Mappers.Profile;
+namespace BikeBuddy.Application.Mappers.User.Profile;
 
 public class UserProfileMapper
 {
     public static UserProfileResponse ToMap(UserProfile profile)
     {
         return new(
-            profile.Id, 
-            profile.Surname, 
+            profile.Id,
+            profile.Surname,
             profile.Name,
             profile.MiddleName,
             profile.BirthDay,
@@ -20,11 +20,11 @@ public class UserProfileMapper
     {
         return UserProfile.Create(
             Guid.NewGuid(),
-            userId, 
-            request.Surname, 
-            request.Name, 
-            request.MiddleName, 
-            request.BirthDay, 
+            userId,
+            request.Surname,
+            request.Name,
+            request.MiddleName,
+            request.BirthDay,
             address
         );
     }

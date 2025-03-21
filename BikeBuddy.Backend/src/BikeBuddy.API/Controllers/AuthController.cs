@@ -1,5 +1,5 @@
 ﻿using BikeBuddy.API.Shared.Extensions;
-using BikeBuddy.Application.DtoModels.Auth;
+using BikeBuddy.Application.DtoModels.User.Auth;
 using BikeBuddy.Application.Services.Auth.Login;
 using BikeBuddy.Application.Services.Auth.Logout;
 using BikeBuddy.Application.Services.Auth.Refresh;

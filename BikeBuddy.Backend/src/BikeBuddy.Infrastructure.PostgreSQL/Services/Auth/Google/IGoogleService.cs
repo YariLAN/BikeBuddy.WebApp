@@ -1,4 +1,4 @@
-﻿using BikeBuddy.Application.DtoModels.Auth;
+﻿using BikeBuddy.Application.DtoModels.User.Auth;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
 

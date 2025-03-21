@@ -1,5 +1,5 @@
 ﻿using BikeBuddy.Application.DtoModels.Profile;
-using BikeBuddy.Application.Mappers.Profile;
+using BikeBuddy.Application.Mappers.User.Profile;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 

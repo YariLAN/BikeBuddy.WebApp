@@ -9,7 +9,7 @@ public interface IEventRepository
 {
     Task<Result<Guid, Error>> CreateAsync(Domain.Models.EventControl.Event dbEvent, CancellationToken cancellationToken);
 
-    Task<Result<List<Domain.Models.EventControl.Event>, Error>> GetEventsAsync(CancellationToken token);
+    Task<Result<Domain.Models.EventControl.Event, Error>> GetEventAsync(Guid eventId, CancellationToken token);
 
     Task<Result<(List<Domain.Models.EventControl.Event>, int), Error>> GetEventsByFilterAsync(SearchFilterDto<EventFilterDto> eventFilter, CancellationToken token);
 }

@@ -2,6 +2,7 @@
 using BikeBuddy.Application.DtoModels.Common;
 using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Services.Event.CreateEventService;
+using BikeBuddy.Application.Services.Event.GetEventService;
 using BikeBuddy.Application.Services.Event.GetEventsService;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -37,5 +38,16 @@ namespace BikeBuddy.API.Controllers
 
             return result.ToResponse();
         }
+
+        [HttpGet("{eventId:Guid}")]
+        public async Task<ActionResult<EventResponse>> GetEventAsync(
+            [FromRoute] Guid eventId,
+            [FromServices] IGetEventService getEventService,
+            CancellationToken cancellationToken)
+        {
+            var result = await getEventService.ExecuteAsync(eventId, cancellationToken);
+
+            return result.ToResponse();
+        } 
     }
 }

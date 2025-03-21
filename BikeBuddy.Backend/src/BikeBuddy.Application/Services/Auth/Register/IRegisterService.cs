@@ -1,4 +1,4 @@
-﻿using BikeBuddy.Application.DtoModels.Auth;
+﻿using BikeBuddy.Application.DtoModels.User.Auth;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 

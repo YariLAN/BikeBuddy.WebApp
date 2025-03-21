@@ -1,6 +1,4 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace BikeBuddy.Domain.Shared;
+﻿namespace BikeBuddy.Domain.Shared;
 
 public class Errors
 {

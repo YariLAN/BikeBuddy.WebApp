@@ -1,10 +1,10 @@
-﻿using BikeBuddy.Application.DtoModels.Profile;
+﻿using BikeBuddy.Application.DtoModels.User;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 
 namespace BikeBuddy.Application.DtoModels.Event;
 
 public record EventResponse(
-    Guid eventId,
+    Guid EventId,
     string Name,
     string Description,
     EventType Type,
@@ -15,6 +15,6 @@ public record EventResponse(
     string EndAddress,
     DateTime StartDate,
     DateTime EndDate,
-    UserProfileResponse Author,
+    UserResponse Author,
     IEnumerable<PointDto> Points,
     EventStatus Status);

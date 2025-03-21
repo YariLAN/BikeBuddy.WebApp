@@ -1,4 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.Event;
+using BikeBuddy.Application.Mappers.User;
+using BikeBuddy.Application.Mappers.User.Profile;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 
 namespace BikeBuddy.Application.Mappers.Event;
@@ -41,5 +43,26 @@ internal class EventMapper
             dbEvent.User.UserName,
             dbEvent.Status,
             imageUrl);
+    }
+
+    public static EventResponse ToMap(Domain.Models.EventControl.Event dbEvent)
+    {
+        var userResponse = UserMapper.ToMap(dbEvent.User);
+
+        return new EventResponse(
+            dbEvent.Id,
+            dbEvent.Name,
+            dbEvent.Description,
+            dbEvent.Type,
+            dbEvent.BicycleType,
+            dbEvent.CountMembers,
+            dbEvent.Distance,
+            dbEvent.StartAddress,
+            dbEvent.EndAddress,
+            dbEvent.StartDate,
+            dbEvent.EndDate,
+            userResponse,
+            dbEvent.Details.Routes.Select(x => new PointDto(x.Lat, x.Lon)).ToList(),
+            dbEvent.Status);
     }
 }

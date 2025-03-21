@@ -1,7 +1,7 @@
-﻿using BikeBuddy.Application.DtoModels.Auth;
+﻿using BikeBuddy.Application.DtoModels.User.Auth;
 using BikeBuddy.Domain.Models.AuthControl;
 
-namespace BikeBuddy.Application.Mappers.Auth;
+namespace BikeBuddy.Application.Mappers.User.Auth;
 
 public class AuthMapper
 {

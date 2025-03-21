@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Event\GetEventService\" />
     <Folder Include="Services\Event\UpdateEventService\" />
     <Folder Include="Services\Event\DeleteEventService\" />
   </ItemGroup>

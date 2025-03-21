@@ -1,6 +1,6 @@
 ﻿using BikeBuddy.Domain.Models.AuthControl;
 
-namespace BikeBuddy.Application.Mappers.Auth;
+namespace BikeBuddy.Application.Mappers.User.Auth;
 
 public static class UserRefreshTokenMapper
 {

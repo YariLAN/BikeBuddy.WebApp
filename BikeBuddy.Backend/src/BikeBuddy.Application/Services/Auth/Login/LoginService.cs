@@ -1,5 +1,5 @@
-﻿using BikeBuddy.Application.DtoModels.Auth;
-using BikeBuddy.Application.Mappers.Auth;
+﻿using BikeBuddy.Application.DtoModels.User.Auth;
+using BikeBuddy.Application.Mappers.User.Auth;
 using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
