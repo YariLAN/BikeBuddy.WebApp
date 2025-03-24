@@ -25,3 +25,11 @@ public record Point
         return new Point(lat, lon);
     }
 }
+
+//public record PointDetails
+//{
+//    public int OrderId { get; }
+//    public Point Point { get; }
+
+//    public string Address { get; } = string.Empty;
+//}

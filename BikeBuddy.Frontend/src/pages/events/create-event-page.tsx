@@ -30,6 +30,7 @@ import useEventStore from "@/stores/event"
 import { alertExpectedError, alertInfo } from "@/core/helpers"
 import JwtService from "@/core/services/JwtService"
 import { useNavigate } from "react-router-dom"
+import { Card, CardContent } from "@/components/ui/card"
 
 const validationService = new ValidationService(eventSchema)
 
@@ -185,20 +186,24 @@ export default function CreateEventPage() {
         )}
 
         {/* Карта */}
-        <RouteMapContainer 
-            ref={routeMapRef}
-            onRouteChange={({ startAddress, endAddress, distance, duration }) => {
-                setFormData(prev => ({
-                ...prev,
-                startAddress,
-                endAddress,
-                distance,
-                endDate: prev.startDate 
-                    ? new Date(prev.startDate.getTime() + duration * 60000)
-                    : undefined
-                }))
-            }}
-        />
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            <RouteMapContainer 
+                ref={routeMapRef}
+                onRouteChange={({ startAddress, endAddress, distance, duration }) => {
+                    setFormData(prev => ({
+                    ...prev,
+                    startAddress,
+                    endAddress,
+                    distance,
+                    endDate: prev.startDate 
+                        ? new Date(prev.startDate.getTime() + duration * 60000)
+                        : undefined
+                    }))
+                }}
+            />
+          </CardContent>
+        </Card>
 
         {/* Описание */}
         {renderFormField(

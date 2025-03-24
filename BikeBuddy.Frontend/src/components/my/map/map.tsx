@@ -24,7 +24,8 @@ export interface RouteMapRef {
   exportMap: () => Promise<{
     blobImage: Blob | null
     markers: Array<Marker>
-  }>
+  }>,
+  getAddress: (coordinates: [number, number]) => Promise<string>
 }
 
 interface RouteMapProps {
@@ -38,11 +39,13 @@ interface RouteMapProps {
     distance: number
     duration: number
   }) => void
+  readOnly?: boolean
 }
 
 let nextId = 1
 
-export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap({ markers, onMarkersChange, onRouteChange }, ref) 
+export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap(
+  { markers, onMarkersChange, onRouteChange, readOnly = false  }, ref) 
 {
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<Map | null>(null)
@@ -115,9 +118,11 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
   useEffect(() => {
     if (!map) return
 
-    // Добавляем взаимодействие для изменения позиции меток
     const modify = new Modify({ source: markersLayer.getSource()! })
-    map.addInteraction(modify)
+
+    if (!readOnly) {
+      map.addInteraction(modify)
+    }
 
     const updatePointerFunc = async (event: any) => {
       if (isUpdating.current) return;
@@ -176,11 +181,12 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
       }
     };
   
-    // Вызов асинхронной функции
     calculateRouteAsync();
     
     return () => {
-      map.removeInteraction(modify);
+      if (!readOnly) {
+        map.removeInteraction(modify)
+      }
     };
   }, [markers, map, markersLayer])
 
@@ -207,11 +213,13 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
 
     setMap(initialMap)
 
-    const select = new Select({
-      layers: [markersLayer],
-      condition: click,
-    })
-    initialMap.addInteraction(select)
+    if (!readOnly) {
+      const select = new Select({
+        layers: [markersLayer],
+        condition: click,
+      })
+      initialMap.addInteraction(select)
+    }
 
     // Обработчик для отслеживания движения мыши
     const handlePointerMove = (event: any) => {
@@ -262,15 +270,6 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
         routeLayer.getSource()?.addFeature(routeFeature)
       })
 
-      // обновление начального адреса и конечного
-      // const [start, end] = await Promise.all([
-      //   getAddress(points[0]),
-      //   getAddress(points[points.length - 1]),
-      // ])
-
-      // markers[0].address = start
-      // markers[markers.length - 1].address = end
-
       if (onRouteChange) {
         onRouteChange({
           startAddress: markers[0].address,
@@ -301,7 +300,7 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
   }
 
   useEffect(() => {
-    if (!map) return
+    if (!map || readOnly) return
 
     const handleClick = async (event: any) => {
       const clickedCoord = map.getCoordinateFromPixel(event.pixel)
@@ -361,6 +360,7 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
 
   useImperativeHandle(ref, () => ({
     exportMap,
+    getAddress,
   }))
 
   return (

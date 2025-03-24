@@ -30,8 +30,8 @@ export interface Marker {
 } 
 
 export interface Point {
-    Lat : string,
-    Lon : string
+    lat : string,
+    lon : string
 } 
 
 ///
@@ -69,6 +69,33 @@ export interface EventListResponse {
     imageUrl : string
 } 
 
+export interface EventResponse {
+    eventId: string,
+    name: string,
+    description: string,
+    type: EventType,
+    bicycleType: BicycleType,
+    countMembers: number,
+    distance: number,
+    startAddress: string,
+    endAddress: string,
+    startDate: Date,
+    endDate: Date,
+    author: UserResponse
+    points: Point[]
+    status: EventStatus
+}
+
+export interface UserResponse {
+    userName: string,
+    email: string,
+    surname: string,
+    name: string,
+    middleName: string,
+    birthDay: string,
+    address: string
+}
+
 ///
 
 export interface EventFilterDto {
@@ -80,6 +107,12 @@ export interface EventFilterDto {
 
 // Преобразование Marker в Point
 export const markerToPoint = (marker: Marker): Point => ({
-    Lat: marker.coordinates[0].toString(),
-    Lon: marker.coordinates[1].toString(),
+    lat: marker.coordinates[0].toString(),
+    lon: marker.coordinates[1].toString(),
 });
+
+// export const markerToPointDetails = (marker: Marker) : any => ({
+//     orderId: marker.id,
+//     address: marker.address,
+//     point: markerToPoint(marker)
+// })

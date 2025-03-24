@@ -5,7 +5,7 @@ import { arrayMove } from "@dnd-kit/sortable"
 import { useState, useCallback, useRef, useImperativeHandle, forwardRef } from "react"
 import { RouteMap, RouteMapRef } from "./map"
 import { MarkerList } from "./marker-list"
-import { Marker } from "@/core/models/event/event-models"
+import { Marker, Point } from "@/core/models/event/event-models"
 
 interface RouteMapContainerProps {
   onRouteChange?: (route: {
@@ -17,17 +17,20 @@ interface RouteMapContainerProps {
   onExport?: (
     imageData: string,
     markers: Array<Marker>,
-  ) => void
+  ) => void,
+  readOnly?: boolean
 }
 
 export interface RouteMapContainerRef {
   exportMap: () => Promise<{
     blobImage: Blob | null
     markers: Array<Marker>
-  }>
+  }>,
+  setPoints: (points: Point[]) => void
 }
 
-export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContainerProps>(function RouteMapContainer( { onRouteChange, onExport }, ref) {
+export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContainerProps>(function RouteMapContainer( 
+  { onRouteChange, onExport, readOnly = false }, ref) {
   const mapRef = useRef<RouteMapRef>(null)
   const [markers, setMarkers] = useState<
     Array<{
@@ -42,6 +45,24 @@ export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContai
     exportMap: async () => {
       const result = await mapRef.current?.exportMap()
       return result || { blobImage: null, markers: [] }
+    },
+    setPoints: async (points: Point[]) => {
+      if (points && points.length > 0) {
+        const newMarkers = await Promise.all(
+          points.map(async (point, index) => {
+            const coord = [Number.parseFloat(point.lat), Number.parseFloat(point.lon)] as [number, number]
+            const address = await mapRef.current?.getAddress(coord) || "";
+
+            return {
+              id: index + 1,
+              address: address,
+              coordinates: coord,
+            } as Marker;
+          })
+        )
+
+        handleMarkersUpdate(newMarkers)
+      }
     },
   }))
 
@@ -80,9 +101,20 @@ export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContai
   return (
     <div className="flex lg:h-[630px] sm:h-full lg:flex-row sm:flex-col">
       <div className="flex-1">
-        <RouteMap ref={mapRef} onRouteChange={onRouteChange} markers={markers} onMarkersChange={setMarkers} />
+        <RouteMap ref={mapRef} onRouteChange={onRouteChange} markers={markers} onMarkersChange={setMarkers} readOnly={readOnly} />
       </div>
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      {!readOnly ? (
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <MarkerList
+            markers={markers}
+            onDelete={handleMarkerDelete}
+            onReorder={(newOrder) => {
+              const newMarkers = newOrder.map((id) => markers.find((m) => m.id === id)!)
+              handleMarkersUpdate(newMarkers)
+            }}
+          />
+        </DndContext>
+      ) : (
         <MarkerList
           markers={markers}
           onDelete={handleMarkerDelete}
@@ -90,8 +122,9 @@ export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContai
             const newMarkers = newOrder.map((id) => markers.find((m) => m.id === id)!)
             handleMarkersUpdate(newMarkers)
           }}
+          readOnly={readOnly}
         />
-      </DndContext>
+      )}
     </div>
   )
 })

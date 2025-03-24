@@ -15,6 +15,7 @@ import EventsPage from './pages/events/event-page'
 import JwtService from './core/services/JwtService';
 import { items } from './components/my/menu-items';
 import CreateEventPage from './pages/events/create-event-page';
+import EventDetailsPage from './pages/events/event-details-page';
 
 export default function App() {
 
@@ -81,6 +82,12 @@ export default function App() {
                 element={
                   authStore.isAuthenticated ? <CreateEventPage /> : <Navigate to="/" replace />
                 } 
+              />
+              <Route
+                path={`${items[0].url}/:eventId`}
+                element={
+                  authStore.isAuthenticated ? <EventDetailsPage /> : <Navigate to="/" replace />
+                }
               />
             </Routes>
           </div>
