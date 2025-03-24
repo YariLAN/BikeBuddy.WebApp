@@ -13,7 +13,9 @@ public class CreateEventService(
 {
     public async Task<Result<Guid, Error>> ExecuteAsync(CreateEventRequest request, CancellationToken cancellationToken)
     {
-        var points = request.Points.Select(p => Point.Create(p.Lat, p.Lon)).Select(x => x.Value);
+        var points = request.Points
+            .Select(p => PointDetails.Create(p.OrderId, p.Point.Lat, p.Point.Lon, p.Address))
+            .Select(x => x.Value);
 
         var userId = await authRepository.GetAsync(request.UserId, cancellationToken);
 

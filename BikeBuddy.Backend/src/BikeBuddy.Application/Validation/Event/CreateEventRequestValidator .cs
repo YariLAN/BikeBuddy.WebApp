@@ -51,7 +51,7 @@ public class CreateEventRequestValidation : AbstractValidator<CreateEventRequest
         RuleFor(e => e.UserId).NotEmpty().NotNull()
             .WithError(Errors.General.ValueIsEmpty("UserId"));
 
-        RuleForEach(e => e.Points).MustBeValueObject(x => Point.Create(x.Lat, x.Lon));
+        RuleForEach(e => e.Points).MustBeValueObject(x => PointDetails.Create(x.OrderId, x.Point.Lat, x.Point.Lon, x.Address));
 
         RuleFor(e => e.Status).IsInEnum().WithError(Errors.General.ValueIsInvalid("Status"));
     }

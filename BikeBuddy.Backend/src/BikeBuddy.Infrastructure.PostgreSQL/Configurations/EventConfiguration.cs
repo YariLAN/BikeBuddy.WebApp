@@ -37,9 +37,16 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             e.ToJson();
             e.OwnsMany(r => r.Routes, r =>
             {
-                r.Property(r => r.Lat).HasMaxLength(Constants.MIDDLE_LOW_TEXT_LENGTH);
+                r.Property(r => r.OrderId).IsRequired();
 
-                r.Property(r => r.Lon).HasMaxLength(Constants.MIDDLE_LOW_TEXT_LENGTH);
+                r.Property(r => r.Address).HasMaxLength(Constants.HIGH_TEXT_LENGTH);
+
+                r.OwnsOne(p => p.Point, p =>
+                {
+                   p.Property(p => p.Lat).HasMaxLength(Constants.MIDDLE_LOW_TEXT_LENGTH);
+
+                   p.Property(p => p.Lon).HasMaxLength(Constants.MIDDLE_LOW_TEXT_LENGTH);
+                });
             });
         });
 

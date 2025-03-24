@@ -14,5 +14,5 @@ public record CreateEventRequest(
     DateTime StartDate,
     DateTime EndDate,
     Guid UserId,
-    IEnumerable<PointDto> Points,
+    IEnumerable<PointDetailsDto> Points,
     EventStatus Status);

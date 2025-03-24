@@ -29,10 +29,16 @@ export interface Marker {
     coordinates: [number, number]
 } 
 
-export interface Point {
+interface Point {
     lat : string,
     lon : string
 } 
+
+export interface PointDetails {
+    orderId : number,
+    point : Point,
+    address : string
+}
 
 ///
 
@@ -48,7 +54,7 @@ export interface CreateEventRequest {
     startDate : Date,
     endDate : Date,
     userId : string,
-    points : Point[]
+    points : PointDetails[]
     status : EventStatus
 }
 
@@ -82,7 +88,7 @@ export interface EventResponse {
     startDate: Date,
     endDate: Date,
     author: UserResponse
-    points: Point[]
+    points: PointDetails[]
     status: EventStatus
 }
 
@@ -111,8 +117,8 @@ export const markerToPoint = (marker: Marker): Point => ({
     lon: marker.coordinates[1].toString(),
 });
 
-// export const markerToPointDetails = (marker: Marker) : any => ({
-//     orderId: marker.id,
-//     address: marker.address,
-//     point: markerToPoint(marker)
-// })
+export const markerToPointDetails = (marker: Marker) : PointDetails => ({
+    orderId: marker.id,
+    address: marker.address,
+    point: markerToPoint(marker)
+})

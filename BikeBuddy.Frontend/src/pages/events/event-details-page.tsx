@@ -8,7 +8,7 @@ import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound } from "lucide-react"
 import { RouteMapContainer, type RouteMapContainerRef } from "@/components/my/map/route-map-container"
-import { BicycleType, type EventResponse, EventStatus, EventType, Point } from "@/core/models/event/event-models"
+import { BicycleType, type EventResponse, EventStatus, EventType, PointDetails } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
 import { alertExpectedError } from "@/core/helpers"
 import { Card, CardContent } from "@/components/ui/card"
@@ -70,7 +70,7 @@ export default function EventDetailsPage() {
         setEvent(result.data)
 
         if (result.data.points && result.data.points.length > 0 && routeMapRef.current) {
-          routeMapRef.current.setPoints(result.data.points as Point[])
+          routeMapRef.current.setPoints(result.data.points as PointDetails[])
         }
       } else if (result.error) {
         setError(result.error)

@@ -1,5 +1,5 @@
 import * as yup from "yup"
-import { BicycleType, EventStatus, EventType, Point } from "../models/event/event-models"
+import { BicycleType, EventStatus, EventType, PointDetails } from "../models/event/event-models"
 
 const typeValues = Object.values(EventType).filter((value) => typeof value === 'number');
 
@@ -53,7 +53,7 @@ export const eventSchema = yup.object({
 })
 
 export type EventFormData = yup.InferType<typeof eventSchema> & {
-  points: Point[]
+  points: PointDetails[]
   // mapImageFile: Blob | null; 
   status : EventStatus
   userId : string

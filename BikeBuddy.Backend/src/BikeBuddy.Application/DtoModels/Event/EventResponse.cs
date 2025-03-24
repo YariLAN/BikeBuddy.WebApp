@@ -16,5 +16,5 @@ public record EventResponse(
     DateTime StartDate,
     DateTime EndDate,
     UserResponse Author,
-    IEnumerable<PointDto> Points,
+    IEnumerable<PointDetailsDto> Points,
     EventStatus Status);

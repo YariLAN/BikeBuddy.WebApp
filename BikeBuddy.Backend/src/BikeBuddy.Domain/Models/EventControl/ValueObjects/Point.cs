@@ -26,10 +26,33 @@ public record Point
     }
 }
 
-//public record PointDetails
-//{
-//    public int OrderId { get; }
-//    public Point Point { get; }
+public record PointDetails
+{
+    public int OrderId { get; }
 
-//    public string Address { get; } = string.Empty;
-//}
+    public Point Point { get; } = default!;
+
+    public string Address { get; } = string.Empty;
+
+    private PointDetails() { }
+
+    private PointDetails(int orderId, Point point, string address)
+    {
+        OrderId = orderId;
+        Point = point;
+        Address = address;
+    }
+
+    public static Result<PointDetails, Error> Create(int orderId, string lat, string lon, string address)
+    {
+        if (string.IsNullOrWhiteSpace(address) || string.IsNullOrWhiteSpace(lat) || string.IsNullOrWhiteSpace(lon))
+            return Error.Validation("Данные точки некорректны");
+
+        var point = Point.Create(lat, lon);
+
+        if (point.IsFailure)
+            return point.Error;
+
+        return new PointDetails(orderId, point.Value, address);
+    }
+}

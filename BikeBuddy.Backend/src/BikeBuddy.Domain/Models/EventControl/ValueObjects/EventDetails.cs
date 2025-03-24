@@ -2,16 +2,16 @@
 
 public record EventDetails
 {
-    public IReadOnlyList<Point> Routes { get; }
+    public IReadOnlyList<PointDetails> Routes { get; }
 
     public EventDetails() { }
 
-    public EventDetails(IEnumerable<Point> points)
+    public EventDetails(IEnumerable<PointDetails> points)
     {
         Routes = points.ToList();
     }
 
-    public static EventDetails Create(IEnumerable<Point> points)
+    public static EventDetails Create(IEnumerable<PointDetails> points)
     {
         return new EventDetails(points);
     }

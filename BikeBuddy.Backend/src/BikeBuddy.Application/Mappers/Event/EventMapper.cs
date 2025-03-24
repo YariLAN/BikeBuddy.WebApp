@@ -7,7 +7,7 @@ namespace BikeBuddy.Application.Mappers.Event;
 
 internal class EventMapper
 {
-    public static Domain.Models.EventControl.Event ToMap(CreateEventRequest request, IEnumerable<Point> points)
+    public static Domain.Models.EventControl.Event ToMap(CreateEventRequest request, IEnumerable<PointDetails> points)
     {
         return Domain.Models.EventControl.Event.Create(
             id: Guid.NewGuid(),
@@ -62,7 +62,11 @@ internal class EventMapper
             dbEvent.StartDate,
             dbEvent.EndDate,
             userResponse,
-            dbEvent.Details.Routes.Select(x => new PointDto(x.Lat, x.Lon)).ToList(),
+            (dbEvent.Details.Routes != null)
+                ? dbEvent.Details.Routes
+                    .Select(x => new PointDetailsDto(x.OrderId, new PointDto(x.Point.Lat, x.Point.Lon), x.Address))
+                    .ToList()
+                : [],
             dbEvent.Status);
     }
 }

@@ -5,7 +5,7 @@ import { arrayMove } from "@dnd-kit/sortable"
 import { useState, useCallback, useRef, useImperativeHandle, forwardRef } from "react"
 import { RouteMap, RouteMapRef } from "./map"
 import { MarkerList } from "./marker-list"
-import { Marker, Point } from "@/core/models/event/event-models"
+import { Marker, PointDetails } from "@/core/models/event/event-models"
 
 interface RouteMapContainerProps {
   onRouteChange?: (route: {
@@ -26,7 +26,7 @@ export interface RouteMapContainerRef {
     blobImage: Blob | null
     markers: Array<Marker>
   }>,
-  setPoints: (points: Point[]) => void
+  setPoints: (points: PointDetails[]) => void
 }
 
 export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContainerProps>(function RouteMapContainer( 
@@ -46,16 +46,15 @@ export const RouteMapContainer = forwardRef<RouteMapContainerRef, RouteMapContai
       const result = await mapRef.current?.exportMap()
       return result || { blobImage: null, markers: [] }
     },
-    setPoints: async (points: Point[]) => {
+    setPoints: async (points: PointDetails[]) => {
       if (points && points.length > 0) {
-        const newMarkers = await Promise.all(
-          points.map(async (point, index) => {
-            const coord = [Number.parseFloat(point.lat), Number.parseFloat(point.lon)] as [number, number]
-            const address = await mapRef.current?.getAddress(coord) || "";
-
+        const newMarkers = (
+          points.map((pd) => {
+            const coord = [Number.parseFloat(pd.point.lat), Number.parseFloat(pd.point.lon)] as [number, number]
+            
             return {
-              id: index + 1,
-              address: address,
+              id: pd.orderId,
+              address: pd.address || "",
               coordinates: coord,
             } as Marker;
           })

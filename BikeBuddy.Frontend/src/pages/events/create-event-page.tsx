@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
-import { BicycleType, CreateEventRequest, EventStatus, EventType, markerToPoint } from "@/core/models/event/event-models"
+import { BicycleType, CreateEventRequest, EventStatus, EventType, markerToPointDetails } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
 import { alertExpectedError, alertInfo } from "@/core/helpers"
 import JwtService from "@/core/services/JwtService"
@@ -109,7 +109,7 @@ export default function CreateEventPage() {
       console.log("Form data:", formData)
 
       const mapExport = await routeMapRef.current?.exportMap()
-      formData.points = mapExport?.markers.map(m => markerToPoint(m))
+      formData.points = mapExport?.markers.map(m => markerToPointDetails(m))
           
       formData.userId = JwtService.decodeToken()?.nameId
       var createEventResult = await eventStore.createEvent(formData as CreateEventRequest)
