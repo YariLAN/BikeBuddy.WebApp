@@ -1,4 +1,5 @@
-﻿using BikeBuddy.Domain.Models.EventControl;
+﻿using BikeBuddy.Domain.Models.ChatControl.Entities;
+using BikeBuddy.Domain.Models.EventControl;
 using BikeBuddy.Domain.Models.ProfileControl;
 
 namespace BikeBuddy.Domain.Models.AuthControl;
@@ -24,6 +25,10 @@ public class AuthUser
     public List<UserRefreshToken> RefreshTokens { get; private set; } = [];
 
     public List<Event> Events { get; private set; } = [];
+
+    public List<MemberGroupChat> Membership { get; private set; } = [];
+
+    public List<Message> Messages { get; private set; } = [];
 
     private AuthUser() { }
 

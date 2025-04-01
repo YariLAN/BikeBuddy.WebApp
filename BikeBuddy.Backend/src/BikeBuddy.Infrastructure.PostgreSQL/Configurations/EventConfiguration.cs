@@ -1,8 +1,10 @@
-﻿using BikeBuddy.Domain.Models.EventControl;
+﻿using BikeBuddy.Domain.Models.ChatControl;
+using BikeBuddy.Domain.Models.EventControl;
 using BikeBuddy.Domain.Shared;
 using BikeBuddy.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace BikeBuddy.Infrastructure.Configurations;
 
@@ -58,5 +60,10 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
                .WithMany(u => u.Events)
                .HasForeignKey(e => e.CreatedBy)
                .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(e => e.Chat)             
+            .WithOne(c => c.Event)            
+            .HasForeignKey<GroupChat>(c => c.EventId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

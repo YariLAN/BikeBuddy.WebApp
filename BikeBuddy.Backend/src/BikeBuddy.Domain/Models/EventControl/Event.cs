@@ -1,4 +1,5 @@
 ﻿using BikeBuddy.Domain.Models.AuthControl;
+using BikeBuddy.Domain.Models.ChatControl;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 
 namespace BikeBuddy.Domain.Models.EventControl;
@@ -33,11 +34,13 @@ public class Event : ICreatedUpdateAt
 
     public Guid? CreatedBy { get; set; }
 
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+    
     public AuthUser User { get; private set; } = default!;
 
-    public DateTime CreatedAt { get; set; }
-    
-    public DateTime? UpdatedAt { get; set; }
+    public GroupChat Chat { get; set; } = default!;
 
     public Event() { }
 

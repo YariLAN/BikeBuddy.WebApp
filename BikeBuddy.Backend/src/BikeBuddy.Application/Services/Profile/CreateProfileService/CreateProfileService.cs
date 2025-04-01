@@ -1,7 +1,7 @@
 ﻿using BikeBuddy.Application.DtoModels.Profile;
 using BikeBuddy.Application.Mappers.User.Profile;
 using BikeBuddy.Application.Services.Auth;
-using BikeBuddy.Domain.Models.ProfileControl;
+using BikeBuddy.Domain.Models.ProfileControl.ValueObjects;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 

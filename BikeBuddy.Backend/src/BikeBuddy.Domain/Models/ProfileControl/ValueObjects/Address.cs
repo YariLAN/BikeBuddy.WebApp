@@ -1,7 +1,7 @@
 ﻿using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 
-namespace BikeBuddy.Domain.Models.ProfileControl;
+namespace BikeBuddy.Domain.Models.ProfileControl.ValueObjects;
 
 public record Address
 {

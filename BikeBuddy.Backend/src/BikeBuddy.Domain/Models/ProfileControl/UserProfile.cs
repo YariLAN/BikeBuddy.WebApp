@@ -1,4 +1,5 @@
 ﻿using BikeBuddy.Domain.Models.AuthControl;
+using BikeBuddy.Domain.Models.ProfileControl.ValueObjects;
 
 namespace BikeBuddy.Domain.Models.ProfileControl;
 

@@ -18,3 +18,8 @@ public record EventResponse(
     UserResponse Author,
     IEnumerable<PointDetailsDto> Points,
     EventStatus Status);
+
+public record EventResponseDetails(
+    EventResponse Event,
+    bool CanEdit,
+    bool IsMemberChat);

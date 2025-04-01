@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.Profile;
 using BikeBuddy.Domain.Models.ProfileControl;
+using BikeBuddy.Domain.Models.ProfileControl.ValueObjects;
 
 namespace BikeBuddy.Application.Mappers.User.Profile;
 
