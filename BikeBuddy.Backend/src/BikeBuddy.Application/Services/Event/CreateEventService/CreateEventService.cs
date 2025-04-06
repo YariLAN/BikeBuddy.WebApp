@@ -1,6 +1,7 @@
 ﻿using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Mappers.Event;
 using BikeBuddy.Application.Services.Auth;
+using BikeBuddy.Domain.Models.ChatControl;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;

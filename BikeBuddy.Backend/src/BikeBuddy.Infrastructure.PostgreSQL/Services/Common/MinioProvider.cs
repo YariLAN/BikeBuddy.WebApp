@@ -20,7 +20,6 @@ public class MinioProvider : IFileProvider
 
     public async Task<Result<string, Error>> UploadFileAsync(byte[] fileData, string bucketName, string objectName, CancellationToken cancellationToken)
     {
-        
         await IfBucketsNotExistCreateBucket([bucketName], cancellationToken);
 
          var result = await PutObject(fileData, bucketName, objectName, cancellationToken);

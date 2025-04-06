@@ -11,6 +11,7 @@ import { AlertCircle, LogIn, X } from 'lucide-react'
 import * as yup from 'yup'
 import { ValidationService } from '@/core/services/ValidationService';
 import useAuthStore from '@/stores/auth'
+import { useNavigate } from 'react-router-dom'
 
 type LoginFormProps = { onClose: () => void; }
 
@@ -26,6 +27,8 @@ export default function LoginForm({ onClose }: LoginFormProps) {
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isLoading, setIsLoading] = useState(false)
   const [loginStatus, setLoginStatus] = useState<string | null>(null)
+
+  const navigate = useNavigate()
 
   const authStore = useAuthStore()
 
@@ -49,8 +52,9 @@ export default function LoginForm({ onClose }: LoginFormProps) {
     try {
       await authStore.login(login, password)      
       setLoginStatus('Вход выполнен успешно!')
-
+      
       onClose()
+      navigate('/events')
     } catch (error : any) {
       setLoginStatus(`Ошибка: ${error.message}`)
     } finally {

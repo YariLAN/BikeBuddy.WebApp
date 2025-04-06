@@ -18,4 +18,9 @@ public static class Files
     {
         public const string MAP_IMAGE_FILENAME = "map.png";
     }
+
+    public class BucketNameConstants
+    {
+        public const string EVENT_IMAGES = "event-images";
+    }
 }

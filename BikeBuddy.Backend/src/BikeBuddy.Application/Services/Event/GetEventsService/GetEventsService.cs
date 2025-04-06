@@ -28,7 +28,7 @@ public class GetEventsService(
         {
             var fileName = $"{dbEvent.Id}/{Files.FileNameConstants.MAP_IMAGE_FILENAME}";
 
-            var imageUrlResult = await fileProvider.GetFileByFileNamesAsync(fileName, "event-images", cancellationToken);
+            var imageUrlResult = await fileProvider.GetFileByFileNamesAsync(fileName, Files.BucketNameConstants.EVENT_IMAGES, cancellationToken);
 
             var imageUrl = imageUrlResult.IsSuccess ? imageUrlResult.Value : string.Empty;
 

@@ -1,4 +1,5 @@
 ﻿using BikeBuddy.Domain.Models.ChatControl.Entities;
+using BikeBuddy.Domain.Models.ChatControl.ValueObjects;
 using BikeBuddy.Domain.Models.EventControl;
 using BikeBuddy.Domain.Shared;
 
@@ -36,13 +37,22 @@ public class GroupChat : ICreatedUpdateAt
         EventId = eventId;
     }
 
-    public static GroupChat Create(Guid id, string name, string description, Guid eventId)
+    public static GroupChat Create(Guid id, string name, string description, Guid eventId, Guid authorId)
     {
-        return new GroupChat(id, name, description, eventId);
+        var chat = new GroupChat(id, name, description, eventId);
+
+        chat.AddMember(authorId, Role.AUTHOR);
+
+        return chat;
     }
 
     public void UpdateLastMessageAt()
     {
         LastMessageAt = DateTimeUtils.ToUTC(DateTime.Now);
+    }
+
+    public void AddMember(Guid userId, Role role)
+    {
+        Members.Add(MemberGroupChat.Create(Id, userId, role));
     }
 }

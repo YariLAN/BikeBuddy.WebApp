@@ -1,4 +1,5 @@
 ﻿using BikeBuddy.Domain.Models.AuthControl;
+using BikeBuddy.Domain.Models.ChatControl;
 using BikeBuddy.Domain.Models.EventControl;
 using BikeBuddy.Domain.Models.ProfileControl;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserRefreshToken> RefreshTokens { get; set; }
 
     public DbSet<Event> Events { get; set; }
+
+    public DbSet<GroupChat> Chats { get; set; }
 
     public ApplicationDbContext(IConfiguration configuration)
     {

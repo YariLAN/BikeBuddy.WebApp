@@ -40,7 +40,7 @@ public class Event : ICreatedUpdateAt
     
     public AuthUser User { get; private set; } = default!;
 
-    public GroupChat Chat { get; set; } = default!;
+    public GroupChat Chat { get; private set; } = default!;
 
     public Event() { }
 
@@ -91,7 +91,7 @@ public class Event : ICreatedUpdateAt
         EventStatus status,
         Guid createdBy)
     {
-        return new Event(
+        var eventModel = new Event(
             id,
             name, 
             description, 
@@ -106,5 +106,16 @@ public class Event : ICreatedUpdateAt
             details, 
             status, 
             createdBy);
+
+        var chat = GroupChat.Create(Guid.NewGuid(), name, string.Empty, id, createdBy);
+
+        eventModel.AddChat(chat);
+
+        return eventModel;
+    }
+
+    public void AddChat(GroupChat groupChat)
+    {
+        Chat = groupChat;
     }
 }
