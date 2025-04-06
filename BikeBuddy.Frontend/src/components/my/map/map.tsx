@@ -47,10 +47,12 @@ let nextId = 1
 export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap(
   { markers, onMarkersChange, onRouteChange, readOnly = false  }, ref) 
 {
+  const apiKey = import.meta.env.VITE_NEXT_PUBLIC_GEOAPIFY_API_KEY
+
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<Map | null>(null)
+  const [isMapReady, setIsMapReady] = useState(false);
   const [mouseCoordinates, setMouseCoordinates] = useState<[number, number] | null>(null)
-  const apiKey = import.meta.env.VITE_NEXT_PUBLIC_GEOAPIFY_API_KEY
 
   const isUpdating = useRef(false);
 
@@ -190,10 +192,33 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
     };
   }, [markers, map, markersLayer])
 
-  useEffect(() => {
-    if (!mapRef.current) return
+  // Вычисление центра карты на основе крайних точек маршрута
+  // Если маркеров нет - по умолчанию центр - Санкт-Петербург
+  const calculateCenter = (markers: Marker[] | null) : { center: [number, number], zoom: number } => {
+    if (!markers || markers.length == 0) {
+      return { center: [30.3141, 59.9386], zoom: 11 }
+    }
 
-    const initialMap = new Map({
+    const lons = markers.map(m => m.coordinates[0])
+    const lats = markers.map(m => m.coordinates[1])
+
+    const [minLon, maxLon] = [Math.min(...lons), Math.max(...lons)];
+    const [minLat, maxLat] = [Math.min(...lats), Math.max(...lats)];
+
+    const center: [number, number] = [ (minLon + maxLon) / 2, (minLat + maxLat) / 2];
+    
+    const [lonDiff, latDiff] = [maxLon - minLon, maxLat - minLat];
+    const maxDiff = Math.max(lonDiff, latDiff);
+    const zoom = 11 - Math.log2(maxDiff * 10);
+
+    return {center, zoom};
+  }
+
+  // Инициализация карты
+  useEffect(() => {
+    if (!mapRef.current) return;
+  
+    const map = new Map({
       target: mapRef.current,
       layers: [
         new TileLayer({
@@ -209,9 +234,40 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
         center: fromLonLat([30.3141, 59.9386]),
         zoom: 11,
       }),
-    })
+    });
 
-    setMap(initialMap)
+    setMap(map)
+
+    return () => map.dispose();
+  }, []); 
+
+  // Обновление центра при изменении маркеров
+  useEffect(() => {
+    if (!map || !markers?.length) return;
+
+    if (isMapReady || markers.length == 1) {
+      const point = markers[markers.length - 1].coordinates
+      map.getView().animate({
+        center: fromLonLat(point),
+        duration: 200,
+      });
+      
+      setIsMapReady(true)
+    } else {
+      const settingMap = calculateCenter(markers);
+      let mapView = map.getView()
+
+      mapView.setCenter(fromLonLat(settingMap.center));
+      mapView.setZoom(settingMap.zoom)
+
+      setIsMapReady(true)
+    }
+  }, [markers]);
+
+  useEffect(() => {
+    if (!mapRef.current || !map) return
+
+    const initialMap = map
 
     if (!readOnly) {
       const select = new Select({

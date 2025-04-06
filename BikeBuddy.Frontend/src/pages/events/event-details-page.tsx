@@ -8,7 +8,7 @@ import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound } from "lucide-react"
 import { RouteMapContainer, type RouteMapContainerRef } from "@/components/my/map/route-map-container"
-import { BicycleType, type EventResponse, EventStatus, EventType, PointDetails } from "@/core/models/event/event-models"
+import { BicycleType, type EventResponseDetails, EventStatus, EventType, PointDetails } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
 import { alertExpectedError } from "@/core/helpers"
 import { Card, CardContent } from "@/components/ui/card"
@@ -51,7 +51,7 @@ export default function EventDetailsPage() {
   const { eventId } = useParams<{ eventId: string }>()
   const navigate = useNavigate()
   const routeMapRef = useRef<RouteMapContainerRef>(null)
-  const [event, setEvent] = useState<EventResponse | null>(null)
+  const [formData, setEvent] = useState<EventResponseDetails | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -67,10 +67,11 @@ export default function EventDetailsPage() {
       const result = await eventStore.getEventById(eventId)
 
       if (result.data) {
+        let event = result.data.event
         setEvent(result.data)
 
-        if (result.data.points && result.data.points.length > 0 && routeMapRef.current) {
-          routeMapRef.current.setPoints(result.data.points as PointDetails[])
+        if (event.points && event.points.length > 0 && routeMapRef.current) {
+          routeMapRef.current.setPoints(event.points as PointDetails[])
         }
       } else if (result.error) {
         setError(result.error)
@@ -135,7 +136,7 @@ export default function EventDetailsPage() {
     )
   }
 
-  if (error || !event) {
+  if (error || !formData) {
     return (
       <div className="container mx-auto px-5 py-8">
         <div className="flex items-center mb-8">
@@ -158,7 +159,7 @@ export default function EventDetailsPage() {
     )
   }
 
-  const statusInfo = getStatusInfo(event.status)
+  const statusInfo = getStatusInfo(formData.event.status)
 
   return (
     <div className="container mx-auto px-5 py-8">
@@ -167,7 +168,7 @@ export default function EventDetailsPage() {
           <ArrowLeft className="h-5 w-5 mr-2" />
           Назад
         </Button>
-        <h1 className="text-3xl font-bold">{event.name}</h1>
+        <h1 className="text-3xl font-bold">{formData.event.name}</h1>
 
         <div className="ml-auto flex items-center gap-2">
           <div className={cn("w-3 h-3 rounded-full", statusInfo.color)} style={{ border: "1px black solid" }} />
@@ -186,7 +187,7 @@ export default function EventDetailsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <div className="lg:col-span-2">
           <h2 className="text-xl font-semibold mb-4">Описание</h2>
-          <p className="text-muted-foreground whitespace-pre-line mb-6">{event.description}</p>
+          <p className="text-muted-foreground whitespace-pre-line mb-6">{formData.event.description}</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div className="flex items-center text-muted-foreground">
@@ -194,7 +195,7 @@ export default function EventDetailsPage() {
               <div>
                 <div className="font-medium text-foreground">Дата и время</div>
                 <div>
-                  {formatDate(event.startDate)} в {formatTime(event.startDate)}
+                  {formatDate(formData.event.startDate)} в {formatTime(formData.event.startDate)}
                 </div>
               </div>
             </div>
@@ -203,7 +204,7 @@ export default function EventDetailsPage() {
               <RouteIcon className="mr-3 h-5 w-5" />
               <div>
                 <div className="font-medium text-foreground">Дистанция</div>
-                <div>{event.distance / 1000} км</div>
+                <div>{formData.event.distance / 1000} км</div>
               </div>
             </div>
 
@@ -211,7 +212,7 @@ export default function EventDetailsPage() {
               <MapPin className="mr-3 h-5 w-5" />
               <div>
                 <div className="font-medium text-foreground">Старт</div>
-                <div>{event.startAddress}</div>
+                <div>{formData.event.startAddress}</div>
               </div>
             </div>
 
@@ -219,7 +220,7 @@ export default function EventDetailsPage() {
               <MapPin className="mr-3 h-5 w-5" />
               <div>
                 <div className="font-medium text-foreground">Финиш</div>
-                <div>{event.endAddress}</div>
+                <div>{formData.event.endAddress}</div>
               </div>
             </div>
           </div>
@@ -227,12 +228,12 @@ export default function EventDetailsPage() {
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-100 px-3 py-1.5 rounded-md">
               <Bike className="mr-2 h-4 w-4" />
-              <span className="font-medium">{getBicycleTypeLabel(event.bicycleType)}</span>
+              <span className="font-medium">{getBicycleTypeLabel(formData.event.bicycleType)}</span>
             </div>
 
             <div className="flex items-center bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-100 px-3 py-1.5 rounded-md">
               <Flag className="mr-2 h-4 w-4" />
-              <span className="font-medium">{getEventTypeLabel(event.type)}</span>
+              <span className="font-medium">{getEventTypeLabel(formData.event.type)}</span>
             </div>
           </div>
         </div>
@@ -246,8 +247,8 @@ export default function EventDetailsPage() {
                   <UserRound className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <div>
-                  <div className="font-medium">{event.author.userName}</div>
-                  <div className="text-sm text-muted-foreground">{event.author.email}</div>
+                  <div className="font-medium">{formData.event.author.userName}</div>
+                  <div className="text-sm text-muted-foreground">{formData.event.author.email}</div>
                 </div>
               </div>
 
@@ -256,20 +257,26 @@ export default function EventDetailsPage() {
                 <Users className="mr-2 h-5 w-5" />
                 <div>
                   <div className="font-medium text-foreground">Количество участников</div>
-                  <div>{event.countMembers}</div>
+                  <div>{formData.event.countMembers}</div>
                 </div>
               </div>
 
               <Button 
                 className={cn(
                     "w-full",
-                    event.status === EventStatus.Opened && event.countMembers > 1
+                    formData.event.status === EventStatus.Opened && formData.event.countMembers > 1
                         ? "bg-green-600 hover:bg-green-700"
                         : "bg-gray-400 hover:bg-gray-500 cursor-not-allowed"
                 )}
-                disabled={event.status !== EventStatus.Opened || event.countMembers == 1}
-                title={event.status !== EventStatus.Opened || event.countMembers == 1 ? "Нельзя присоединиться к этому событию" : ""}>
-                    {event.status === EventStatus.Opened && event.countMembers > 1 ? "Присоединиться к событию" : "Присоединение недоступно"}
+                disabled={!formData.isMemberChat && (formData.event.status !== EventStatus.Opened || formData.event.countMembers == 1)}
+                title={formData.event.status !== EventStatus.Opened || formData.event.countMembers == 1 ? "Нельзя присоединиться к этому событию" : ""}>
+                {
+                  formData.isMemberChat 
+                    ? "Открыть чат"
+                    : formData.event.status === EventStatus.Opened && formData.event.countMembers > 1 
+                      ? "Присоединиться к событию" 
+                      : "Присоединение недоступно"
+                }
               </Button>
             </CardContent>
           </Card>

@@ -1,4 +1,4 @@
-import { CreateEventRequest, EventFilterDto, EventListResponse, EventResponse } from "@/core/models/event/event-models";
+import { CreateEventRequest, EventFilterDto, EventListResponse, EventResponseDetails } from "@/core/models/event/event-models";
 import { ApiResponse, apiService } from "@/core/services/ApiService";
 import { convertBlobToFormData } from "@/lib/utils";
 import { create } from "zustand";
@@ -8,7 +8,7 @@ interface EventState {
     uploadMap: (eventId : string, fileBlob : Blob) => Promise<ApiResponse<string>>;
     createEvent: (event: CreateEventRequest) => Promise<ApiResponse<string>>;
     getEvents: (filter: SearchFilterDto<EventFilterDto>) => Promise<ApiResponse<PageData<EventListResponse>>>;
-    getEventById: (eventId: string) => Promise<ApiResponse<EventResponse>>;
+    getEventById: (eventId: string) => Promise<ApiResponse<EventResponseDetails>>;
 }
 
 const useEventStore = create<EventState>(
@@ -28,7 +28,7 @@ const useEventStore = create<EventState>(
             return result
         },
         getEventById: async (eventId: string) => {
-            const result = await apiService.get<EventResponse>(`/events/${eventId}`)
+            const result = await apiService.get<EventResponseDetails>(`/events/${eventId}`)
             return result
         },
     })

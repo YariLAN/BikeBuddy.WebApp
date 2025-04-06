@@ -29,7 +29,7 @@ export interface Marker {
     coordinates: [number, number]
 } 
 
-interface Point {
+export interface Point {
     lat : string,
     lon : string
 } 
@@ -102,6 +102,12 @@ export interface UserResponse {
     address: string
 }
 
+export interface EventResponseDetails {
+    event : EventResponse,
+    canEdit : boolean,
+    isMemberChat : boolean
+}
+
 ///
 
 export interface EventFilterDto {
@@ -109,16 +115,3 @@ export interface EventFilterDto {
 }
 
 ///
-
-
-// Преобразование Marker в Point
-export const markerToPoint = (marker: Marker): Point => ({
-    lat: marker.coordinates[0].toString(),
-    lon: marker.coordinates[1].toString(),
-});
-
-export const markerToPointDetails = (marker: Marker) : PointDetails => ({
-    orderId: marker.id,
-    address: marker.address,
-    point: markerToPoint(marker)
-})

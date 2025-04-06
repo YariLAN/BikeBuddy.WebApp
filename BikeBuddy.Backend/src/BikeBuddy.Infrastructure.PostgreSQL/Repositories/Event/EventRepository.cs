@@ -33,6 +33,8 @@ public class EventRepository(ApplicationDbContext context) : IEventRepository
         var dbEvent = await context.Events
             .Include(x => x.User)
                 .ThenInclude(u => u.UserProfile)
+            .Include(x => x.Chat)
+                .ThenInclude(x => x.Members)
             .FirstOrDefaultAsync(e => e.Id == eventId);
 
         return dbEvent != null ? dbEvent : General.NotFound(eventId);

@@ -25,12 +25,13 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
-import { BicycleType, CreateEventRequest, EventStatus, EventType, markerToPointDetails } from "@/core/models/event/event-models"
+import { BicycleType, CreateEventRequest, EventStatus, EventType } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
 import { alertExpectedError, alertInfo } from "@/core/helpers"
 import JwtService from "@/core/services/JwtService"
 import { useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
+import { markerToPointDetails } from "@/core/mappers/event-mapper"
 
 const validationService = new ValidationService(eventSchema)
 

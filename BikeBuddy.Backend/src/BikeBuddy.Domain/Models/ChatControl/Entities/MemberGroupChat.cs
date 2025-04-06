@@ -28,6 +28,8 @@ public class MemberGroupChat : ICreatedUpdateAt
         Role = role;
     }
 
+    public static implicit operator Guid(MemberGroupChat member) => member.UserId;
+
     public static MemberGroupChat Create(Guid groupChatId, Guid userId, Role role)
     {
         return new MemberGroupChat(groupChatId, userId, role);

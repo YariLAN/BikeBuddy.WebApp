@@ -8,6 +8,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BikeBuddy.API.Controllers
 {
@@ -40,12 +41,12 @@ namespace BikeBuddy.API.Controllers
         }
 
         [HttpGet("{eventId:Guid}")]
-        public async Task<ActionResult<EventResponse>> GetEventAsync(
+        public async Task<ActionResult<EventResponseDetails>> GetEventAsync(
             [FromRoute] Guid eventId,
             [FromServices] IGetEventService getEventService,
             CancellationToken cancellationToken)
         {
-            var result = await getEventService.ExecuteAsync(eventId, cancellationToken);
+            var result = await getEventService.ExecuteAsync(eventId, User, cancellationToken);
 
             return result.ToResponse();
         } 
