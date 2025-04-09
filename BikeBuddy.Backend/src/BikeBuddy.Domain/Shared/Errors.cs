@@ -56,4 +56,25 @@ public class Errors
             return Error.Validation(message);
         }
     }
+
+    public static class Chat
+    {
+        public static Error AlreadyMember(Guid? userId = null)
+        {
+            string forId = userId is null
+                ? ""
+                : $" by id = {userId}";
+
+            return Error.Validation($"Member{forId} already exist in chat");
+        }
+
+        public static Error AuthorCannotLeave(Guid? userId = null)
+        {
+            string forId = userId is null
+                ? ""
+                : $" ID = {userId}";
+
+            return Error.Validation($"Author of the chat ({forId}) can't leave a chat");
+        }
+    }
 }

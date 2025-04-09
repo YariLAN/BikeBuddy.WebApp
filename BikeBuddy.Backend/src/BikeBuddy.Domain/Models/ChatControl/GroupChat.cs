@@ -46,13 +46,34 @@ public class GroupChat : ICreatedUpdateAt
         return chat;
     }
 
-    public void UpdateLastMessageAt()
+    public void UpdateLastMessageAt(DateTime? lastMessageAt = null)
     {
-        LastMessageAt = DateTimeUtils.ToUTC(DateTime.Now);
+        LastMessageAt = lastMessageAt.HasValue && lastMessageAt.Value != default(DateTime) 
+            ? lastMessageAt.Value 
+            : DateTimeUtils.ToUTC(DateTime.Now);
     }
 
     public void AddMember(Guid userId, Role role)
     {
         Members.Add(MemberGroupChat.Create(Id, userId, role));
+    }
+
+    public void RemoveMember(MemberGroupChat member)
+    {
+        Members.Remove(member);
+    }
+
+    public List<Message> GetMessages(int skip = 0, int take = 100)
+    {
+        return Messages
+            .OrderByDescending(m => m.CreatedAt)
+            .Skip(skip)
+            .Take(take)
+            .ToList();
+    }
+
+    public void AddMessage(Message message)
+    {
+        Messages.Add(message);
     }
 }

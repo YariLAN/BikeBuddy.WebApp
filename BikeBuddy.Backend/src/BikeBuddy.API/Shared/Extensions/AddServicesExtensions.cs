@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Application.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -34,6 +35,8 @@ public static class AddServicesExtensions
     {
         services.AddSwaggerGen(opt =>
         {
+            opt.SwaggerDoc("v1", new OpenApiInfo { Title = "BikeBuddy.API", Version = "v1" });
+
             opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
@@ -60,6 +63,8 @@ public static class AddServicesExtensions
                     new List<string>()
                 }
             });
+
+            opt.AddSignalRSwaggerGen();
         });
     }
 

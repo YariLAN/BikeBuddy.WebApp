@@ -3,6 +3,11 @@ using BikeBuddy.Application.Services.Auth.Login;
 using BikeBuddy.Application.Services.Auth.Logout;
 using BikeBuddy.Application.Services.Auth.Refresh;
 using BikeBuddy.Application.Services.Auth.Register;
+using BikeBuddy.Application.Services.Chat.GetChatMessagesService;
+using BikeBuddy.Application.Services.Chat.JoinChatService;
+using BikeBuddy.Application.Services.Chat.LeaveChatService;
+using BikeBuddy.Application.Services.Chat.SendMessageService;
+using BikeBuddy.Application.Services.Chat.StateManagerService;
 using BikeBuddy.Application.Services.Event.CreateEventService;
 using BikeBuddy.Application.Services.Event.GetEventService;
 using BikeBuddy.Application.Services.Event.GetEventsService;
@@ -40,22 +45,38 @@ public static class Inject
                 };
             });
 
+        services.AddServices();
+
+        return services;
+    }
+
+    public static IServiceCollection AddServices(this IServiceCollection services)
+    {
         // Auth
-        services.AddTransient<IRegisterService, RegisterService>();
-        services.AddTransient<ILoginService, LoginService>();
-        services.AddTransient<IRefreshService, RefreshService>();
-        services.AddTransient<ILogoutService, LogoutService>();
+        services.AddScoped<IRegisterService, RegisterService>();
+        services.AddScoped<ILoginService, LoginService>();
+        services.AddScoped<IRefreshService, RefreshService>();
+        services.AddScoped<ILogoutService, LogoutService>();
 
         // Profile
-        services.AddTransient<IGetProfileService, GetProfileService>();
-        services.AddTransient<ICreateProfileService, CreateProfileService>();
-        services.AddTransient<IUpdateProfileService, UpdateProfileService>();
+        services.AddScoped<IGetProfileService, GetProfileService>();
+        services.AddScoped<ICreateProfileService, CreateProfileService>();
+        services.AddScoped<IUpdateProfileService, UpdateProfileService>();
 
         // Event
-        services.AddTransient<ICreateEventService, CreateEventService>();
-        services.AddTransient<IGetEventsService, GetEventsService>();
-        services.AddTransient<IGetEventService, GetEventService>();
-        services.AddTransient<IUploadMapService, UploadMapService>();
+        services.AddScoped<ICreateEventService, CreateEventService>();
+        services.AddScoped<IGetEventsService, GetEventsService>();
+        services.AddScoped<IGetEventService, GetEventService>();
+        services.AddScoped<IUploadMapService, UploadMapService>();
+
+        // Chat
+        services.AddScoped<IJoinChatService, JoinChatService>();
+        services.AddScoped<ILeaveChatService, LeaveChatService>();
+        services.AddScoped<ISendMessageService, SendMessageService>();
+        services.AddScoped<IGetChatMessagesService, GetChatMessagesService>();
+
+        // ChatManager
+        services.AddScoped<IStateManagerService, StateManagerService>();
 
         services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
 

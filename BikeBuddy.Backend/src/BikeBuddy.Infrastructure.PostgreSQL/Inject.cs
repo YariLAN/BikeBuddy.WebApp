@@ -1,9 +1,11 @@
 ﻿using BikeBuddy.Application.Services.Auth;
+using BikeBuddy.Application.Services.Chat;
 using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Application.Services.Event;
 using BikeBuddy.Application.Services.Profile;
 using BikeBuddy.Infrastructure.Options;
 using BikeBuddy.Infrastructure.Repositories.Auth;
+using BikeBuddy.Infrastructure.Repositories.Chat;
 using BikeBuddy.Infrastructure.Repositories.Event;
 using BikeBuddy.Infrastructure.Repositories.Profile;
 using BikeBuddy.Infrastructure.Services.Auth;
@@ -64,6 +66,10 @@ public static class Inject
         services.AddTransient<IUserProfileRepository, UserProfileRepository>();
 
         services.AddTransient<IEventRepository, EventRepository>();
+
+        services.AddTransient<IChatRepository, ChatRepository>();
+
+        services.AddTransient<IMessageRepository, MessageRepository>();
 
         return services;
     }

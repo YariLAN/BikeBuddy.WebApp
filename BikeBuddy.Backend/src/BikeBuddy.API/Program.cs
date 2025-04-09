@@ -1,3 +1,4 @@
+using BikeBuddy.API.Hubs;
 using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application;
 using BikeBuddy.Infrastructure;
@@ -23,6 +24,8 @@ builder.Services.AddFluentValidationAutoValidation(configuration =>
 
 builder.Services.AddCors("CorsPolicy");
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -32,6 +35,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("CorsPolicy");
+
+
+app.MapHub<GroupChatHub>("/hub/group-chat");
 
 app.UseHttpsRedirection();
 
