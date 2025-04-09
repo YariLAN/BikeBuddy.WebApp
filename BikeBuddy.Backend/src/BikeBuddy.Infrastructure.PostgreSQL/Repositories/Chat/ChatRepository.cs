@@ -28,6 +28,7 @@ public class ChatRepository(ApplicationDbContext context) : IChatRepository
     public async Task<Result<GroupChat, Error>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         var chat = await context.Chats
+            .Include(c => c.Event)
             .Include(c => c.Members)
             .Include(c => c.Messages)
                 .ThenInclude(m => m.AuthUser)

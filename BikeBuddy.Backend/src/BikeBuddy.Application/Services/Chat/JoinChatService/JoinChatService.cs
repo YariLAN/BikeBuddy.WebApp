@@ -27,9 +27,12 @@ public class JoinChatService(
 
         if (chat.IsFailure) return chat.Error;
 
-        var isMemberChat = chat.Value.Members.Any(m => m == authUser.Id);
-        if (isMemberChat)
+        var isMemberChat = chatRepository.IsMemberOfChat(chat.Value, authUser.Id);
+        if (isMemberChat.IsSuccess)
             return Errors.Chat.AlreadyMember(authUser.Id);
+
+        if (chat.Value.Event!.CountMembers == chat.Value.Members.Count)
+            return Errors.Chat.CountMembersExceeded(authUser.Id);
 
         chat.Value.AddMember(authUser.Id, Role.MEMBER);
         var updateResult = await chatRepository.UpdateAsync(chat.Value, cancellationToken);

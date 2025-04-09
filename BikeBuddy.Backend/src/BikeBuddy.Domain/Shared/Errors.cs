@@ -66,6 +66,15 @@ public class Errors
                 : $" by id = {userId}";
 
             return Error.Validation($"Member{forId} already exist in chat");
+        }        
+        
+        public static Error CountMembersExceeded(Guid? userId = null)
+        {
+            string forId = userId is null
+                ? ""
+                : $" by id = {userId}";
+
+            return Error.Validation($"Count of members exceeded. User{forId} can't be added in chat");
         }
 
         public static Error AuthorCannotLeave(Guid? userId = null)
@@ -74,7 +83,7 @@ public class Errors
                 ? ""
                 : $" ID = {userId}";
 
-            return Error.Validation($"Author of the chat ({forId}) can't leave a chat");
+            return Error.Conflict($"Author of the chat ({forId}) can't leave a chat");
         }
     }
 }
