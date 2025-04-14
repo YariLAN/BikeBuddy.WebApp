@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
-import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound } from "lucide-react"
+import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound, MessageSquare } from "lucide-react"
 import { RouteMapContainer, type RouteMapContainerRef } from "@/components/my/map/route-map-container"
 import { BicycleType, type EventResponseDetails, EventStatus, EventType, PointDetails } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
 import { alertExpectedError } from "@/core/helpers"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import useChatStore from "@/stores/chat"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 const bikeTypes = [
   { value: BicycleType.Default, label: "Городской" },
@@ -52,6 +54,8 @@ export default function EventDetailsPage() {
   const navigate = useNavigate()
   const routeMapRef = useRef<RouteMapContainerRef>(null)
   const [formData, setEvent] = useState<EventResponseDetails | null>(null)
+  const [isJoining, setIsJoining] = useState(false)
+
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -109,6 +113,31 @@ export default function EventDetailsPage() {
     return type ? type.label : "Неизвестный"
   }
 
+  const useChat = useChatStore()
+
+  const handleChatAction = async () => {
+    if (!eventId) return;
+
+    if (formData?.isMemberChat) {
+      navigate(`/events/${eventId}/chat`, {state: { chatId: formData!.event.chatId } })
+    } else {
+      setIsJoining(true)
+
+      try {
+        const response = await useChat.registerInChat(formData!.event.chatId)
+
+        if (response.data) {
+          await fetchEventDetails()
+          navigate(`/events/${eventId}/chat`, {state: { chatId: formData!.event.chatId } })
+        }
+      }
+      catch (error : any) {
+        alertExpectedError(error.message)
+      }
+      finally { setIsJoining(false) }
+    }
+  } 
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-5 py-8">
@@ -160,6 +189,7 @@ export default function EventDetailsPage() {
   }
 
   const statusInfo = getStatusInfo(formData.event.status)
+  const canJoinChat = formData.event.status === EventStatus.Opened && formData.event.countMembers > 1
 
   return (
     <div className="container mx-auto px-5 py-8">
@@ -261,23 +291,49 @@ export default function EventDetailsPage() {
                 </div>
               </div>
 
-              <Button 
-                className={cn(
-                    "w-full",
-                    formData.event.status === EventStatus.Opened && formData.event.countMembers > 1
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-gray-400 hover:bg-gray-500 cursor-not-allowed"
-                )}
-                disabled={!formData.isMemberChat && (formData.event.status !== EventStatus.Opened || formData.event.countMembers == 1)}
-                title={formData.event.status !== EventStatus.Opened || formData.event.countMembers == 1 ? "Нельзя присоединиться к этому событию" : ""}>
-                {
-                  formData.isMemberChat 
-                    ? "Открыть чат"
-                    : formData.event.status === EventStatus.Opened && formData.event.countMembers > 1 
-                      ? "Присоединиться к событию" 
-                      : "Присоединение недоступно"
-                }
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Button 
+                        className={cn(
+                            "w-full",
+                            formData.isMemberChat || canJoinChat
+                                ? "bg-green-600 hover:bg-green-700"
+                                : "bg-gray-400 hover:bg-gray-500 cursor-not-allowed"
+                        )}
+                        disabled={ !formData.isMemberChat && !canJoinChat }
+                        onClick={handleChatAction}
+                        title={!formData.isMemberChat && !canJoinChat? "Нельзя присоединиться к этому событию" : ""}
+                      >
+                        {
+                          isJoining ? (
+                            "Присоединение..."
+                          ) : (
+                            <>
+                              <MessageSquare className="mr-2 h-4 w-4" />
+                              {formData.isMemberChat 
+                                ? "Открыть чат"
+                                : formData.event.status === EventStatus.Opened && formData.event.countMembers > 1 
+                                  ? "Присоединиться к событию" 
+                                  : "Присоединение недоступно"}
+                            </>
+                          )
+                        }
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+                  {!formData.isMemberChat && !canJoinChat && (
+                    <TooltipContent>
+                      <p>
+                        {formData.event.countMembers <= 1
+                          ? "Для чата необходимо минимум 2 участника"
+                          : `Нельзя присоединиться к событию со статусом "${statusInfo.label}"`}
+                      </p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             </CardContent>
           </Card>
         </div>

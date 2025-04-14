@@ -31,6 +31,7 @@ public class EventRepository(ApplicationDbContext context) : IEventRepository
     public async Task<Result<EventModel, Error>> GetEventAsync(Guid eventId, CancellationToken token)
     {
         var dbEvent = await context.Events
+            .Include(x => x.Chat)
             .Include(x => x.User)
                 .ThenInclude(u => u.UserProfile)
             .Include(x => x.Chat)

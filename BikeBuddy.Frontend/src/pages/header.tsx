@@ -65,41 +65,45 @@ export function Header() {
       <header className="border-b">
         <div className="flex h-16 items-center px-4 justify-end gap-4">
           {authStore.isAuthenticated ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <img
-                    className="rounded-full"
-                    src="/public/vite.svg"
-                    alt="User avatar"
-                  />
+            <>
+              { JwtService.decodeToken()!.name }
 
-                  { hasNotifications && (
-                    <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-white"></span>
-                  )}
-                </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <img
+                      className="rounded-full"
+                      src="/public/vite.svg"
+                      alt="User avatar"
+                    />
 
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuItem onClick={() => handleProfileClick()}>
-                  <UserPen className="mr-2 h-4 w-4" />
-                  <span className="flex items-center">
-                    Профиль
-                    {hasNotifications && (
-                      <span
-                        className="ml-2 inline-block h-2 w-2 rounded-full bg-red-500"
-                        title="Есть уведомления"
-                      ></span>
+                    { hasNotifications && (
+                      <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-white"></span>
                     )}
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Выйти</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  </Button>
+
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuItem onClick={() => handleProfileClick()}>
+                    <UserPen className="mr-2 h-4 w-4" />
+                    <span className="flex items-center">
+                      Профиль
+                      {hasNotifications && (
+                        <span
+                          className="ml-2 inline-block h-2 w-2 rounded-full bg-red-500"
+                          title="Есть уведомления"
+                        ></span>
+                      )}
+                    </span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Выйти</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           ) : (
             <>
               <Button onClick={() => setIsOpenLoginForm(true)}>Войти</Button>

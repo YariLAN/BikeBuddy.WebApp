@@ -15,6 +15,7 @@ public record EventResponse(
     string EndAddress,
     DateTime StartDate,
     DateTime EndDate,
+    Guid ChatId,
     UserResponse Author,
     IEnumerable<PointDetailsDto> Points,
     EventStatus Status);

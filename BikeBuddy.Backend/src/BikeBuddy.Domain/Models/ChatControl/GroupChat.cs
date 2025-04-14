@@ -66,7 +66,7 @@ public class GroupChat : ICreatedUpdateAt
     public List<Message> GetMessages(int skip = 0, int take = 100)
     {
         return Messages
-            .OrderByDescending(m => m.CreatedAt)
+            .OrderBy(m => m.CreatedAt)
             .Skip(skip)
             .Take(take)
             .ToList();

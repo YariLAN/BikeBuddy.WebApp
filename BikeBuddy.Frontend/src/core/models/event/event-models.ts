@@ -87,6 +87,7 @@ export interface EventResponse {
     endAddress: string,
     startDate: Date,
     endDate: Date,
+    chatId : string,
     author: UserResponse
     points: PointDetails[]
     status: EventStatus

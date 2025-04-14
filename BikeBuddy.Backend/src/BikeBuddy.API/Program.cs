@@ -24,7 +24,11 @@ builder.Services.AddFluentValidationAutoValidation(configuration =>
 
 builder.Services.AddCors("CorsPolicy");
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(opt =>
+{
+    opt.ClientTimeoutInterval = TimeSpan.FromSeconds(10);
+    opt.KeepAliveInterval = TimeSpan.FromSeconds(5);
+});
 
 var app = builder.Build();
 

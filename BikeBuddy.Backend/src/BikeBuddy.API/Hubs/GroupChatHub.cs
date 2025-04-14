@@ -54,7 +54,9 @@ public class GroupChatHub(
         if (result.IsSuccess)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, groupChatId.ToString());
-            await Clients.Group(groupChatId.ToString()).UserJoined(userId);
+
+            var activeUsers = await stateManagerService.GetActiveUsersAsync(groupChatId);
+            await Clients.Group(groupChatId.ToString()).ActiveUsersList(activeUsers);
             await Clients.Caller.Joined(groupChatId);
         }
         else
@@ -88,7 +90,10 @@ public class GroupChatHub(
         if (result.IsSuccess)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupChatId.ToString());
-            await Clients.Group(groupChatId.ToString()).UserLeft(userId);
+
+            var activeUsers = await stateManagerService.GetActiveUsersAsync(groupChatId);
+            await Clients.Group(groupChatId.ToString()).ActiveUsersList(activeUsers);
+
             await Clients.Caller.Left(groupChatId);
         }
         else
@@ -100,7 +105,7 @@ public class GroupChatHub(
     public async Task GetActiveUsers(Guid groupChatId)
     {
         var users = await stateManagerService.GetActiveUsersAsync(groupChatId);
-        await Clients.Caller.ActiveUsersList(users);
+        await Clients.Group(groupChatId.ToString()).ActiveUsersList(users);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

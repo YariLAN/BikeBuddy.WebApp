@@ -61,6 +61,7 @@ internal class EventMapper
             dbEvent.EndAddress,
             dbEvent.StartDate,
             dbEvent.EndDate,
+            dbEvent.Chat is null ? Guid.Empty : dbEvent.Chat.Id,
             userResponse,
             (dbEvent.Details.Routes != null)
                 ? dbEvent.Details.Routes
