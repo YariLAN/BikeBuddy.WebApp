@@ -10,6 +10,7 @@ public record EventResponse(
     EventType Type,
     BicycleType BicycleType,
     int CountMembers,
+    int CurrentCountMembers,
     double Distance,
     string StartAddress,
     string EndAddress,

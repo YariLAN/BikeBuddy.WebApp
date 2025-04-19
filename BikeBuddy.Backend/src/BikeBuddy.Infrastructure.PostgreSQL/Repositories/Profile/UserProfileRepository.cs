@@ -26,6 +26,7 @@ public class UserProfileRepository(ApplicationDbContext context) : IUserProfileR
     public async Task<UserProfile?> GetByUserIdAsync(Guid id, CancellationToken cancellationToken)
     {
         var profile = await context.Profiles
+            .Include(profile => profile.AuthUser)
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.UserId == id, cancellationToken);
 

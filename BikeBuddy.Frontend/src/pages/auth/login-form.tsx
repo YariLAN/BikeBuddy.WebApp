@@ -145,7 +145,7 @@ export default function LoginForm({ onClose }: LoginFormProps) {
                 {isLoading ? 'Выполняется вход...' : 'Войти'}
               </Button>
               <Separator />
-              <Button 
+              {/* <Button 
                 type="button" 
                 variant="outline" 
                 onClick={handleGoogleLogin}
@@ -153,7 +153,7 @@ export default function LoginForm({ onClose }: LoginFormProps) {
               >
                 <LogIn className="mr-2 h-4 w-4" />
                 Войти через Google
-              </Button>
+              </Button> */}
             </CardFooter>
           </form>
         </CardContent>

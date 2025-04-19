@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Send, Users, UserRound, AlertCircle } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowLeft, Send, Users, UserRound, AlertCircle, Calendar, RouteIcon, MapPin, Bike, Flag, User, Mail, Cake, Home } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
@@ -15,10 +15,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
 import * as signalR from "@microsoft/signalr"
-import useAuthStore from "@/stores/auth"
 import type { MessageDto, SendMessageRequest } from "@/core/models/event/chat-models"
 import { decodeToken, getToken } from "@/core/services/JwtService"
 import { LOCAL_BASE_URL } from "@/core/constants"
+import { BicycleType, bikeTypes, EventResponse, EventType, eventTypes, UserResponse } from "@/core/models/event/event-models"
+import useEventStore from "@/stores/event"
+import { alertExpectedError } from "@/core/helpers"
+import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 
 export default function EventChatPage() {
   const { eventId} = useParams<{ eventId: string}>()
@@ -26,19 +31,43 @@ export default function EventChatPage() {
   const chatId = location.state?.chatId;
   
   const navigate = useNavigate()
-
-  const authStore = useAuthStore()
-  
+  const eventStore = useEventStore()
   const currentUser =  decodeToken()
 
   const [messages, setMessages] = useState<MessageDto[]>([])
   const [messageText, setMessageText] = useState("")
-  const [activeUsers, setActiveUsers] = useState<string[]>([])
+  const [activeUsers, setActiveUsers] = useState<UserResponse[]>([])
   const [isConnected, setIsConnected] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const [eventDetails, setEventDetails] = useState<EventResponse | null>(null)
+  const [isLoadingEvent, setIsLoadingEvent] = useState(true)
+
   const connectionRef = useRef<signalR.HubConnection | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Загрузка информации о событии
+  useEffect(() => {
+    if (!eventId) return
+
+    const fetchEventDetails = async () => {
+      setIsLoadingEvent(true)
+      try {
+        const result = await eventStore.getEventById(eventId)
+        if (result.data) {
+          setEventDetails(result.data.event)
+        } else if (result.error) {
+          alertExpectedError(`Ошибка загрузки информации о событии: ${result.error}`)
+        }
+      } catch (error: any) {
+        alertExpectedError(`Ошибка загрузки информации о событии: ${error.message}`)
+      } finally {
+        setIsLoadingEvent(false)
+      }
+    }
+
+    fetchEventDetails()
+  }, [eventId, eventStore])
 
   // Инициализация подключения к SignalR
   useEffect(() => {
@@ -65,12 +94,12 @@ export default function EventChatPage() {
       setError(message)
     })
 
-    connection.on("UserJoined", (userId: string) => {
-      setActiveUsers((prev) => [...prev, userId])
+    connection.on("UserJoined", (user: UserResponse) => {
+      setActiveUsers((prev) => [...prev, user])
     })
 
     connection.on("UserLeft", (userId: string) => {
-      setActiveUsers((prev) => prev.filter((id) => id !== userId))
+      setActiveUsers((prev) => prev.filter((user) => user.userID !== userId))
     })
 
     connection.on("LoadMessages", (loadedMessages: MessageDto[]) => {
@@ -78,8 +107,7 @@ export default function EventChatPage() {
       scrollToBottom()
     })
 
-    connection.on("ActiveUsersList", (users: string[]) => {
-      console.log(users)
+    connection.on("ActiveUsersList", (users: UserResponse[]) => {
       setActiveUsers(users)
     })
 
@@ -175,6 +203,45 @@ export default function EventChatPage() {
     return format(date, "d MMMM", { locale: ru })
   }
 
+  // Форматирование даты события
+  const formatEventDate = (dateString: Date) => {
+    return format(new Date(dateString), "d MMMM yyyy", { locale: ru })
+  }
+
+  // Форматирование времени события
+  const formatEventTime = (dateString: Date) => {
+    return format(new Date(dateString), "HH:mm", { locale: ru })
+  }
+
+  // Форматирование даты рождения
+  const formatBirthday = (dateString: string | undefined) => {
+    try {
+      return formatMessageDate(dateString!)
+    } catch (e) {
+      return "Не указано"
+    }
+  }
+
+  // Получение полного имени пользователя
+  const getFullName = (user: UserResponse): string => {
+    if (user.name && user.surname) {
+      return `${user.name} ${user.surname}${user.middleName ? ` ${user.middleName}` : ""}`
+    }
+    return user.userName
+  }
+
+  // Получение названия типа велосипеда
+  const getBikeTypeLabel = (bicycleType: BicycleType): string => {
+    const type = bikeTypes.find((t) => t.value === bicycleType)
+    return type ? type.label : "Неизвестный"
+  }
+
+  // Получение названия типа события
+  const getEventTypeLabel = (eventType: EventType): string => {
+    const type = eventTypes.find((t) => t.value === eventType)
+    return type ? type.label : "Неизвестный"
+  }
+
   // Группировка сообщений по дате
   const groupedMessages = messages.reduce((groups: { [date: string]: MessageDto[] }, message) => {
     const date = formatMessageDate(message.createdAt)
@@ -195,7 +262,7 @@ export default function EventChatPage() {
         <h1 className="text-3xl font-bold">Чат</h1>
 
         <div className="ml-auto flex items-center gap-2">
-          <Badge variant="outline" className="flex items-center gap-1">
+          <Badge variant="outline" className="flex items-center gap-1 bg-slate-200 text-slate-900">
             <Users className="h-3 w-3" />
             <span>{activeUsers.length} онлайн</span>
           </Badge>
@@ -210,15 +277,118 @@ export default function EventChatPage() {
         </Alert>
       )} */}
 
+      {/* Информация о маршруте */}
+      {isLoadingEvent ? (
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="animate-pulse flex flex-col gap-2">
+              <div className="h-6 bg-muted rounded w-1/4"></div>
+              <div className="h-4 bg-muted rounded w-3/4"></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                <div className="h-4 bg-muted rounded w-full"></div>
+                <div className="h-4 bg-muted rounded w-full"></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : eventDetails ? (
+        <Card className="mb-6 bg-green-50">
+          <CardHeader>
+            <CardTitle>{eventDetails.name}</CardTitle>
+            <CardDescription className="line-clamp-2">{eventDetails.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="flex items-center text-muted-foreground">
+                <Calendar className="mr-2 h-4 w-4" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Дата и время</div>
+                  <div className="text-sm">
+                    {formatEventDate(eventDetails.startDate)} в {formatEventTime(eventDetails.startDate)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center text-muted-foreground">
+                <RouteIcon className="mr-2 h-4 w-4" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Дистанция</div>
+                  <div className="text-sm">{eventDetails.distance / 1000} км</div>
+                </div>
+              </div>
+
+              <div className="flex items-center text-muted-foreground">
+                <MapPin className="mr-2 h-4 w-4" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Старт</div>
+                  <div className="text-sm truncate max-w-[200px]" title={eventDetails.startAddress}>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex-1 text-sm truncate">{`${eventDetails.startAddress}` || "Загрузка адреса..."}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{`${eventDetails.startAddress}`}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center text-muted-foreground">
+                <MapPin className="mr-2 h-4 w-4" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Финиш</div>
+                  <div className="text-sm truncate max-w-[200px]" title={eventDetails.endAddress}>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex-1 text-sm truncate">{`${eventDetails.endAddress}` || "Загрузка адреса..."}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{`${eventDetails.endAddress}`}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Separator className="my-4" />
+
+            <div className="flex flex-wrap gap-2">
+              <Badge 
+                variant="outline" 
+                className="flex items-center gap-1 bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-100">
+                  <Bike className="h-3 w-3 mr-1" />
+                  {getBikeTypeLabel(eventDetails.bicycleType)}
+              </Badge>
+              <Badge 
+                variant="outline" 
+                className="flex items-center gap-1 bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
+                  <Flag className="h-3 w-3 mr-1" />
+                  {getEventTypeLabel(eventDetails.type)}
+              </Badge>
+              <Badge variant="outline" className="flex items-center gap-1 bg-red-200 text-red-900">
+                <Users className="h-3 w-3 mr-1" />
+                {eventDetails.countMembers} участников
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Основной чат */}
         <div className="lg:col-span-3">
           <Card className="h-[70vh] flex flex-col">
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-3 bg-green-50">
               <CardTitle>Сообщения</CardTitle>
             </CardHeader>
 
-            <ScrollArea className="flex-1 p-4">
+            <ScrollArea className="flex-1 p-4 ">
               {Object.entries(groupedMessages).map(([date, dateMessages]) => (
                 <div key={date} className="mb-6">
                   <div className="flex justify-center mb-4">
@@ -278,7 +448,7 @@ export default function EventChatPage() {
               <div ref={messagesEndRef} />
             </ScrollArea>
 
-            <CardContent className="pt-3 border-t">
+            <CardContent className="pt-3 border-t bg-green-50">
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
@@ -291,7 +461,7 @@ export default function EventChatPage() {
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   disabled={!isConnected}
-                  className="flex-1"
+                  className="flex-1 bg-white"
                 />
                 <Button type="submit" disabled={!isConnected || !messageText.trim()}>
                   <Send className="h-4 w-4 mr-2" />
@@ -305,28 +475,70 @@ export default function EventChatPage() {
         {/* Список участников */}
         <div className="lg:col-span-1">
           <Card className="h-[70vh]">
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-3 bg-green-50">
               <CardTitle className="flex items-center">
                 <Users className="h-5 w-5 mr-2" />
                 Участники онлайн
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[calc(70vh-80px)]">
+            <ScrollArea className="h-[calc(60vh-80px)]  mt-2">
                 {activeUsers.length > 0 ? (
-                  <div className="space-y-3">
-                    {activeUsers.map((userId) => (
-                      <div key={userId} className="flex items-center">
-                        <Avatar className="h-8 w-8 mr-2">
-                          <AvatarFallback>
-                            <UserRound className="h-4 w-4" />
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="text-sm">
-                          {userId === currentUser?.nameId ? "Вы" : `Участник`}
-                          <div className="h-2 w-2 rounded-full bg-green-500 inline-block ml-2"></div>
-                        </div>
-                      </div>
+                  <div className="">
+                    {activeUsers.map((user) => (
+                      <HoverCard key={user.userID}>
+                        <HoverCardTrigger asChild>
+                          <div className="flex items-center cursor-pointer hover:bg-muted/50 p-2 transition-colors">
+                            <Avatar className="h-8 w-8 mr-2">
+                              <AvatarFallback>
+                                <UserRound className="h-4 w-4" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="text-sm">
+                              <div className="font-medium">
+                                {user.userID === currentUser?.nameId ? "Вы" : user.userName}
+                              </div>
+                            </div>
+                            <div className="h-2 w-2 rounded-full bg-green-500 ml-2"></div>
+                          </div>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="flex justify-between space-x-4">
+                            <Avatar className="h-12 w-12">
+                              <AvatarFallback className="text-lg">
+                                {user.name ? user.name.charAt(0) : user.userName.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="space-y-1 flex-1">
+                              <h4 className="text-sm font-semibold">
+                                {getFullName(user)}
+                              </h4>
+                              <div className="text-sm text-muted-foreground">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <User className="h-3.5 w-3.5" />
+                                  <span>{user.userName}</span>
+                                </div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Mail className="h-3.5 w-3.5" />
+                                  <span>{user.email}</span>
+                                </div>
+                                {user.birthDay && (
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Cake className="h-3.5 w-3.5" />
+                                    <span>{formatBirthday(user.birthDay)}</span>
+                                  </div>
+                                )}
+                                {user.address && (
+                                  <div className="flex items-center gap-2">
+                                    <Home className="h-3.5 w-3.5" />
+                                    <span className="truncate">{user.address}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
                     ))}
                   </div>
                 ) : (

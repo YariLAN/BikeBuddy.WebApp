@@ -1,14 +1,18 @@
-﻿using BikeBuddy.Domain.Shared;
+﻿using BikeBuddy.Application.DtoModels.User;
+using BikeBuddy.Application.Mappers.User;
+using BikeBuddy.Application.Services.Auth;
+using BikeBuddy.Application.Services.Profile;
+using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using System.Collections.Concurrent;
 
 namespace BikeBuddy.Application.Services.Chat.StateManagerService;
 
-public class StateManagerService(IChatRepository chatRepository) : IStateManagerService
+public class StateManagerService(IChatRepository chatRepository, IUserProfileRepository profileRepository) : IStateManagerService
 {
-    private static readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, HashSet<string>>> ActiveUsers = [];
+    private static readonly ConcurrentDictionary<Guid, ConcurrentDictionary<UserResponse, HashSet<string>>> ActiveUsers = [];
 
-    public Task<List<Guid>> GetActiveUsersAsync(Guid groupChatId)
+    public Task<List<UserResponse>> GetActiveUsersAsync(Guid groupChatId)
     {
         return Task.FromResult(
             ActiveUsers.TryGetValue(groupChatId, out var users) 
@@ -36,7 +40,6 @@ public class StateManagerService(IChatRepository chatRepository) : IStateManager
     public async Task<Result<bool, Error>> JoinChatAsync(Guid groupChatId, Guid userId, string connectionId)
     {
         var chat = await chatRepository.GetByIdAsync(groupChatId, CancellationToken.None);
-
         if (chat.IsFailure)
             return chat.Error;
 
@@ -44,9 +47,11 @@ public class StateManagerService(IChatRepository chatRepository) : IStateManager
         if (isMember.IsFailure)
             return chat.Error;
 
+        var user = UserMapper.ToMap(await profileRepository.GetByUserIdAsync(userId, CancellationToken.None)!);
+
         ActiveUsers
-            .GetOrAdd(groupChatId, _ => new ConcurrentDictionary<Guid, HashSet<string>>())
-            .AddOrUpdate(userId, 
+            .GetOrAdd(groupChatId, _ => new ConcurrentDictionary<UserResponse, HashSet<string>>())
+            .AddOrUpdate(user!, 
                 new HashSet<string> { connectionId }, 
                 (_, connections) => { 
                     connections.Add(connectionId); 

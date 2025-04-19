@@ -1,4 +1,5 @@
 ﻿using BikeBuddy.Application.DtoModels.Chat;
+using BikeBuddy.Application.DtoModels.User;
 using BikeBuddy.Application.Services.Chat.GetChatMessagesService;
 using BikeBuddy.Application.Services.Chat.SendMessageService;
 using BikeBuddy.Application.Services.Chat.StateManagerService;
@@ -12,17 +13,13 @@ public interface IGroupChatClient
 {
     Task ReceiveMessage(MessageDto message);
 
-    Task Error(string message);   
-
-    Task UserJoined(Guid userId); 
-
-    Task UserLeft(Guid userId);
+    Task Error(string message);  
 
     Task Joined(Guid groupChatId);
 
     Task Left(Guid groupChatId);
 
-    Task ActiveUsersList(List<Guid> activeUsers);
+    Task ActiveUsersList(List<UserResponse> activeUsers);
 
     Task LoadMessages(List<MessageDto> messages);
 }

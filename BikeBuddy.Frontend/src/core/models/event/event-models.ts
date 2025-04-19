@@ -23,6 +23,24 @@ export enum EventType {
     Tour = 6
 }
 
+export const bikeTypes = [
+  { value: BicycleType.Default, label: "Городской" },
+  { value: BicycleType.Road, label: "Шоссейный" },
+  { value: BicycleType.Mountain, label: "Горный" },
+  { value: BicycleType.BMX, label: "BMX" },
+  { value: BicycleType.Any, label: "Любой" },
+]
+
+export const eventTypes = [
+  { value: EventType.Solo, label: "Индивидуальный" },
+  { value: EventType.Group, label: "Групповой" },
+  { value: EventType.Leisure, label: "Прогулка" },
+  { value: EventType.Race, label: "Веломарафон" },
+  { value: EventType.Challenge, label: "Вызов" },
+  { value: EventType.Training, label: "Тренировка" },
+  { value: EventType.Tour, label: "Путешествие" },
+]
+
 export interface Marker {
     id : number,
     address: string,
@@ -82,6 +100,7 @@ export interface EventResponse {
     type: EventType,
     bicycleType: BicycleType,
     countMembers: number,
+    currentCountMembers: number,
     distance: number,
     startAddress: string,
     endAddress: string,
@@ -94,6 +113,7 @@ export interface EventResponse {
 }
 
 export interface UserResponse {
+    userID: string,
     userName: string,
     email: string,
     surname: string,

@@ -5,7 +5,7 @@ using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 
 namespace BikeBuddy.Application.Mappers.Event;
 
-internal class EventMapper
+public class EventMapper
 {
     public static Domain.Models.EventControl.Event ToMap(CreateEventRequest request, IEnumerable<PointDetails> points)
     {
@@ -56,6 +56,7 @@ internal class EventMapper
             dbEvent.Type,
             dbEvent.BicycleType,
             dbEvent.CountMembers,
+            dbEvent.Chat.Members.Count,
             dbEvent.Distance,
             dbEvent.StartAddress,
             dbEvent.EndAddress,

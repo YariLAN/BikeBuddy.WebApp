@@ -3,7 +3,6 @@ using BikeBuddy.Application.Mappers.Event;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using System.Security.Claims;
-using static BikeBuddy.Domain.Shared.Errors;
 
 namespace BikeBuddy.Application.Services.Event.GetEventService;
 

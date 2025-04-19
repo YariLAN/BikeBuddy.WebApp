@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
-import { BicycleType, CreateEventRequest, EventStatus, EventType } from "@/core/models/event/event-models"
+import { BicycleType, bikeTypes, CreateEventRequest, EventStatus, EventType, eventTypes } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
 import { alertExpectedError, alertInfo } from "@/core/helpers"
 import JwtService from "@/core/services/JwtService"
@@ -34,25 +34,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { markerToPointDetails } from "@/core/mappers/event-mapper"
 
 const validationService = new ValidationService(eventSchema)
-
-const bikeTypes = [
-  { value: BicycleType.Default,  label: 'Городской' },
-  { value: BicycleType.Road,     label: 'Шоссейный' },
-  { value: BicycleType.Mountain, label: 'Горный' },
-  { value: BicycleType.BMX,      label: 'BMX' },
-  { value: BicycleType.Any,      label: 'Любой' },
-]
-
-const eventTypes = [
-  { value: EventType.Solo,      label: 'Индивидуальный' },
-  { value: EventType.Group,     label: 'Групповой' },
-  { value: EventType.Leisure,   label: 'Прогулка' },
-  { value: EventType.Race,      label: 'Веломарафон' },
-  { value: EventType.Challenge, label: 'Вызов' },
-  { value: EventType.Training,  label: 'Тренировка'},
-  { value: EventType.Tour,      label: 'Путешествие'}
-]
-
 
 export default function CreateEventPage() {
   const navigate = useNavigate()

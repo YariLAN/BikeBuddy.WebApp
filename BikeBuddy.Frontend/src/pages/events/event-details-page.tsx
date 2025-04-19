@@ -286,8 +286,8 @@ export default function EventDetailsPage() {
               <div className="flex items-center text-muted-foreground mb-6">
                 <Users className="mr-2 h-5 w-5" />
                 <div>
-                  <div className="font-medium text-foreground">Количество участников</div>
-                  <div>{formData.event.countMembers}</div>
+                  <div className="font-medium text-foreground">Количество зарегистрированных участников</div>
+                  <div>{formData.event.currentCountMembers} из {formData.event.countMembers}</div>
                 </div>
               </div>
 
