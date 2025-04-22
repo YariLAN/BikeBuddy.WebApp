@@ -9,6 +9,7 @@ interface EventState {
     createEvent: (event: CreateEventRequest) => Promise<ApiResponse<string>>;
     getEvents: (filter: SearchFilterDto<EventFilterDto>) => Promise<ApiResponse<PageData<EventListResponse>>>;
     getEventById: (eventId: string) => Promise<ApiResponse<EventResponseDetails>>;
+    cancelEventById: (eventId: string) => Promise<ApiResponse<boolean>>;
 }
 
 const useEventStore = create<EventState>(
@@ -31,6 +32,10 @@ const useEventStore = create<EventState>(
             const result = await apiService.get<EventResponseDetails>(`/events/${eventId}`)
             return result
         },
+        cancelEventById: async (eventId: string) => {
+            const result = await apiService.delete<boolean>(`/events/${eventId}`)
+            return result
+        }
     })
 )
 

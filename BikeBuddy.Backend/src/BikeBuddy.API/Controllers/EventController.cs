@@ -1,6 +1,7 @@
 ﻿using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application.DtoModels.Common;
 using BikeBuddy.Application.DtoModels.Event;
+using BikeBuddy.Application.Services.Event.CancelEventService;
 using BikeBuddy.Application.Services.Event.CreateEventService;
 using BikeBuddy.Application.Services.Event.GetEventService;
 using BikeBuddy.Application.Services.Event.GetEventsService;
@@ -48,6 +49,17 @@ namespace BikeBuddy.API.Controllers
             var result = await getEventService.ExecuteAsync(eventId, User, cancellationToken);
 
             return result.ToResponse();
-        } 
+        }
+
+        [HttpDelete("{eventId:Guid}")]
+        public async Task<ActionResult<bool>> CanceledEventAsync(
+            [FromRoute] Guid eventId,
+            [FromServices] ICancelEventService cancelEventService,
+            CancellationToken cancellationToken)
+        {
+            var result = await cancelEventService.ExecuteAsync(eventId, User, cancellationToken);
+
+            return result.ToResponse();
+        }
     }
 }

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
-import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound, MessageSquare } from "lucide-react"
+import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound, MessageSquare, X } from "lucide-react"
 import { RouteMapContainer, type RouteMapContainerRef } from "@/components/my/map/route-map-container"
 import { BicycleType, type EventResponseDetails, EventStatus, EventType, PointDetails } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import useChatStore from "@/stores/chat"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import Swal from "sweetalert2"
 
 const bikeTypes = [
   { value: BicycleType.Default, label: "Городской" },
@@ -55,6 +56,7 @@ export default function EventDetailsPage() {
   const routeMapRef = useRef<RouteMapContainerRef>(null)
   const [formData, setEvent] = useState<EventResponseDetails | null>(null)
   const [isJoining, setIsJoining] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -138,6 +140,46 @@ export default function EventDetailsPage() {
     }
   } 
 
+  const showCancelDialog = async () => {
+    Swal.fire({
+      title: "Вы уверены, что хотите отменить этот заезд? Это действие нельзя отменить.",
+      showConfirmButton: true,
+      showCancelButton: true,
+      icon: "info",
+      confirmButtonText: "Да, отменить заезд",
+      cancelButtonText: "Отмена",
+      width: 450,
+      customClass: {
+        confirmButton: "btn btn-danger",
+        popup: "swal-alert-info"
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+       await handleCancelEvent()
+      }
+    });
+  }
+
+  const handleCancelEvent = async () => {
+    if (!eventId || !formData?.canEdit) {
+      return
+    }
+
+    setIsCancelling(true)
+
+    try {
+      const result = await eventStore.cancelEventById(eventId)
+
+      if (result.data) {
+        await fetchEventDetails()
+      } else if (result.error) {
+        alertExpectedError(result.error)
+      }
+    } catch (error : any) {
+      alertExpectedError(error.message)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-5 py-8">
@@ -194,15 +236,28 @@ export default function EventDetailsPage() {
   return (
     <div className="container mx-auto px-5 py-8">
       <div className="flex items-center mb-8">
-        <Button variant="outline" onClick={() => navigate("/events")} className="mr-4">
+        <Button variant="outline" onClick={() => navigate("/events")} className="mr-10">
           <ArrowLeft className="h-5 w-5 mr-2" />
           Назад
         </Button>
         <h1 className="text-3xl font-bold">{formData.event.name}</h1>
 
-        <div className="ml-auto flex items-center gap-2">
-          <div className={cn("w-3 h-3 rounded-full", statusInfo.color)} style={{ border: "1px black solid" }} />
-          <span className="text-sm font-medium">{statusInfo.label}</span>
+        <div className="ml-auto flex items-center gap-20">
+          <div className="flex items-center gap-2">
+            <div className={cn("w-3 h-3 rounded-full", statusInfo.color)} style={{ border: "1px black solid" }} />
+            <span className="text-sm font-medium">{statusInfo.label}</span>
+          </div>
+          
+          {formData.canEdit && formData.event.status !== EventStatus.Canceled && (
+          <div className="flex items-center gap-10">
+            {/* Кнопка отмены события (только для автора) */}
+            
+              <Button variant="destructive" className=""  onClick={() => showCancelDialog()}>
+                <X className="mr-2 h-4 w-4" />
+                Отменить заезд
+              </Button>
+            </div>
+          )}  
         </div>
       </div>
 
