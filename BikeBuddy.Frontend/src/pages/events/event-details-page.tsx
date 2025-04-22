@@ -10,7 +10,7 @@ import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound, M
 import { RouteMapContainer, type RouteMapContainerRef } from "@/components/my/map/route-map-container"
 import { BicycleType, type EventResponseDetails, EventStatus, EventType, PointDetails } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
-import { alertExpectedError } from "@/core/helpers"
+import { alertExpectedError, toastAlert } from "@/core/helpers"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import useChatStore from "@/stores/chat"
@@ -142,13 +142,13 @@ export default function EventDetailsPage() {
 
   const showCancelDialog = async () => {
     Swal.fire({
-      title: "Вы уверены, что хотите отменить этот заезд? Это действие нельзя отменить.",
+      title: "Вы уверены, что хотите отменить этот заезд? Это действие нельзя отменить после.",
       showConfirmButton: true,
       showCancelButton: true,
-      icon: "info",
+      icon: "warning",
       confirmButtonText: "Да, отменить заезд",
-      cancelButtonText: "Отмена",
-      width: 450,
+      cancelButtonText: "Отменить действие",
+      width: 650,
       customClass: {
         confirmButton: "btn btn-danger",
         popup: "swal-alert-info"
@@ -172,6 +172,7 @@ export default function EventDetailsPage() {
 
       if (result.data) {
         await fetchEventDetails()
+        toastAlert("", "Заезд успешно отменен", 'success', 'center')
       } else if (result.error) {
         alertExpectedError(result.error)
       }

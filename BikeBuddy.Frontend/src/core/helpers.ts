@@ -1,4 +1,4 @@
-import Swal, { SweetAlertIcon } from "sweetalert2";
+import Swal, { SweetAlertIcon, SweetAlertPosition } from "sweetalert2";
 
 function errorText(err : Object): string{
     if (typeof err === 'object' && err !== null && 'data' in err  && 'status' in err) {
@@ -58,9 +58,35 @@ export function alertInfo(text : string, title: string, type: SweetAlertIcon){
       }
   })
 }
+export function toastAlert(text : string, title: string, type: SweetAlertIcon, position: SweetAlertPosition = "bottom-end"){
+   const Toast =  Swal.mixin({
+      position: position,
+      timer: 3000,
+      toast: true,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      },
+      width: 400,
+  })
+  Toast.fire({
+    title: title || "Сообщение",
+    html: text,
+    icon: type,
+    buttonsStyling: true,
+    confirmButtonText: "Закрыть",
+    customClass: {
+      confirmButton: "btn btn-danger",
+      popup: "swal-alert-info"
+    },
+    heightAuto: true
+  });
+}
 
   export default {
     errorText,
     alertError,
     alertInfo,
+    toastAlert
   }
