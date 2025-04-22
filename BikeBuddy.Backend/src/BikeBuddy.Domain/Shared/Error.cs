@@ -38,6 +38,11 @@ public record Error
     public static Error UnAuthorized(string message)
     {
         return new Error(message, ErrorType.Unauthorized);
+    }       
+
+    public static Error Forbidden(string message)
+    {
+        return new Error(message, ErrorType.Forbidden);
     }
 
     public string Serialize()
@@ -70,4 +75,5 @@ public enum ErrorType
     Failure,
     Conflict,
     Unauthorized,
+    Forbidden
 }

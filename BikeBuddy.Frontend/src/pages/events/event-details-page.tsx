@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
-import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound, MessageSquare, X } from "lucide-react"
+import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound, MessageSquare, X, AlertCircle } from "lucide-react"
 import { RouteMapContainer, type RouteMapContainerRef } from "@/components/my/map/route-map-container"
 import { BicycleType, type EventResponseDetails, EventStatus, EventType, PointDetails } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import useChatStore from "@/stores/chat"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import Swal from "sweetalert2"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 const bikeTypes = [
   { value: BicycleType.Default, label: "Городской" },
@@ -262,10 +263,33 @@ export default function EventDetailsPage() {
         </div>
       </div>
 
+      {formData.event.status === EventStatus.Canceled && (
+        <div className="mb-6 bg-red border-1-4 border-red-500 rounded-md shadow-sm dark:bg-red-900/20 dark:border-red-800">
+          <Alert variant="destructive" className="p-4">
+            <AlertCircle className="h-6 w-6 text-red-500"/>
+            <AlertTitle  className="text-lg text-red-700 ml-3">Заезд отменен</AlertTitle>
+            <AlertDescription className="text-red-600 dark:text-red-300 ml-3">
+              <span>Этот заезд был отменен организатором {formData.event.author.userName} и не состоится.</span>          
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       {/* Карта */}
       <Card className="mb-8 overflow-hidden">
         <CardContent className="p-0">
-          <RouteMapContainer ref={routeMapRef} readOnly={true} />
+          <div className="relative">
+            <RouteMapContainer ref={routeMapRef} readOnly={true} />
+            {formData.event.status === EventStatus.Canceled && (
+              <div className="absolute inset-0 top-0 left-0 right-0 bottom-0 bg-red-900/10 
+                              backdrop-blur-[1px] flex items-center justify-center"
+              >
+                <div>
+                  <h3 className="text-2xl font-bold text-red-600 dark:text-red-500">ОТМЕНЕНО</h3>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -354,9 +378,9 @@ export default function EventDetailsPage() {
                       <Button 
                         className={cn(
                             "w-full",
-                            formData.isMemberChat || canJoinChat
+                            (formData.isMemberChat || canJoinChat)
                                 ? "bg-green-600 hover:bg-green-700"
-                                : "bg-gray-400 hover:bg-gray-500 cursor-not-allowed"
+                                : "bg-gray-400 hover:bg-gray-500 cursor-not-allowed",
                         )}
                         disabled={ !formData.isMemberChat && !canJoinChat }
                         onClick={handleChatAction}

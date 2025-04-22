@@ -12,4 +12,6 @@ public interface IEventRepository
     Task<Result<Domain.Models.EventControl.Event, Error>> GetEventAsync(Guid eventId, CancellationToken token);
 
     Task<Result<(List<Domain.Models.EventControl.Event>, int), Error>> GetEventsByFilterAsync(SearchFilterDto<EventFilterDto> eventFilter, CancellationToken token);
+
+    Task<Result<bool, Error>> UpdateAsync(Domain.Models.EventControl.Event eventModel, CancellationToken cancellationToken);
 }

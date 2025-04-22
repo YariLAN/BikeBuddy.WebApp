@@ -27,6 +27,13 @@ public class Errors
             return Error.NotFound($"Record not found{forId}");
         }
 
+        public static Error AccessIsDenied(Guid? userId = null)
+        {
+            var forId = userId is null ? "" : $" by id = {userId}";
+
+            return Error.Forbidden($"User{forId} access is denied");
+        }
+
         public static Error ValueIsInvalidLength(string? name = null)
         {
             string forName = name is null

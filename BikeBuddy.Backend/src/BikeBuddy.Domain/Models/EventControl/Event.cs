@@ -30,7 +30,7 @@ public class Event : ICreatedUpdateAt
 
     public EventDetails Details { get; private set; } = default!;
 
-    public EventStatus Status { get; set; } = EventStatus.OPENED;
+    public EventStatus Status { get; private set; } = EventStatus.OPENED;
 
     public Guid? CreatedBy { get; set; }
 
@@ -117,5 +117,10 @@ public class Event : ICreatedUpdateAt
     public void AddChat(GroupChat groupChat)
     {
         Chat = groupChat;
+    }
+
+    public void UpdateStatus(EventStatus status)
+    {
+        Status = status;
     }
 }

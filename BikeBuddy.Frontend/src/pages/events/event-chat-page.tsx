@@ -18,11 +18,10 @@ import * as signalR from "@microsoft/signalr"
 import type { MessageDto, SendMessageRequest } from "@/core/models/event/chat-models"
 import { decodeToken, getToken } from "@/core/services/JwtService"
 import { LOCAL_BASE_URL } from "@/core/constants"
-import { BicycleType, bikeTypes, EventResponse, EventType, eventTypes, UserResponse } from "@/core/models/event/event-models"
+import { BicycleType, bikeTypes, EventResponse, EventStatus, EventType, eventTypes, UserResponse } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
 import { alertExpectedError } from "@/core/helpers"
 import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 
 export default function EventChatPage() {
@@ -69,7 +68,7 @@ export default function EventChatPage() {
     fetchEventDetails()
   }, [eventId, eventStore])
 
-  // Инициализация подключения к SignalR
+  // SignalR
   useEffect(() => {
     if (!chatId) {
       navigate(`/events/${eventId}`)
@@ -252,6 +251,8 @@ export default function EventChatPage() {
     return groups
   }, {})
 
+  const isCancel = eventDetails?.status === EventStatus.Canceled
+
   return (
     <div className="container mx-auto px-5 py-8">
       <div className="flex items-center mb-8">
@@ -292,92 +293,104 @@ export default function EventChatPage() {
           </CardContent>
         </Card>
       ) : eventDetails ? (
-        <Card className="mb-6 bg-green-50">
-          <CardHeader>
-            <CardTitle>{eventDetails.name}</CardTitle>
-            <CardDescription className="line-clamp-2">{eventDetails.description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="flex items-center text-muted-foreground">
-                <Calendar className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="text-xs text-muted-foreground">Дата и время</div>
-                  <div className="text-sm">
-                    {formatEventDate(eventDetails.startDate)} в {formatEventTime(eventDetails.startDate)}
+       <div className="relative">
+          <Card className={cn("mb-6", isCancel ? "bg-red-50" : "bg-green-50")}>
+            <CardHeader>
+              <CardTitle>{eventDetails.name}</CardTitle>
+              <CardDescription className="line-clamp-2">{eventDetails.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="flex items-center text-muted-foreground">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Дата и время</div>
+                      <div className="text-sm">
+                        {formatEventDate(eventDetails.startDate)} в {formatEventTime(eventDetails.startDate)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center text-muted-foreground">
+                    <RouteIcon className="mr-2 h-4 w-4" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Дистанция</div>
+                      <div className="text-sm">{eventDetails.distance / 1000} км</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center text-muted-foreground">
+                    <MapPin className="mr-2 h-4 w-4" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Старт</div>
+                      <div className="text-sm truncate max-w-[200px]" title={eventDetails.startAddress}>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="flex-1 text-sm truncate">{`${eventDetails.startAddress}` || "Загрузка адреса..."}</span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{`${eventDetails.startAddress}`}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center text-muted-foreground">
+                    <MapPin className="mr-2 h-4 w-4" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Финиш</div>
+                      <div className="text-sm truncate max-w-[200px]" title={eventDetails.endAddress}>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="flex-1 text-sm truncate">{`${eventDetails.endAddress}` || "Загрузка адреса..."}</span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{`${eventDetails.endAddress}`}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+
+              {/* Оверлэй */}
+              {eventDetails.status === EventStatus.Canceled && (
+                <div className="absolute flex items-center justify-center z-10 backdrop-blur-[1px] top-0 left-0 right-0 bottom-0"
+                >
+                  <div>
+                    <h3 className="text-2xl font-bold text-red-600 dark:text-red-500">ОТМЕНЕНО</h3>
                   </div>
                 </div>
+              )}
+
+              <Separator className="my-4" />
+
+              <div className="flex flex-wrap gap-2">
+                <Badge 
+                  variant="outline" 
+                  className="flex items-center gap-1 bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-100">
+                    <Bike className="h-3 w-3 mr-1" />
+                    {getBikeTypeLabel(eventDetails.bicycleType)}
+                </Badge>
+                <Badge 
+                  variant="outline" 
+                  className="flex items-center gap-1 bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
+                    <Flag className="h-3 w-3 mr-1" />
+                    {getEventTypeLabel(eventDetails.type)}
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-1 bg-red-200 text-red-900">
+                  <Users className="h-3 w-3 mr-1" />
+                  {eventDetails.countMembers} участников
+                </Badge>
               </div>
-
-              <div className="flex items-center text-muted-foreground">
-                <RouteIcon className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="text-xs text-muted-foreground">Дистанция</div>
-                  <div className="text-sm">{eventDetails.distance / 1000} км</div>
-                </div>
-              </div>
-
-              <div className="flex items-center text-muted-foreground">
-                <MapPin className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="text-xs text-muted-foreground">Старт</div>
-                  <div className="text-sm truncate max-w-[200px]" title={eventDetails.startAddress}>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex-1 text-sm truncate">{`${eventDetails.startAddress}` || "Загрузка адреса..."}</span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{`${eventDetails.startAddress}`}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center text-muted-foreground">
-                <MapPin className="mr-2 h-4 w-4" />
-                <div>
-                  <div className="text-xs text-muted-foreground">Финиш</div>
-                  <div className="text-sm truncate max-w-[200px]" title={eventDetails.endAddress}>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex-1 text-sm truncate">{`${eventDetails.endAddress}` || "Загрузка адреса..."}</span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{`${eventDetails.endAddress}`}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <Separator className="my-4" />
-
-            <div className="flex flex-wrap gap-2">
-              <Badge 
-                variant="outline" 
-                className="flex items-center gap-1 bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-100">
-                  <Bike className="h-3 w-3 mr-1" />
-                  {getBikeTypeLabel(eventDetails.bicycleType)}
-              </Badge>
-              <Badge 
-                variant="outline" 
-                className="flex items-center gap-1 bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
-                  <Flag className="h-3 w-3 mr-1" />
-                  {getEventTypeLabel(eventDetails.type)}
-              </Badge>
-              <Badge variant="outline" className="flex items-center gap-1 bg-red-200 text-red-900">
-                <Users className="h-3 w-3 mr-1" />
-                {eventDetails.countMembers} участников
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       ) : null}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -460,10 +473,10 @@ export default function EventChatPage() {
                   placeholder="Введите сообщение..."
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
-                  disabled={!isConnected}
+                  disabled={!isConnected || isCancel}
                   className="flex-1 bg-white"
                 />
-                <Button type="submit" disabled={!isConnected || !messageText.trim()}>
+                <Button type="submit" disabled={!isConnected || !messageText.trim() || isCancel}>
                   <Send className="h-4 w-4 mr-2" />
                   Отправить
                 </Button>

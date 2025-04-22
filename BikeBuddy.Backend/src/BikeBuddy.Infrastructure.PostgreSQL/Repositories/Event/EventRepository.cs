@@ -1,7 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.Common;
 using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Services.Event;
-using BikeBuddy.Domain.Models.ChatControl;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -66,6 +65,18 @@ public class EventRepository(ApplicationDbContext context) : IEventRepository
         catch
         {
             return Error.Failure("Ошибка получения заездов");
+        }
+    }
+
+    public async Task<Result<bool, Error>> UpdateAsync(EventModel eventModel, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (Exception ex) {
+            return Error.Failure($"Ошибка обновления заезда: {ex.Message}");
         }
     }
 }
