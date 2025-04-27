@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Application.Services.Auth;
 using BikeBuddy.Domain.Models.ChatControl.ValueObjects;
+using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using System.Security.Claims;
@@ -32,7 +33,13 @@ public class JoinChatService(
             return Errors.Chat.AlreadyMember(authUser.Id);
 
         if (chat.Value.Event!.CountMembers == chat.Value.Members.Count)
+        {
             return Errors.Chat.CountMembersExceeded(authUser.Id);
+        }
+        else if (chat.Value.Event!.CountMembers - chat.Value.Members.Count == 1)
+        {
+            chat.Value.Event!.UpdateStatus(EventStatus.CLOSED);
+        }
 
         chat.Value.AddMember(authUser.Id, Role.MEMBER);
         var updateResult = await chatRepository.UpdateAsync(chat.Value, cancellationToken);

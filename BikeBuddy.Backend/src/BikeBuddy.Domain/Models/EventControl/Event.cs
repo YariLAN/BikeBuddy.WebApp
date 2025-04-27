@@ -1,6 +1,7 @@
 ﻿using BikeBuddy.Domain.Models.AuthControl;
 using BikeBuddy.Domain.Models.ChatControl;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
+using CSharpFunctionalExtensions;
 
 namespace BikeBuddy.Domain.Models.EventControl;
 
@@ -123,4 +124,24 @@ public class Event : ICreatedUpdateAt
     {
         Status = status;
     }
+
+    public void Update(string name, string description, EventType type, BicycleType bicycleType, int countMembers, int distance,
+        string startAddress,
+        string endAddress,
+        DateTime startDate,
+        DateTime endDate,
+        EventDetails details)
+    {
+        Name = name;
+        Description = description;
+        Type = type;
+        BicycleType = bicycleType;
+        CountMembers = countMembers;
+        Distance = distance;
+        StartAddress = startAddress;
+        EndAddress = endAddress;
+        StartDate = startDate;
+        EndDate = endDate;
+        Details = details;
+    }  
 }

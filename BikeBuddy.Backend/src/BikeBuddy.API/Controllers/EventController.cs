@@ -5,6 +5,7 @@ using BikeBuddy.Application.Services.Event.CancelEventService;
 using BikeBuddy.Application.Services.Event.CreateEventService;
 using BikeBuddy.Application.Services.Event.GetEventService;
 using BikeBuddy.Application.Services.Event.GetEventsService;
+using BikeBuddy.Application.Services.Event.UpdateEventService;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -52,7 +53,7 @@ namespace BikeBuddy.API.Controllers
         }
 
         [HttpDelete("{eventId:Guid}")]
-        public async Task<ActionResult<bool>> CanceledEventAsync(
+        public async Task<ActionResult<bool>> CancelEventAsync(
             [FromRoute] Guid eventId,
             [FromServices] ICancelEventService cancelEventService,
             CancellationToken cancellationToken)
@@ -60,6 +61,17 @@ namespace BikeBuddy.API.Controllers
             var result = await cancelEventService.ExecuteAsync(eventId, User, cancellationToken);
 
             return result.ToResponse();
+        }
+
+        [HttpPut("{eventId:Guid}")]
+        public async Task<ActionResult<bool>> UpdateEventAsync(
+            [FromServices] IUpdateEventService updateEventService,
+            [FromServices] IValidator<UpdateEventRequest> validator,
+            [FromRoute] Guid eventId,
+            [FromBody] UpdateEventRequest request,
+            CancellationToken cancellationToken)
+        {
+            return (await updateEventService.ExecuteAsync(eventId, request, User, cancellationToken)).ToResponse();
         }
     }
 }

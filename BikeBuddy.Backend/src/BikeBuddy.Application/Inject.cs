@@ -12,6 +12,7 @@ using BikeBuddy.Application.Services.Event.CancelEventService;
 using BikeBuddy.Application.Services.Event.CreateEventService;
 using BikeBuddy.Application.Services.Event.GetEventService;
 using BikeBuddy.Application.Services.Event.GetEventsService;
+using BikeBuddy.Application.Services.Event.UpdateEventService;
 using BikeBuddy.Application.Services.Event.UploadMapService;
 using BikeBuddy.Application.Services.Profile.CreateProfileService;
 using BikeBuddy.Application.Services.Profile.GetProfileService;
@@ -70,6 +71,7 @@ public static class Inject
         services.AddScoped<IGetEventService, GetEventService>();
         services.AddScoped<IUploadMapService, UploadMapService>();
         services.AddScoped<ICancelEventService, CancelEventService>();
+        services.AddScoped<IUpdateEventService, UpdateEventService>();
 
         // Chat
         services.AddScoped<IJoinChatService, JoinChatService>();

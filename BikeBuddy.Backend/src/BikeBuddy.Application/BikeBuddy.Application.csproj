@@ -18,8 +18,4 @@
     <ProjectReference Include="..\BikeBuddy.Domain\BikeBuddy.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Event\UpdateEventService\" />
-  </ItemGroup>
-
 </Project>

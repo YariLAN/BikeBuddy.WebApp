@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
-import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound, MessageSquare, X, AlertCircle } from "lucide-react"
+import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound, MessageSquare, X, AlertCircle, Pencil } from "lucide-react"
 import { RouteMapContainer, type RouteMapContainerRef } from "@/components/my/map/route-map-container"
 import { BicycleType, type EventResponseDetails, EventStatus, EventType, PointDetails } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
@@ -244,22 +244,31 @@ export default function EventDetailsPage() {
         </Button>
         <h1 className="text-3xl font-bold">{formData.event.name}</h1>
 
-        <div className="ml-auto flex items-center gap-20">
+        <div className="ml-auto flex items-center gap-6">
           <div className="flex items-center gap-2">
             <div className={cn("w-3 h-3 rounded-full", statusInfo.color)} style={{ border: "1px black solid" }} />
             <span className="text-sm font-medium">{statusInfo.label}</span>
           </div>
           
-          {formData.canEdit && formData.event.status !== EventStatus.Canceled && (
-          <div className="flex items-center gap-10">
-            {/* Кнопка отмены события (только для автора) */}
-            
-              <Button variant="destructive" className=""  onClick={() => showCancelDialog()}>
-                <X className="mr-2 h-4 w-4" />
-                Отменить заезд
-              </Button>
-            </div>
-          )}  
+          {formData.canEdit && (
+            <>
+              {formData.event.status !== EventStatus.Canceled && (
+                <Button variant="outline" className="bg-yellow-50" onClick={() => navigate(`/events/edit/${eventId}`)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Редактировать
+                </Button>
+              )}
+              {formData.event.status !== EventStatus.Canceled && (
+                <div className="flex items-center gap-10">
+                  {/* Кнопка отмены события (только для автора) */}
+                  <Button variant="destructive" className=""  onClick={() => showCancelDialog()}>
+                    <X className="mr-2 h-4 w-4" />
+                    Отменить заезд
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 

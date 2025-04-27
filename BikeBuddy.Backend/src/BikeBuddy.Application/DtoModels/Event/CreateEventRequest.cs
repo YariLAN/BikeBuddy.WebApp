@@ -2,9 +2,9 @@
 
 namespace BikeBuddy.Application.DtoModels.Event;
 
-public record CreateEventRequest(
-    string Name, 
-    string Description, 
+public abstract record EventRequest(
+    string Name,
+    string Description,
     EventType Type,
     BicycleType BicycleType,
     int CountMembers,
@@ -13,6 +13,20 @@ public record CreateEventRequest(
     string EndAddress,
     DateTime StartDate,
     DateTime EndDate,
-    Guid UserId,
+    IEnumerable<PointDetailsDto> Points);
+
+public record CreateEventRequest(
+    string Name,
+    string Description,
+    EventType Type,
+    BicycleType BicycleType,
+    int CountMembers,
+    double Distance,
+    string StartAddress,
+    string EndAddress,
+    DateTime StartDate,
+    DateTime EndDate,
     IEnumerable<PointDetailsDto> Points,
-    EventStatus Status);
+    Guid UserId,
+    EventStatus Status) 
+    : EventRequest(Name, Description, Type, BicycleType, CountMembers, Distance, StartAddress, EndAddress, StartDate, EndDate, Points);
