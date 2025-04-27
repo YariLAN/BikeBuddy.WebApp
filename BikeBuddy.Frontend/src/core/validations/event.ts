@@ -46,6 +46,7 @@ export const eventSchema = yup.object({
     .number()
     .min(1, "Участников не может быть ноль или меньше")
     .required("Число участников заезда обязательно"),
+  currentCountMembers: yup.number(),
   // images: yup
   //   .array()
   //   .of(yup.string())

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ValidationService } from "@/core/services/ValidationService"
 import { eventSchema, type EventFormData } from "@/core/validations/event"
 import { Button } from "@/components/ui/button"
@@ -22,20 +22,27 @@ import {
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
-import { CalendarIcon, Loader2, AlertCircle, Upload } from 'lucide-react'
+import { CalendarIcon, Loader2, AlertCircle, Upload, ArrowLeft } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
-import { BicycleType, bikeTypes, CreateEventRequest, EventStatus, EventType, eventTypes } from "@/core/models/event/event-models"
+import { bikeTypes, CreateEventRequest, EventStatus, eventTypes, UpdateEventRequest } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
 import { alertExpectedError, alertInfo } from "@/core/helpers"
 import JwtService from "@/core/services/JwtService"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { markerToPointDetails } from "@/core/mappers/event-mapper"
+import { ApiResponse } from "@/core/services/ApiService"
 
 const validationService = new ValidationService(eventSchema)
 
 export default function CreateEventPage() {
+  const { eventId } = useParams<{ eventId: string}>()
+  const isEditMode = !!eventId
+  
+  const location = useLocation()
+  const eventData = location.state?.eventData
+
   const navigate = useNavigate()
   const routeMapRef = useRef<RouteMapContainerRef>(null)
   const [formData, setFormData] = useState<Partial<EventFormData>>({
@@ -49,6 +56,7 @@ export default function CreateEventPage() {
     endDate: undefined,
     distance: undefined,
     countMembers: undefined,
+    currentCountMembers: undefined,
     points: [],
     status: EventStatus.Opened
     // images: [],
@@ -60,6 +68,31 @@ export default function CreateEventPage() {
   
   const eventStore = useEventStore()
   
+  useEffect(() => {
+    if (isEditMode && eventId) {
+      if (eventData) {
+        setFormData({
+          name: eventData.name,
+          description: eventData.description,
+          type: eventData.type,
+          bicycleType: eventData.bicycleType,
+          countMembers: eventData.countMembers,
+          currentCountMembers: eventData.currentCountMembers,
+          distance: eventData.distance,
+          startAddress: eventData.startAddress,
+          endAddress: eventData.endAddress,
+          startDate: new Date(eventData.startDate),
+          endDate: new Date(eventData.endDate),
+          points: eventData.points,
+        })
+
+        if (eventData.points && eventData.points.length > 0 && routeMapRef.current) {
+          routeMapRef.current.setPoints(eventData.points)
+        }
+      }
+    }
+  }, [eventId, isEditMode])
+
   const validateField = async (field: string, value: any) => {
     await validationService.validateField(field, value, setErrors)
   }
@@ -89,29 +122,36 @@ export default function CreateEventPage() {
 
     try {
       console.log("Form data:", formData)
-
       const mapExport = await routeMapRef.current?.exportMap()
       formData.points = mapExport?.markers.map(m => markerToPointDetails(m))
+      
+      let result: ApiResponse<boolean | string>;
+      if (isEditMode) {
+        result = await eventStore.updateEvent(eventId, formData as UpdateEventRequest)
+      } else {
+        formData.userId = JwtService.decodeToken()?.nameId
+        result = await eventStore.createEvent(formData as CreateEventRequest)
+      }
           
-      formData.userId = JwtService.decodeToken()?.nameId
-      var createEventResult = await eventStore.createEvent(formData as CreateEventRequest)
-
-      if (createEventResult.error) { 
-        alertExpectedError(createEventResult.error) 
+      if (result.error) { 
+        alertExpectedError(result.error) 
         return
       }
 
-      var resultUpload = await eventStore.uploadMap(createEventResult.data!, mapExport!.blobImage!)
+      var resultUpload = await eventStore.uploadMap(isEditMode ? eventId : result.data! as string, mapExport!.blobImage!)
 
       if (resultUpload.error) { 
         alertExpectedError(resultUpload.error) 
       }
       else {
-        alertInfo("", "Заезд успешно создан", 'success')
+        alertInfo("", isEditMode ? "Заезд успешно обновлен" : "Заезд успешно создан", 'success')
       }
       await new Promise(resolve => setTimeout(resolve, 1000))
 
-      navigate('/events')
+      isEditMode 
+        ? navigate(`/events/${eventId}`) 
+        : navigate('/events')
+
     } catch (error: any) {
       alertExpectedError(error.message)
     } finally {
@@ -152,7 +192,13 @@ export default function CreateEventPage() {
 
   return (
     <div className="container mx-auto px-5 py-8">
-      <h1 className="text-3xl font-bold mb-8">Создание события</h1>
+      <div className="flex items-center mb-8">
+        <Button variant='outline' onClick={() => isEditMode ? navigate(`/events/${eventId}`) : navigate("/events")} className="mr-4">
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Назад
+        </Button>
+        <h1 className="text-3xl font-bold ml-6">{isEditMode ? "Редактирование заезда" : "Создание заезда"}</h1>
+      </div>
       
       <form onSubmit={onSubmit} className="space-y-8">
         {/* Название */}
@@ -259,6 +305,7 @@ export default function CreateEventPage() {
             'Введите число участников',
             <Input
               type="number"
+              min={isEditMode ? formData.currentCountMembers : 0}
               value={formData.countMembers}
               onChange={(e) => handleInputChange('countMembers', Number(e.target.value))}
             />,
@@ -386,7 +433,7 @@ export default function CreateEventPage() {
             {isSubmitting && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-            Создать событие
+            {isEditMode ? "Сохранить изменения" : "Создать событие"}
           </Button>
         </div>
       </form>

@@ -182,6 +182,12 @@ export default function EventDetailsPage() {
     }
   }
 
+  const handleEditEvent = () => {
+    if (formData && formData.event) {
+      navigate(`/events/edit/${eventId}`, { state: { eventData: formData.event }})
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-5 py-8">
@@ -253,7 +259,7 @@ export default function EventDetailsPage() {
           {formData.canEdit && (
             <>
               {formData.event.status !== EventStatus.Canceled && (
-                <Button variant="outline" className="bg-yellow-50" onClick={() => navigate(`/events/edit/${eventId}`)}>
+                <Button variant="outline" className="bg-yellow-50" onClick={handleEditEvent}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Редактировать
                 </Button>

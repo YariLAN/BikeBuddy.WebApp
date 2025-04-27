@@ -85,6 +85,10 @@ export default function App() {
                 } 
               />
               <Route
+                path={`${items[0].url}/edit/:eventId`}
+                element={authStore.isAuthenticated ? <CreateEventPage /> : <Navigate to="/" replace />}
+              />
+              <Route
                 path={`${items[0].url}/:eventId`}
                 element={
                   authStore.isAuthenticated ? <EventDetailsPage /> : <Navigate to="/" replace />

@@ -27,6 +27,8 @@ public class UpdateEventService(IEventRepository eventRepository) : IUpdateEvent
 
         if (updateRequest.CountMembers > eventDb.Value.CountMembers && eventDb.Value.Status == EventStatus.CLOSED)
             eventDb.Value.UpdateStatus(EventStatus.OPENED);
+        else if (updateRequest.CountMembers == eventDb.Value.Chat.Members.Count)
+            eventDb.Value.UpdateStatus(EventStatus.CLOSED);
 
         eventDb.Value.Update(
             updateRequest.Name,
@@ -34,7 +36,7 @@ public class UpdateEventService(IEventRepository eventRepository) : IUpdateEvent
             updateRequest.Type,
             updateRequest.BicycleType,
             updateRequest.CountMembers,
-            (int)updateRequest.Distance * 1000,
+            (int)(updateRequest.Distance * 1000),
             updateRequest.StartAddress,
             updateRequest.EndAddress,
             updateRequest.StartDate,

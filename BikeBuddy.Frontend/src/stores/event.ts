@@ -1,4 +1,4 @@
-import { CreateEventRequest, EventFilterDto, EventListResponse, EventResponseDetails } from "@/core/models/event/event-models";
+import { CreateEventRequest, EventFilterDto, EventListResponse, EventResponseDetails, UpdateEventRequest } from "@/core/models/event/event-models";
 import { ApiResponse, apiService } from "@/core/services/ApiService";
 import { convertBlobToFormData } from "@/lib/utils";
 import { create } from "zustand";
@@ -10,6 +10,7 @@ interface EventState {
     getEvents: (filter: SearchFilterDto<EventFilterDto>) => Promise<ApiResponse<PageData<EventListResponse>>>;
     getEventById: (eventId: string) => Promise<ApiResponse<EventResponseDetails>>;
     cancelEventById: (eventId: string) => Promise<ApiResponse<boolean>>;
+    updateEvent: (eventId: string, event: UpdateEventRequest) => Promise<ApiResponse<boolean>>
 }
 
 const useEventStore = create<EventState>(
@@ -35,6 +36,10 @@ const useEventStore = create<EventState>(
         cancelEventById: async (eventId: string) => {
             const result = await apiService.delete<boolean>(`/events/${eventId}`)
             return result
+        },
+        updateEvent: async (eventId: string, event: UpdateEventRequest) => {
+            const result = await apiService.put<boolean>(`/events/${eventId}`, event);
+            return result;
         }
     })
 )

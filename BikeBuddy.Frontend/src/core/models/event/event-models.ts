@@ -135,4 +135,18 @@ export interface EventFilterDto {
     countMembers : number
 }
 
+export interface UpdateEventRequest {
+    name: string
+    description: string
+    type: EventType
+    bicycleType: BicycleType
+    countMembers: number
+    distance: number
+    startAddress: string
+    endAddress: string
+    startDate: Date
+    endDate: Date
+    points: PointDetails[]
+  }
+
 ///
