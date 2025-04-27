@@ -51,8 +51,10 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
 
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<Map | null>(null)
-  const [isMapReady, setIsMapReady] = useState(false);
   const [mouseCoordinates, setMouseCoordinates] = useState<[number, number] | null>(null)
+  
+  const [isMapReady, setIsMapReady] = useState(false);
+  const [idMarker, setIdMarker] = useState<number | null>(null)
 
   const isUpdating = useRef(false);
 
@@ -149,6 +151,8 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
             coordinates,
           };
           onMarkersChange(newMarkers);
+
+          setIdMarker(markerIndex)
         }
       } catch (error) {
         console.error("Ошибка при обновлении маркера:", error);
@@ -169,6 +173,8 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
         id: marker.id,
       })
       markersLayer.getSource()?.addFeature(feature)
+      
+      setIdMarker(null)
     })
 
     const calculateRouteAsync = async () => {
@@ -209,7 +215,7 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
     
     const [lonDiff, latDiff] = [maxLon - minLon, maxLat - minLat];
     const maxDiff = Math.max(lonDiff, latDiff);
-    const zoom = 11 - Math.log2(maxDiff * 10);
+    const zoom = 12 - Math.log2(maxDiff * 10);
 
     return {center, zoom};
   }
@@ -246,7 +252,7 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
     if (!map || !markers?.length) return;
 
     if (isMapReady || markers.length == 1) {
-      const point = markers[markers.length - 1].coordinates
+      const point = markers[idMarker != null ? idMarker : markers.length - 1].coordinates
       map.getView().animate({
         center: fromLonLat(point),
         duration: 200,
@@ -300,7 +306,7 @@ export const RouteMap = forwardRef<RouteMapRef, RouteMapProps>(function RouteMap
         mapRef.current.removeEventListener("mouseleave", handlePointerLeave)
       }
     }
-  }, [])
+  }, [map])
 
   const calculateRoute = async (points: [number, number][]) => {
     try {
