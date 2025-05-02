@@ -30,3 +30,10 @@ export function convertBlobToFormData(fileBlob: Blob, fileName: string) {
 
   return formFile
 }
+
+export function convertFileToFormData(file: File) {
+  const formFile = new FormData();
+  formFile.append("file", file)
+
+  return formFile
+}

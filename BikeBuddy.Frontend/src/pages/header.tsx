@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {  LogOut, UserPen, } from 'lucide-react'
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import LoginForm from "./auth/login-form"
 import RegisterForm from "./auth/register-form"
 import useAuthStore from "@/stores/auth"
@@ -17,15 +17,39 @@ import Swal from "sweetalert2"
 import { useNavigate } from 'react-router-dom'
 import JwtService from "@/core/services/JwtService"
 import { alertError } from "@/core/helpers"
+import useProfileStore from "@/stores/profile"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function Header() {
   const authStore = useAuthStore()
+  const profileStore = useProfileStore()
   const [isOpenLoginForm, setIsOpenLoginForm] = useState(false)
   const [isOpenRegisterForm, setIsOpenRegisterForm] = useState(false)
   
   const navigate = useNavigate()
 
   const hasNotifications = false;
+
+  const currentProfile = useProfileStore((state) => state.currentProfile)
+  const avatarUrl = currentProfile?.avatarUrl || ""
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (authStore.isAuthenticated) {
+        const decoded = JwtService.decodeToken()
+
+        if (decoded?.nameId) {
+          try {
+            await profileStore.getProfile(decoded.nameId)
+          } catch (error: any) {
+            alertError(error.message)
+          }
+        }
+      }
+    }
+
+    fetchUserProfile()
+  }, [authStore.isAuthenticated])
   
   const handleProfileClick = async () => {
     const decoded = JwtService.decodeToken()
@@ -59,6 +83,11 @@ export function Header() {
     });
   }
 
+  const getInitials = () => {
+    const name = JwtService.decodeToken()?.name
+    if (!name) return "U"
+    return name.slice(0, 2).toUpperCase()
+  }
 
   return (
     <div>
@@ -71,12 +100,11 @@ export function Header() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <img
-                      className="rounded-full"
-                      src="/public/vite.svg"
-                      alt="User avatar"
-                    />
-
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={avatarUrl || "/placeholder.svg"} alt="User avatar" className="object-cover" />
+                      <AvatarFallback>{getInitials()}</AvatarFallback>
+                    </Avatar>
+                    
                     { hasNotifications && (
                       <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-white"></span>
                     )}

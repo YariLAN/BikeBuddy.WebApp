@@ -1,5 +1,4 @@
 using BikeBuddy.Application.DtoModels.Profile;
-using BikeBuddy.Application.Mappers.User.Profile;
 using BikeBuddy.Domain.Models.ProfileControl.ValueObjects;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
@@ -12,7 +11,11 @@ public class UpdateProfileService(IUserProfileRepository userProfileRepository) 
     {
         var addressResult = Address.Create(request.Address);
 
-        var dbProfile = UserProfileMapper.ToMap(userId, request, addressResult.Value);
+        var dbProfile = await userProfileRepository.GetByUserIdAsync(userId, cancellationToken);
+
+        if (dbProfile is null) return Errors.General.NotFound(userId);
+
+        dbProfile.Update(request.Surname, request.Name, request.MiddleName, request.BirthDay?.ToUTC(), addressResult.Value);
 
         var result = await userProfileRepository.UpdateAsync(dbProfile, cancellationToken);
 

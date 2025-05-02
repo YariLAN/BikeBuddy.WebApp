@@ -40,6 +40,9 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
                   .HasMaxLength(Constants.LOW_TEXT_LENGTH);
         });
 
+        builder.Property(u => u.PhotoUrl)
+            .IsRequired(false);
+
         builder.HasOne(x => x.AuthUser)
             .WithOne(x => x.UserProfile)
             .HasForeignKey<UserProfile>(x => x.UserId);

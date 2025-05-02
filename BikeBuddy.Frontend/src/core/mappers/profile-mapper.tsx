@@ -16,5 +16,6 @@ export const getFormData = (userData : TokenPayload, profile : UserProfileRespon
   firstName: profile.name || "",
   middleName: profile.middleName || "",
   birthDate: profile.birthDay,
-  address: profile.address || ""
+  address: profile.address || "",
+  avatarUrl: profile.avatarUrl
 })

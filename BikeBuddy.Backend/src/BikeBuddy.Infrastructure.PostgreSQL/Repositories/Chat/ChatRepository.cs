@@ -32,6 +32,7 @@ public class ChatRepository(ApplicationDbContext context) : IChatRepository
             .Include(c => c.Members)
             .Include(c => c.Messages)
                 .ThenInclude(m => m.AuthUser)
+                .ThenInclude(u => u!.UserProfile)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
         if (chat is null)

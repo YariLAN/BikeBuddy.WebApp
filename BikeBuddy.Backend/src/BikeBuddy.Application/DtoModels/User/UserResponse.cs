@@ -8,4 +8,5 @@ public record UserResponse(
     string Name,
     string MiddleName,
     DateTime? BirthDay,
-    string Address);
+    string Address,
+    string PhotoUrl = "");

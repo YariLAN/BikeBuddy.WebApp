@@ -33,6 +33,7 @@ public class UserMapper
             profile.Name,
             profile.MiddleName,
             profile.BirthDay,
-            profile.Address.ToString());
+            profile.Address.ToString(),
+            PhotoUrl: profile.PhotoUrl ?? "");
     }
 }

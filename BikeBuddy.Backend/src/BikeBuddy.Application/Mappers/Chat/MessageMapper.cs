@@ -23,7 +23,8 @@ namespace BikeBuddy.Application.Mappers.Chat
                 message.UserId, 
                 authUser?.UserName ?? "Unknown", 
                 message.Content, 
-                message.CreatedAt);
+                message.CreatedAt,
+                authUser?.UserProfile?.PhotoUrl ?? "");
         }
     }
 }

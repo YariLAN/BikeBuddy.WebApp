@@ -4,7 +4,8 @@ export interface MessageDto {
     userId: string
     userName: string
     content: string
-    createdAt: string
+    createdAt: string,
+    photoUrl: string
   }
   
   export interface SendMessageRequest {

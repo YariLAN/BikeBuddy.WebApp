@@ -36,15 +36,8 @@ public class UserProfileRepository(ApplicationDbContext context) : IUserProfileR
     public async Task<Result<bool, Error>> UpdateAsync(UserProfile profile, CancellationToken cancellationToken)
     {
         try
-        {
-            var exitingProfile = await GetByUserIdAsync(profile.UserId, cancellationToken);
-    
-            if (exitingProfile is null)
-                return false;
-    
-            exitingProfile.Update(profile.Surname, profile.Name, profile.MiddleName, profile.BirthDay?.ToUTC(), profile.Address);
-    
-            context.Profiles.Update(exitingProfile);
+        {   
+            context.Profiles.Update(profile);
     
             await context.SaveChangesAsync(cancellationToken);
     

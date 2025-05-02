@@ -14,7 +14,8 @@ public class UserProfileMapper
             profile.Name,
             profile.MiddleName,
             profile.BirthDay,
-            profile.Address.ToString());
+            profile.Address.ToString(),
+            profile.PhotoUrl);
     }
 
     public static UserProfile ToMap(Guid userId, UserProfileRequest request, Address address)

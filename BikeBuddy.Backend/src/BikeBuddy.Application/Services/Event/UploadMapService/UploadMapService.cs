@@ -13,7 +13,8 @@ public class UploadMapService(IFileProvider fileProvider) : IUploadMapService
         var resutUpload = await fileProvider.UploadFileAsync(
             file,
             BucketNameConstants.EVENT_IMAGES,
-            $"{eventId}/{FileNameConstants.MAP_IMAGE_FILENAME}", 
+            $"{eventId}/{FileNameConstants.MAP_IMAGE_FILENAME}",
+            TypeMIME.IMAGE_PNG,
             cancellationToken);
 
         if (resutUpload.IsFailure)

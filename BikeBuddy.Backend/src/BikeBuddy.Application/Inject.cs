@@ -17,6 +17,7 @@ using BikeBuddy.Application.Services.Event.UploadMapService;
 using BikeBuddy.Application.Services.Profile.CreateProfileService;
 using BikeBuddy.Application.Services.Profile.GetProfileService;
 using BikeBuddy.Application.Services.Profile.UpdateProfileService;
+using BikeBuddy.Application.Services.Profile.UploadAvatarService;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -64,6 +65,7 @@ public static class Inject
         services.AddScoped<IGetProfileService, GetProfileService>();
         services.AddScoped<ICreateProfileService, CreateProfileService>();
         services.AddScoped<IUpdateProfileService, UpdateProfileService>();
+        services.AddScoped<IUploadAvatarService, UploadAvatarService>();
 
         // Event
         services.AddScoped<ICreateEventService, CreateEventService>();

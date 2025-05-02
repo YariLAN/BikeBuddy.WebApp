@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { CalendarIcon, Loader2, AlertCircle } from 'lucide-react'
@@ -45,6 +45,8 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
   
   useEffect(() => {
     setFormData(getFormData(userData!, profile))
+
+    setAvatarUrl(profile.avatarUrl ?? "")
   }, [profile])
 
   const apiKey = import.meta.env.VITE_NEXT_PUBLIC_GEOAPIFY_API_KEY
@@ -56,6 +58,7 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
   const [usernameChanged, setUsernameChanged] = useState(false)
   const [originalUsername] = useState(userData?.name)
 
+  const [filePhoto, setAvatarFile] = useState<File | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string>("")
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
 
@@ -127,26 +130,36 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
     finally {
       setIsSubmitting(false)
     }
+
+    if (filePhoto) {
+      setIsUploadingAvatar(true)
+      try {
+        const url = await profileStore.uploadAvatar(userData!.nameId, filePhoto);
+        
+        if (url.data) {
+          setAvatarUrl(url.data)
+          return () => URL.revokeObjectURL(url.data!)
+        }
+        else if (url.error) {
+          alertExpectedError(url.error)
+        }
+      } catch (error : any) {
+        alertExpectedError(error.message)
+      } finally {
+        setIsUploadingAvatar(false)
+      }
+    }
   }
 
   const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
-    setIsUploadingAvatar(true)
-    try {
-      // Здесь будет загрузка файла на сервер
-      // Временно создаем URL для превью
-      const objectUrl = URL.createObjectURL(file)
-      setAvatarUrl(objectUrl)
+    const objectUrl = URL.createObjectURL(file)
+    setAvatarUrl(objectUrl)
+    setAvatarFile(file)
 
-      // Очистка URL после использования
-      return () => URL.revokeObjectURL(objectUrl)
-    } catch (error) {
-      console.error("Error uploading avatar:", error)
-    } finally {
-      setIsUploadingAvatar(false)
-    }
+    return () => URL.revokeObjectURL(objectUrl)
   }
 
   function suggestionsFilter(suggestions : any[]) {
@@ -163,6 +176,8 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
 
     return filtered;
   }
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const renderFormField = (
     name: string,
@@ -257,7 +272,7 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
                   type="button"
                   variant="outline"
                   className="w-48"
-                  onClick={() => document.getElementById("avatar")?.click()}
+                  onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingAvatar}
                 >
                   Изменить фото
@@ -268,7 +283,7 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
                   </span>
                 </div>
                 <input
-                  id="avatar"
+                  ref={fileInputRef}
                   type="file"
                   accept="image/*"
                   className="hidden"
@@ -281,8 +296,11 @@ export default function ProfileForm({ profile } : ProfileDataProps) {
                   type="button"
                   variant="ghost"
                   className="text-secondary"
-                  onClick={() => setAvatarUrl("")}
-                >
+                  onClick={() =>{ 
+                    setAvatarUrl(""); 
+                    setAvatarFile(null)
+                    if (fileInputRef.current) {fileInputRef.current.value = "";}
+                  }}>
                   Удалить фото
                 </Button>
               )}

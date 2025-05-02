@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Domain.Models.AuthControl;
 using BikeBuddy.Domain.Models.ProfileControl.ValueObjects;
+using BikeBuddy.Domain.Shared;
 
 namespace BikeBuddy.Domain.Models.ProfileControl;
 
@@ -18,6 +19,8 @@ public class UserProfile
     public DateTime? BirthDay { get; private set; }
 
     public Address Address { get; private set; } = Address.Create("", "");
+
+    public string PhotoUrl { get; private set; } = string.Empty;
 
     public AuthUser AuthUser { get; private set; } = default!;
 
@@ -58,5 +61,11 @@ public class UserProfile
         MiddleName = middleName;
         BirthDay = birthDay;
         Address = address;
+    }
+
+    public void UpdatePhoto(string photoUrl)
+    {
+        PhotoUrl = photoUrl;
+        BirthDay = BirthDay?.ToUTC();
     }
 }

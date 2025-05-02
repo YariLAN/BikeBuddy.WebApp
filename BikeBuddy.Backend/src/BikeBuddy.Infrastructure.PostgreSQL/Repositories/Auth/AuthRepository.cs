@@ -18,6 +18,7 @@ public class AuthRepository(ApplicationDbContext context) : IAuthRepository
     public async Task<AuthUser?> GetAsync(Guid id, CancellationToken token)
     {
         var user = await context.Users
+            .Include(u => u.UserProfile)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, token);
 

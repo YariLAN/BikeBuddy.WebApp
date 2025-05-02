@@ -120,7 +120,8 @@ export interface UserResponse {
     name: string,
     middleName: string,
     birthDay: string,
-    address: string
+    address: string,
+    photoUrl: string,
 }
 
 export interface EventResponseDetails {

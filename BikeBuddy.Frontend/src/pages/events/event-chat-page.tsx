@@ -45,7 +45,6 @@ export default function EventChatPage() {
   const connectionRef = useRef<signalR.HubConnection | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Загрузка информации о событии
   useEffect(() => {
     if (!eventId) return
 
@@ -110,7 +109,6 @@ export default function EventChatPage() {
       setActiveUsers(users)
     })
 
-    // Запуск подключения
     connection
       .start()
       .then(() => {
@@ -221,7 +219,6 @@ export default function EventChatPage() {
     }
   }
 
-  // Получение полного имени пользователя
   const getFullName = (user: UserResponse): string => {
     if (user.name && user.surname) {
       return `${user.name} ${user.surname}${user.middleName ? ` ${user.middleName}` : ""}`
@@ -241,7 +238,7 @@ export default function EventChatPage() {
     return type ? type.label : "Неизвестный"
   }
 
-  // Группировка сообщений по дате
+  // сообщения по дате
   const groupedMessages = messages.reduce((groups: { [date: string]: MessageDto[] }, message) => {
     const date = formatMessageDate(message.createdAt)
     if (!groups[date]) {
@@ -420,8 +417,7 @@ export default function EventChatPage() {
                       >
                         <div className={cn("flex", isCurrentUser ? "flex-row-reverse" : "flex-row")}>
                           <Avatar className={cn("h-8 w-8", isCurrentUser ? "ml-2" : "mr-2")}>
-                            {/* message.userAvatar || ↓↓↓ */}
-                            <AvatarImage src={ ""} />
+                            <AvatarImage src={message.photoUrl || ""} />
                             <AvatarFallback>{message.userName?.charAt(0) || "U"}</AvatarFallback>
                           </Avatar>
 
@@ -503,6 +499,7 @@ export default function EventChatPage() {
                         <HoverCardTrigger asChild>
                           <div className="flex items-center cursor-pointer hover:bg-muted/50 p-2 transition-colors">
                             <Avatar className="h-8 w-8 mr-2">
+                              <AvatarImage src={user.photoUrl ?? ""} className="object-cover"/>
                               <AvatarFallback>
                                 <UserRound className="h-4 w-4" />
                               </AvatarFallback>

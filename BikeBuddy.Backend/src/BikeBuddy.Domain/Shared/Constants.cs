@@ -17,10 +17,19 @@ public static class Files
     public class FileNameConstants
     {
         public const string MAP_IMAGE_FILENAME = "map.png";
+
+        public const string AVATAR_IMAGE_FILENAME = "avatar";
     }
 
     public class BucketNameConstants
     {
         public const string EVENT_IMAGES = "event-images";
+
+        public const string PROFILE_IMAGES = "profile-images";
+    }
+
+    public struct TypeMIME
+    {
+        public const string IMAGE_PNG = "image/png";
     }
 }

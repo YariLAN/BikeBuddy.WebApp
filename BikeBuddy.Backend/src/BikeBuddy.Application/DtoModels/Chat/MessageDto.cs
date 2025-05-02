@@ -6,4 +6,5 @@ public record MessageDto(
     Guid? UserId,
     string? UserName,
     string Content,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    string PhotoUrl = "");
