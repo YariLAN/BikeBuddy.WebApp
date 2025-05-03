@@ -33,7 +33,7 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql("Server=localhost;Port=5445;Database=BikeBuddyDb;User Id=postgres;Password=postgres;");
+        optionsBuilder.UseNpgsql(_configuration.GetConnectionString(DATABASE));
 
         optionsBuilder.UseSnakeCaseNamingConvention();
 

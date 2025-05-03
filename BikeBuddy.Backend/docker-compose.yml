@@ -7,9 +7,7 @@ networks:
 services:
   bikebuddy_api:
     container_name: bikebuddy_api
-    build:
-      context: .
-      dockerfile: src/BikeBuddy.API/Dockerfile
+    image: yarila/bikebuddybackend-bikebuddy_api:latest
     networks:
       - deploy-bikebuddy-dev
     depends_on:

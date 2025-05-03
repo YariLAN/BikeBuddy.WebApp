@@ -2,6 +2,7 @@ using BikeBuddy.API.Hubs;
 using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application;
 using BikeBuddy.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var db =scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.MigrateAsync();
 }
 
 app.UseCors("CorsPolicy");
