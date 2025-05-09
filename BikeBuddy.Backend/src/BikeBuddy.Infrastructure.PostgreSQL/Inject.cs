@@ -3,6 +3,7 @@ using BikeBuddy.Application.Services.Chat;
 using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Application.Services.Event;
 using BikeBuddy.Application.Services.Profile;
+using BikeBuddy.Application.Services.Scheduler.Event;
 using BikeBuddy.Infrastructure.Options;
 using BikeBuddy.Infrastructure.Repositories.Auth;
 using BikeBuddy.Infrastructure.Repositories.Chat;
@@ -11,6 +12,9 @@ using BikeBuddy.Infrastructure.Repositories.Profile;
 using BikeBuddy.Infrastructure.Services.Auth;
 using BikeBuddy.Infrastructure.Services.Auth.Google;
 using BikeBuddy.Infrastructure.Services.Common;
+using BikeBuddy.Infrastructure.Services.Scheduler.Event;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Minio;
@@ -23,11 +27,14 @@ public static class Inject
     {
         services.AddScoped<ApplicationDbContext>()
                 .AddRepositories()
-                .AddMinio(configuration);
+                .AddMinio(configuration)
+                .AddHangfire(configuration);
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<ICookieProvider, CookieProvider>();
+
+        services.AddScoped<IEventJobSchedulerService, EventJobSchedulerService>();
 
         services.AddTransient<IGoogleService, GoogleService>();
 
@@ -53,6 +60,18 @@ public static class Inject
         });
 
         services.AddTransient<IFileProvider, MinioProvider>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddHangfire(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddHangfire(h =>
+        {
+            h.UsePostgreSqlStorage(opt => opt.UseNpgsqlConnection(configuration.GetConnectionString("HangfireDb")));
+        });
+
+        services.AddHangfireServer();
 
         return services;
     }

@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {  LogOut, UserPen, } from 'lucide-react'
+import {  Bell, LogOut, MessageCirclePlus, MessageSquare, UserPen, } from 'lucide-react'
 import { useEffect, useState } from "react"
 import LoginForm from "./auth/login-form"
 import RegisterForm from "./auth/register-form"
@@ -95,6 +95,15 @@ export function Header() {
         <div className="flex h-16 items-center px-4 justify-end gap-4">
           {authStore.isAuthenticated ? (
             <>
+              <button className="mr-4 bg-white relative">
+                <Bell className="h-4 w-4"/>
+                
+                { hasNotifications && (
+                  <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-white"></span>
+                )}
+              </button>
+              
+
               { JwtService.decodeToken()!.name }
 
               <DropdownMenu>
@@ -105,9 +114,9 @@ export function Header() {
                       <AvatarFallback>{getInitials()}</AvatarFallback>
                     </Avatar>
                     
-                    { hasNotifications && (
+                    {/* { hasNotifications && (
                       <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-white"></span>
-                    )}
+                    )} */}
                   </Button>
 
                 </DropdownMenuTrigger>

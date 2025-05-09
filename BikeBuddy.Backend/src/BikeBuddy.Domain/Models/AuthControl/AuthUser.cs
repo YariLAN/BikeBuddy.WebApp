@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Domain.Models.ChatControl.Entities;
 using BikeBuddy.Domain.Models.EventControl;
+using BikeBuddy.Domain.Models.NotificationControl;
 using BikeBuddy.Domain.Models.ProfileControl;
 
 namespace BikeBuddy.Domain.Models.AuthControl;
@@ -29,6 +30,8 @@ public class AuthUser
     public List<MemberGroupChat> Membership { get; private set; } = [];
 
     public List<Message> Messages { get; private set; } = [];
+
+    public List<Notification> NotificationMessages { get; private set; } = [];
 
     private AuthUser() { }
 

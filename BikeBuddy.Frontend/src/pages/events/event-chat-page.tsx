@@ -23,6 +23,7 @@ import useEventStore from "@/stores/event"
 import { alertExpectedError } from "@/core/helpers"
 import { Separator } from "@/components/ui/separator"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import Picker from 'emoji-picker-react';
 
 export default function EventChatPage() {
   const { eventId} = useParams<{ eventId: string}>()
@@ -41,6 +42,8 @@ export default function EventChatPage() {
 
   const [eventDetails, setEventDetails] = useState<EventResponse | null>(null)
   const [isLoadingEvent, setIsLoadingEvent] = useState(true)
+
+  const [showPicker, setIsShowEmojiPicker] = useState<string | null>(null)
 
   const connectionRef = useRef<signalR.HubConnection | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -445,7 +448,26 @@ export default function EventChatPage() {
                                   </Tooltip>
                                 </TooltipProvider>
                               </div>
-                              <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                              <p className="whitespace-pre-wrap break-words">
+                                {message.content}
+
+                                {/* <Button 
+                                  onClick={() => setIsShowEmojiPicker(showPicker === message.id ? null : message.id)}
+                                  className="bg-green-50 ml-3"
+                                />
+
+                                {showPicker === message.id && (
+                                  <div className="emoji-picker-wrapper">
+                                    <Picker
+                                      skinTonesDisabled={true}
+                                      reactionsDefaultOpen={true}
+                                      onEmojiClick={(e) => console.log(e)}
+                                      open={showPicker === message.id}
+                                    />
+                                  </div>
+                                )} */}
+                                
+                              </p>
                             </div>
                           </div>
                         </div>

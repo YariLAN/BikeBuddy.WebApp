@@ -12,6 +12,7 @@ services:
       - deploy-bikebuddy-dev
     depends_on:
       - postgres_db 
+      - hangfire_db
       - minio 
 
   postgres_db:
@@ -28,6 +29,21 @@ services:
         - deploy-bikebuddy-dev
     volumes:
         - postgres-data:/var/lib/postgresql/data 
+
+  hangfire_db:
+    container_name: hangfire_db
+    image: postgres
+    restart: always
+    environment:
+        POSTGRES_DB: HangfireDb
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+    ports:
+        - 5446:5432
+    networks:
+        - deploy-bikebuddy-dev
+    volumes:
+        - hangfire-data:/var/lib/postgresql/data
 
   minio:
     container_name: bikebuddy_minio
@@ -47,4 +63,5 @@ services:
 
 volumes:
     postgres-data:
+    hangfire-data:
     minio-data:

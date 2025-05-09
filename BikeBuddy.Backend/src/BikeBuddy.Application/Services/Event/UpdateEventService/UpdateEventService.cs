@@ -1,4 +1,5 @@
 ﻿using BikeBuddy.Application.DtoModels.Event;
+using BikeBuddy.Application.Services.Scheduler.Event;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
@@ -6,7 +7,7 @@ using System.Security.Claims;
 
 namespace BikeBuddy.Application.Services.Event.UpdateEventService;
 
-public class UpdateEventService(IEventRepository eventRepository) : IUpdateEventService
+public class UpdateEventService(IEventRepository eventRepository, IEventJobSchedulerService _eventJobSchedulerService) : IUpdateEventService
 {
     public async Task<Result<bool, Error>> ExecuteAsync(Guid eventId, UpdateEventRequest updateRequest, ClaimsPrincipal user, CancellationToken cancellationToken)
     {
@@ -30,6 +31,8 @@ public class UpdateEventService(IEventRepository eventRepository) : IUpdateEvent
         else if (updateRequest.CountMembers == eventDb.Value.Chat.Members.Count)
             eventDb.Value.UpdateStatus(EventStatus.CLOSED);
 
+        var tempStartDate = eventDb.Value.StartDate;
+
         eventDb.Value.Update(
             updateRequest.Name,
             updateRequest.Description,
@@ -43,6 +46,13 @@ public class UpdateEventService(IEventRepository eventRepository) : IUpdateEvent
             updateRequest.EndDate,
             EventDetails.Create(points));
 
-        return await eventRepository.UpdateAsync(eventDb.Value, cancellationToken);
+        var updResult = await eventRepository.UpdateAsync(eventDb.Value, cancellationToken);
+
+        if (updResult.IsFailure) return updResult.Error;
+
+        if (tempStartDate != updateRequest.StartDate)
+            _eventJobSchedulerService.Schedule(eventDb.Value.Id, userId, updateRequest.StartDate, eventDb.Value.EndDate);
+
+        return updResult;
     }
 }

@@ -1,4 +1,5 @@
-﻿using BikeBuddy.Application.Options;
+﻿using BikeBuddy.Application.Jobs.Executor.Event;
+using BikeBuddy.Application.Options;
 using BikeBuddy.Application.Services.Auth.Login;
 using BikeBuddy.Application.Services.Auth.Logout;
 using BikeBuddy.Application.Services.Auth.Refresh;
@@ -83,6 +84,9 @@ public static class Inject
 
         // ChatManager
         services.AddScoped<IStateManagerService, StateManagerService>();
+
+        // Jobs
+        services.AddScoped<IEventJobExecutor,  EventJobExecutor>();
 
         services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
 

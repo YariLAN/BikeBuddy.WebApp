@@ -93,6 +93,12 @@ export default function CreateEventPage() {
     }
   }, [eventId, isEditMode])
 
+  const formattedDate = (date : Date) => {
+    const dateCopy = new Date(date)
+    const timezoneOffset = dateCopy.getTimezoneOffset() * 60000
+    return new Date(dateCopy.getTime() - timezoneOffset)
+  }
+
   const validateField = async (field: string, value: any) => {
     await validationService.validateField(field, value, setErrors)
   }
@@ -121,10 +127,13 @@ export default function CreateEventPage() {
     }
 
     try {
+      formData.startDate = formattedDate(formData.startDate!)
+      formData.endDate = formattedDate(formData.endDate!)
+
       console.log("Form data:", formData)
       const mapExport = await routeMapRef.current?.exportMap()
       formData.points = mapExport?.markers.map(m => markerToPointDetails(m))
-      
+
       let result: ApiResponse<boolean | string>;
       if (isEditMode) {
         result = await eventStore.updateEvent(eventId, formData as UpdateEventRequest)
@@ -364,12 +373,72 @@ export default function CreateEventPage() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.startDate}
-                    onSelect={(date) => handleInputChange('startDate', date)}
-                    initialFocus
-                  />
+                  <div className="p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.startDate}
+                      onSelect={(date) => {
+                        if (date) {
+                          const hours = formData.startDate ? formData.startDate.getHours() : 12
+                          const minutes = formData.startDate ? formData.startDate.getMinutes() : 0
+
+                          const newDate = new Date(date)
+                          newDate.setHours(hours)
+                          newDate.setMinutes(minutes)
+
+                          handleInputChange("startDate", newDate)
+                        } else {
+                          handleInputChange("startDate", date)
+                        }
+                      }}
+                      initialFocus
+                    />
+
+                    <div className="border-t border-border p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm font-medium">Время</div>
+                        <div className="flex space-x-2">
+                          <select
+                            className="w-16 rounded-md border border-input bg-background px-2 py-1 text-sm"
+                            value={formData.startDate ? formData.startDate.getHours() : 12}
+                            onChange={(e) => {
+                              if (!formData.startDate) return
+
+                              const newDate = new Date(formData.startDate)
+                              newDate.setHours(Number.parseInt(e.target.value))
+                              handleInputChange("startDate", newDate)
+                            }}
+                          >
+                            {Array.from({ length: 24 }).map((_, i) => (
+                              <option key={i} value={i}>
+                                {i.toString().padStart(2, "0")}
+                              </option>
+                            ))}
+                          </select>
+
+                          <span className="text-sm">:</span>
+
+                          <select
+                            className="w-16 rounded-md border border-input bg-background px-2 py-1 text-sm"
+                            value={formData.startDate ? formData.startDate.getMinutes() : 0}
+                            onChange={(e) => {
+                              if (!formData.startDate) return
+
+                              const newDate = new Date(formData.startDate)
+                              newDate.setMinutes(Number.parseInt(e.target.value))
+                              handleInputChange("startDate", newDate)
+                            }}
+                          >
+                            {Array.from({ length: 60 }).map((_, i) => (
+                              <option key={i} value={i}>
+                                {i.toString().padStart(2, "0")}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </PopoverContent>
               </Popover>
             )}
