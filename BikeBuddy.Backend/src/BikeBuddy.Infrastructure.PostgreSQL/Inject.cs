@@ -1,6 +1,7 @@
 ﻿using BikeBuddy.Application.Services.Auth;
 using BikeBuddy.Application.Services.Chat;
 using BikeBuddy.Application.Services.Common;
+using BikeBuddy.Application.Services.Common.Notification;
 using BikeBuddy.Application.Services.Event;
 using BikeBuddy.Application.Services.Profile;
 using BikeBuddy.Application.Services.Scheduler.Event;
@@ -8,6 +9,7 @@ using BikeBuddy.Infrastructure.Options;
 using BikeBuddy.Infrastructure.Repositories.Auth;
 using BikeBuddy.Infrastructure.Repositories.Chat;
 using BikeBuddy.Infrastructure.Repositories.Event;
+using BikeBuddy.Infrastructure.Repositories.Notification;
 using BikeBuddy.Infrastructure.Repositories.Profile;
 using BikeBuddy.Infrastructure.Services.Auth;
 using BikeBuddy.Infrastructure.Services.Auth.Google;
@@ -89,6 +91,8 @@ public static class Inject
         services.AddTransient<IChatRepository, ChatRepository>();
 
         services.AddTransient<IMessageRepository, MessageRepository>();
+
+        services.AddScoped<INotificationRepository, NotificationRepository>();
 
         return services;
     }

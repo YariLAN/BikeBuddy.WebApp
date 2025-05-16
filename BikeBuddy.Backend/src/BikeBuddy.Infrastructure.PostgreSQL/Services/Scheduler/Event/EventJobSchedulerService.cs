@@ -8,7 +8,7 @@ public class EventJobSchedulerService : IEventJobSchedulerService
 {
     public void Schedule(Guid eventId, Guid authorId, DateTime start, DateTime end)
     {
-        var notifyStart = start.AddHours(-3);
+        var notifyStart = start.AddMinutes(-3);
 
         var notifyEnd = end.AddHours(1);
 

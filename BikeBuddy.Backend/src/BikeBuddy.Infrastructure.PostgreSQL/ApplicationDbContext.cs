@@ -1,6 +1,7 @@
 ﻿using BikeBuddy.Domain.Models.AuthControl;
 using BikeBuddy.Domain.Models.ChatControl;
 using BikeBuddy.Domain.Models.EventControl;
+using BikeBuddy.Domain.Models.NotificationControl;
 using BikeBuddy.Domain.Models.ProfileControl;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +25,8 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<GroupChat> Chats { get; set; }
 
+    public DbSet<Notification> Notifications { get; set; }
+                    
     public ApplicationDbContext(IConfiguration configuration)
     {
         _configuration = configuration;

@@ -5,6 +5,7 @@ using BikeBuddy.Domain.Models.NotificationControl.ValueObject;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
+using BikeBuddy.Application.DtoModels.Notification;
 
 namespace BikeBuddy.Application.Jobs.Executor.Event;
 
@@ -16,15 +17,11 @@ public class EventJobExecutor(IEventRepository eventRepository, INotificationSer
 
         if (eventDb.IsFailure) return eventDb.Error;
 
-        // создавать в БД Notification и маппер
-        var notification = Notification.Create(
-            Guid.NewGuid(), 
-            authorId,
-            $"Подтвердите свой заезд '{eventDb.Value.Name}'", 
-            MessageType.Info, 
-            false);
-
-        await notificationService.SenAsync(authorId, notification, cancellationToken);
+        await notificationService.SenAsync(authorId, 
+            new NotificationDto(authorId, 
+                $"Подтвердите свой заезд '{eventDb.Value.Name}'",
+                $"/events/{eventDb.Value.Id}"), 
+            cancellationToken);
 
         return true;
     }
@@ -35,9 +32,14 @@ public class EventJobExecutor(IEventRepository eventRepository, INotificationSer
 
         if (eventDb.IsFailure) return eventDb.Error;
 
-        eventDb.Value.UpdateStatus(EventStatus.CLOSED);
+        if (eventDb.Value.Status == EventStatus.OPENED)
+        {
+            eventDb.Value.UpdateStatus(EventStatus.CLOSED);
 
-        return await eventRepository.UpdateAsync(eventDb.Value, cancellationToken); 
+            return await eventRepository.UpdateAsync(eventDb.Value, cancellationToken); 
+        }
+
+        return true;
     }
 
     public Task<Result<bool, Error>> AutoComplete(Guid eventId, CancellationToken cancellationToken)

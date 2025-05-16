@@ -54,16 +54,26 @@ public class AuthRepository(ApplicationDbContext context) : IAuthRepository
 
     public async Task<bool> UpdateLastLoginAtAsync(Guid userId, CancellationToken token)
     {
-        var user = await GetAsync(userId, token);
+        try
+        {
+            var user = await context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == userId, token);
 
-        if (user is null)
+            if (user is null)
+                return false;
+
+            user.UpdateLastLoginAt();
+
+            context.Users.Update(user);
+            await context.SaveChangesAsync(token);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
             return false;
-
-        user.UpdateLastLoginAt();
-
-        context.Users.Update(user);
-        await context.SaveChangesAsync(token);
-
-        return true;
+        }
     }
 }

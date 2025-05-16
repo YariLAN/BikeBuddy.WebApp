@@ -7,13 +7,21 @@ namespace BikeBuddy.API.Hubs;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class NotificationHub : Hub
 {
-    public override async Task OnConnectedAsync()
+    public async Task ConnectedAsync()
     {
         if (Guid.TryParse(Context.UserIdentifier, out var userId))
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, userId.ToString());
         }
+    }
 
-        await base.OnConnectedAsync();
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        if (Guid.TryParse(Context.UserIdentifier, out var userId))
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId.ToString());
+        }
+
+        await base.OnDisconnectedAsync(exception);
     }
 }

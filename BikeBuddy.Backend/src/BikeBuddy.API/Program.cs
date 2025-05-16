@@ -2,6 +2,7 @@ using BikeBuddy.API.Hubs;
 using BikeBuddy.API.Services;
 using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application;
+using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Application.Services.Common.Notification;
 using BikeBuddy.Infrastructure;
 using Hangfire;
@@ -17,7 +18,7 @@ builder.Services.AddCustomSwaggerGen();
 
 builder.Services.AddAuthentication(builder.Configuration);
 
-builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IRealTimeNotifier, RealTimeNotifier>();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
@@ -53,6 +54,8 @@ app.UseCors("CorsPolicy");
 
 
 app.MapHub<GroupChatHub>("/hub/group-chat");
+
+app.MapHub<NotificationHub>("/hub/notifications");
 
 app.UseHttpsRedirection();
 

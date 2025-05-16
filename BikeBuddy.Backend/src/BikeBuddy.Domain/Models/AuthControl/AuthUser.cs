@@ -2,6 +2,7 @@
 using BikeBuddy.Domain.Models.EventControl;
 using BikeBuddy.Domain.Models.NotificationControl;
 using BikeBuddy.Domain.Models.ProfileControl;
+using BikeBuddy.Domain.Shared;
 
 namespace BikeBuddy.Domain.Models.AuthControl;
 
