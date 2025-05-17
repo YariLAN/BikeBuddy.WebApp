@@ -1,4 +1,5 @@
-﻿using BikeBuddy.Application.DtoModels.Notification;
+﻿using BikeBuddy.Application.DtoModels.Common;
+using BikeBuddy.Application.DtoModels.Notification;
 using BikeBuddy.Application.Mappers.Notification;
 using BikeBuddy.Application.Services.Auth;
 using BikeBuddy.Domain.Shared;
@@ -26,5 +27,55 @@ public class NotificationService(
             return resultAdded.Error;
 
         return realTimeNotifier.SendToUserAsync(recipientId, NotificationMapper.ToMap(notificationDb), cancellationToken);
+    }
+
+    public async Task<Result<PageData<NotificationResponse>, Error>> GetByUserAsync(Guid recipientId, CancellationToken cancellationToken)
+    {
+        var user = await authRepository.GetAsync(recipientId, cancellationToken);
+
+        if (user is null)
+            return Errors.General.NotFound(recipientId);
+
+        var result = await notificationRepository.GetAllByUserAsync(recipientId, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error;
+
+        var (notification, total) = result.Value;
+
+        return new PageData<NotificationResponse>
+        {
+            Body = notification.ConvertAll(n => NotificationMapper.ToMap(n)),
+            TotalCount = total,
+        };
+    }
+
+    public async Task<Result<bool, Error>> MarkAsReadAsync(Guid notificationId, Guid recipientId, CancellationToken cancellationToken)
+    {
+        var user = await authRepository.GetAsync(recipientId, cancellationToken);
+
+        if (user is null)
+            return Errors.General.NotFound(recipientId);
+
+        var notification = await notificationRepository.GetAsync(notificationId, cancellationToken);
+
+        if (notification.IsFailure) return notification.Error;
+
+        if (notification.Value.IsRead)
+            return true;
+
+        notification.Value.UpdateRead();
+
+        return await notificationRepository.UpdateAsync(notification.Value, cancellationToken);
+    }
+
+    public async Task<Result<bool, Error>> MarkAllAsReadAsync(Guid recipientId, CancellationToken cancellationToken)
+    {
+        var user = await authRepository.GetAsync(recipientId, cancellationToken);
+
+        if (user is null)
+            return Errors.General.NotFound(recipientId);
+
+        return await notificationRepository.MarkAllAsReadAsync(recipientId, cancellationToken);
     }
 }

@@ -14,6 +14,9 @@ internal class NotificationConfiguration : IEntityTypeConfiguration<Notification
 
         builder.HasKey(x => x.Id);
 
+        builder.Property(x => x.Title)
+            .HasMaxLength(Constants.LOW_TEXT_LENGTH);
+
         builder.Property(x => x.Message)
             .HasMaxLength(Constants.HIGH_TEXT_LENGTH);
 

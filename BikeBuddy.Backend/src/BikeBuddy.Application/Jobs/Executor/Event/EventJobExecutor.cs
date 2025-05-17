@@ -18,9 +18,10 @@ public class EventJobExecutor(IEventRepository eventRepository, INotificationSer
         if (eventDb.IsFailure) return eventDb.Error;
 
         await notificationService.SenAsync(authorId, 
-            new NotificationDto(authorId, 
-                $"Подтвердите свой заезд '{eventDb.Value.Name}'",
-                $"/events/{eventDb.Value.Id}"), 
+            new NotificationDto(authorId,
+                "Подтвердите заезд",
+                $"Заезд \"{eventDb.Value.Name}\" скоро начнется, подтвердите его",
+                $"events/{eventDb.Value.Id}"), 
             cancellationToken);
 
         return true;
@@ -34,6 +35,15 @@ public class EventJobExecutor(IEventRepository eventRepository, INotificationSer
 
         if (eventDb.Value.Status == EventStatus.OPENED)
         {
+            var authorId = eventDb.Value.CreatedBy!.Value;
+
+            await notificationService.SenAsync(authorId,
+                new NotificationDto(authorId,
+                    "Велозаезд был начат",
+                    $"Система запустила событие \"{eventDb.Value.Name}\"",
+                    $"events/{eventDb.Value.Id}"),
+                cancellationToken);
+
             eventDb.Value.UpdateStatus(EventStatus.CLOSED);
 
             return await eventRepository.UpdateAsync(eventDb.Value, cancellationToken); 

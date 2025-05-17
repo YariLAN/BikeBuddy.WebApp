@@ -18,7 +18,12 @@ public class CancelEventService(IEventRepository eventRepository) : ICancelEvent
         if (userId != dbEventResult.Value.CreatedBy)
             return Errors.General.AccessIsDenied(userId);
 
+        if (dbEventResult.Value.Status == EventStatus.CANCELLED)
+            return Errors.Event.AlreadyStatus(EventStatus.CANCELLED);
+
         dbEventResult.Value.UpdateStatus(EventStatus.CANCELLED);
+
+        // тут надо будет удалить все фоновые задачи, связанные с данным заездом
 
         return await eventRepository.UpdateAsync(dbEventResult.Value, cancellationToken); 
     }

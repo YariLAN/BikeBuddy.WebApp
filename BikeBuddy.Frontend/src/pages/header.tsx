@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { LogOut, UserPen, } from 'lucide-react'
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import LoginForm from "./auth/login-form"
 import RegisterForm from "./auth/register-form"
 import useAuthStore from "@/stores/auth"
@@ -19,22 +19,16 @@ import JwtService from "@/core/services/JwtService"
 import { alertError } from "@/core/helpers"
 import useProfileStore from "@/stores/profile"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import * as signalR from "@microsoft/signalr"
-import { LOCAL_BASE_URL } from "@/core/constants"
-import { NotificationResponse } from "@/core/models/notification/notification-models"
 import { NotificationDropdown } from "@/components/my/notifiction-dropdown"
 
 export function Header() {
   const authStore = useAuthStore()
   const profileStore = useProfileStore()
+  
   const [isOpenLoginForm, setIsOpenLoginForm] = useState(false)
   const [isOpenRegisterForm, setIsOpenRegisterForm] = useState(false)
   
   const navigate = useNavigate()
-
-  const notificationConnectionRef = useRef<signalR.HubConnection | null>(null)
-  const [hasNotifications, setHasNotifications] = useState(false)
-  const [notifications, setNotifications] = useState<NotificationResponse[]>([])
 
   const currentProfile = useProfileStore((state) => state.currentProfile)
   const avatarUrl = currentProfile?.avatarUrl || ""
@@ -56,61 +50,6 @@ export function Header() {
 
     fetchUserProfile()
   }, [authStore.isAuthenticated])
-  
-  useEffect(() => {
-    if (!authStore.isAuthenticated) {
-      setNotifications([])
-      setHasNotifications(false)
-      return
-    };
-
-    if (!notificationConnectionRef.current) {
-      
-      notificationConnectionRef.current = new signalR.HubConnectionBuilder()
-        .withUrl(`${LOCAL_BASE_URL}hub/notifications`, {
-          accessTokenFactory: () => JwtService.getToken() || "",
-        })
-        .withAutomaticReconnect()
-        .build()
-          
-      notificationConnectionRef.current.on("ReceiveNotification", (notification : NotificationResponse) => {
-        console.log(notification);
-
-        setNotifications( (prev) => [ ...prev, notification])
-        setHasNotifications(true)
-      })
-
-      notificationConnectionRef.current
-        .start()
-        .then(() => {
-          notificationConnectionRef.current!.invoke("ConnectedAsync")
-        })
-        .catch((err) => {
-          console.error("Ошибка подключения к хабу:", err)
-        });
-
-      return () => {
-        if (notificationConnectionRef.current!.state === signalR.HubConnectionState.Connected) {
-          notificationConnectionRef.current!
-            .stop()
-            .then(() => {
-              console.log("Отключение от хаба")
-              notificationConnectionRef.current = null
-            })
-            .catch((err) => console.error("Ошибка отключения от хаба: ", err))
-        }
-      }
-    }
-  }, [authStore.isAuthenticated])
-
-  const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
-    setHasNotifications(false)
-  }
-
-  const handleNotificationClick = (notification: NotificationResponse) => {
-    setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n)))
-  }
 
   const handleProfileClick = async () => {
     const decoded = JwtService.decodeToken()
@@ -156,12 +95,7 @@ export function Header() {
         <div className="flex h-16 items-center px-4 justify-end gap-4">
           {authStore.isAuthenticated ? (
             <>
-              <NotificationDropdown 
-                notifications={notifications}
-                hasUnread={hasNotifications}
-                onMarkAllAsRead={handleMarkAllAsRead}
-                onNotificationClick={handleNotificationClick}
-              />
+              <NotificationDropdown />
               
               { JwtService.decodeToken()!.name }
 
@@ -172,10 +106,6 @@ export function Header() {
                       <AvatarImage src={avatarUrl || "/placeholder.svg"} alt="User avatar" className="object-cover" />
                       <AvatarFallback>{getInitials()}</AvatarFallback>
                     </Avatar>
-                    
-                    {/* { hasNotifications && (
-                      <span className="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-white"></span>
-                    )} */}
                   </Button>
 
                 </DropdownMenuTrigger>
@@ -184,12 +114,12 @@ export function Header() {
                     <UserPen className="mr-2 h-4 w-4" />
                     <span className="flex items-center">
                       Профиль
-                      {hasNotifications && (
+                      {/* {hasNotifications && (
                         <span
                           className="ml-2 inline-block h-2 w-2 rounded-full bg-red-500"
                           title="Есть уведомления"
                         ></span>
-                      )}
+                      )} */}
                     </span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

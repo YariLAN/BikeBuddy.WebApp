@@ -58,6 +58,35 @@ export function alertInfo(text : string, title: string, type: SweetAlertIcon){
       }
   })
 }
+
+export function alertWithAction(
+  title : string, 
+  text : string, 
+  type : SweetAlertIcon, 
+  confirmButtonText : string, 
+  cancelButtonText : string,
+  denyButtonText: string) {
+
+    return Swal.fire({
+      title: title || "Сообщение",
+      html: text,
+      icon: type,
+      width: 535,
+      buttonsStyling: true,
+      confirmButtonText: confirmButtonText,
+      cancelButtonText: cancelButtonText,
+      denyButtonText: denyButtonText,
+      showConfirmButton: true,
+      showCancelButton: true,
+      showDenyButton: true,
+      customClass: {
+        confirmButton: "btn btn-danger",
+        cancelButton: "btn-danger",
+        popup: "swal-alert-info"
+      }
+    })
+  }
+
 export function toastAlert(text : string, title: string, type: SweetAlertIcon, position: SweetAlertPosition = "bottom-end"){
    const Toast =  Swal.mixin({
       position: position,

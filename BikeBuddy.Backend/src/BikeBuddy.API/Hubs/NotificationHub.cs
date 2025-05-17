@@ -11,7 +11,14 @@ public class NotificationHub : Hub
     {
         if (Guid.TryParse(Context.UserIdentifier, out var userId))
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, userId.ToString());
+            var groupName = userId.ToString();
+            var connectionAlreadyInGroup = Context.Items.ContainsKey($"AddedToGroup_{groupName}");
+
+            if (!connectionAlreadyInGroup)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, userId.ToString());
+                Context.Items[$"AddedToGroup_{groupName}"] = true;
+            }
         }
     }
 

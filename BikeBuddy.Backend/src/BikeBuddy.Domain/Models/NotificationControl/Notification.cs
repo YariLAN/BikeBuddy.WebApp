@@ -9,6 +9,8 @@ public class Notification : ICreatedUpdateAt
 
     public Guid UserId { get; private set; }
 
+    public string Title { get; private set; } = string.Empty;
+
     public string Message { get; private set; } = string.Empty;
 
     public MessageType Type { get; private set; }
@@ -27,6 +29,7 @@ public class Notification : ICreatedUpdateAt
 
     private Notification(Guid id,
         Guid userId, 
+        string title,
         string message, 
         MessageType type, 
         bool isRead,
@@ -34,14 +37,20 @@ public class Notification : ICreatedUpdateAt
     {
         Id = id;
         UserId = userId;
+        Title = title;
         Message = message;
         Type = type;
         IsRead = isRead;
         Url = url;
     }
 
-    public static Notification Create(Guid id, Guid userId, string message, MessageType type, bool isRead, string url = "")
+    public static Notification Create(Guid id, Guid userId, string title, string message, MessageType type, bool isRead, string url = "")
     {
-        return new Notification(id, userId, message, type, isRead, url);
+        return new Notification(id, userId, title, message, type, isRead, url);
+    }
+
+    public void UpdateRead()
+    {
+        IsRead = true;
     }
 }

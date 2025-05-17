@@ -10,6 +10,7 @@ public class NotificationMapper
         return NotificationModel.Create(
             Guid.NewGuid(),
             notificationDto.AuthorId,
+            notificationDto.Title,
             notificationDto.Message,
             notificationDto.Type,
             false,
@@ -20,6 +21,7 @@ public class NotificationMapper
     {
         return new NotificationResponse(
             notification.Id, 
+            notification.Title,
             notification.Message, 
             notification.Type,
             notification.IsRead, 

@@ -1,4 +1,6 @@
-﻿namespace BikeBuddy.Domain.Shared;
+﻿using BikeBuddy.Domain.Models.EventControl.ValueObjects;
+
+namespace BikeBuddy.Domain.Shared;
 
 public class Errors
 {
@@ -61,6 +63,16 @@ public class Errors
             };
 
             return Error.Validation(message);
+        }
+
+        public static Error AlreadyStatus(EventStatus eventStatus)
+        {
+            var statusName = eventStatus switch
+            {
+                EventStatus.CANCELLED => "отменен", 
+            };
+
+            return Error.Conflict($"Заезд уже {statusName}");
         }
     }
 
