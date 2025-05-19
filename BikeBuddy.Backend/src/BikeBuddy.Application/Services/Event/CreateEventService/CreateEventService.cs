@@ -31,7 +31,7 @@ public class CreateEventService(
         if (eventResult.IsFailure)
             return eventResult.Error;
 
-        _eventJobSchedulerService.Schedule(eventResult.Value, userId.Id, dbEvent.StartDate, dbEvent.EndDate);
+        _eventJobSchedulerService.Schedule(eventResult.Value, userId.Id, dbEvent.StartDate, dbEvent.EndDate, cancellationToken);
 
         return eventResult.Value;
     }

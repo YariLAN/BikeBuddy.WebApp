@@ -14,6 +14,8 @@ public record EventResponse(
     double Distance,
     string StartAddress,
     string EndAddress,
+    bool? IsCorfirmedByAuthor,
+    bool IsPlannedFinished,
     DateTime StartDate,
     DateTime EndDate,
     Guid ChatId,

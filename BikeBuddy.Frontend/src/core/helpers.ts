@@ -1,3 +1,4 @@
+import { NavigateFunction } from "react-router-dom";
 import Swal, { SweetAlertIcon, SweetAlertPosition } from "sweetalert2";
 
 function errorText(err : Object): string{
@@ -62,27 +63,45 @@ export function alertInfo(text : string, title: string, type: SweetAlertIcon){
 export function alertWithAction(
   title : string, 
   text : string, 
+  url : string,
   type : SweetAlertIcon, 
   confirmButtonText : string, 
   cancelButtonText : string,
-  denyButtonText: string) {
+  denyButtonText: string,
+  navigate: NavigateFunction,
+  width: number = 535) {
+
+    let navigateButton: HTMLElement | null = null;
 
     return Swal.fire({
       title: title || "Сообщение",
       html: text,
       icon: type,
-      width: 535,
+      width: width,
       buttonsStyling: true,
       confirmButtonText: confirmButtonText,
       cancelButtonText: cancelButtonText,
       denyButtonText: denyButtonText,
-      showConfirmButton: true,
-      showCancelButton: true,
-      showDenyButton: true,
+      showConfirmButton: !!confirmButtonText,
+      showCancelButton: !!cancelButtonText,
+      showDenyButton: !!denyButtonText,
       customClass: {
-        confirmButton: "btn btn-danger",
-        cancelButton: "btn-danger",
-        popup: "swal-alert-info"
+        confirmButton: "btn btn-confirm",
+        cancelButton: "btn btn-cancel",
+        denyButton: "btn btn-deny",
+        popup: "swal-alert-info",
+      },
+      didOpen: () => {
+        if (url) {
+          navigateButton = document.getElementById('navigate-link');
+          navigateButton?.addEventListener('click', () => {
+            navigate(url);
+            Swal.close();
+          });
+        }
+      },
+      willClose: () => {
+        navigateButton?.removeEventListener('click', () => {});
       }
     })
   }

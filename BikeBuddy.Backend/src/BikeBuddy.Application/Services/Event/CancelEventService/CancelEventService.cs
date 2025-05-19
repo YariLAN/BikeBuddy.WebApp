@@ -1,11 +1,12 @@
-﻿using BikeBuddy.Domain.Models.EventControl.ValueObjects;
+﻿using BikeBuddy.Application.Services.Scheduler.Event;
+using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using System.Security.Claims;
 
 namespace BikeBuddy.Application.Services.Event.CancelEventService;
 
-public class CancelEventService(IEventRepository eventRepository) : ICancelEventService
+public class CancelEventService(IEventRepository eventRepository, IEventJobSchedulerService _eventJobSchedulerService) : ICancelEventService
 {
     public async Task<Result<bool, Error>> ExecuteAsync(Guid eventId, ClaimsPrincipal user, CancellationToken cancellationToken)
     {
@@ -23,8 +24,13 @@ public class CancelEventService(IEventRepository eventRepository) : ICancelEvent
 
         dbEventResult.Value.UpdateStatus(EventStatus.CANCELLED);
 
-        // тут надо будет удалить все фоновые задачи, связанные с данным заездом
+        var resultCancel = await eventRepository.UpdateAsync(dbEventResult.Value, cancellationToken); 
 
-        return await eventRepository.UpdateAsync(dbEventResult.Value, cancellationToken); 
+        if (resultCancel.IsFailure) 
+            return resultCancel.Error;
+
+        _eventJobSchedulerService.DeleteJobsForEvent(eventId, cancellationToken);
+
+        return resultCancel.IsSuccess;
     }
 }

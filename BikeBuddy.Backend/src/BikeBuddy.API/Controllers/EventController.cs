@@ -2,6 +2,7 @@
 using BikeBuddy.Application.DtoModels.Common;
 using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Services.Event.CancelEventService;
+using BikeBuddy.Application.Services.Event.ConfirmEventService;
 using BikeBuddy.Application.Services.Event.CreateEventService;
 using BikeBuddy.Application.Services.Event.GetEventService;
 using BikeBuddy.Application.Services.Event.GetEventsService;
@@ -72,6 +73,24 @@ namespace BikeBuddy.API.Controllers
             CancellationToken cancellationToken)
         {
             return (await updateEventService.ExecuteAsync(eventId, request, User, cancellationToken)).ToResponse();
+        }
+
+        [HttpPost("{eventId:Guid}/confirm")]
+        public async Task<ActionResult<bool>> ConfirmStartEventAsync(
+            [FromServices] IConfirmEventService confirmEventService,
+            [FromRoute] Guid eventId,
+            CancellationToken cancellationToken)
+        {
+            return (await confirmEventService.ExecuteConfirmStartAsync(eventId, cancellationToken)).ToResponse();
+        }  
+
+        [HttpPost("{eventId:Guid}/finish")]
+        public async Task<ActionResult<bool>> ConfirmFinishEventAsync(
+            [FromServices] IConfirmEventService confirmEventService,
+            [FromRoute] Guid eventId,
+            CancellationToken cancellationToken)
+        {
+            return (await confirmEventService.ExecuteConfirmFinishAsync(eventId, cancellationToken)).ToResponse();
         }
     }
 }

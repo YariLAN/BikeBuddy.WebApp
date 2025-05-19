@@ -53,6 +53,10 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
 
         builder.Property(e => e.Status).HasConversion<string>();
 
+        builder.Property(e => e.IsConfirmedByAuthor)
+            .HasColumnName("is_confirmed_by_author")
+            .IsRequired(false);
+
         builder.ConfigureTimestamps();
 
         builder.HasOne(e => e.User)

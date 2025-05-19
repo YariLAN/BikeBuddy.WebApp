@@ -1,6 +1,5 @@
 ﻿using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Mappers.User;
-using BikeBuddy.Application.Mappers.User.Profile;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 
 namespace BikeBuddy.Application.Mappers.Event;
@@ -42,12 +41,15 @@ public class EventMapper
             dbEvent.EndDate,
             dbEvent.User.UserName,
             dbEvent.Status,
+            dbEvent.IsConfirmedByAuthor,
             imageUrl);
     }
 
     public static EventResponse ToMap(Domain.Models.EventControl.Event dbEvent)
     {
         var userResponse = UserMapper.ToMap(dbEvent.User);
+
+        var isPlannedFinished = DateTime.Now > dbEvent.EndDate.AddHours(1); 
 
         return new EventResponse(
             dbEvent.Id,
@@ -60,6 +62,8 @@ public class EventMapper
             dbEvent.Distance,
             dbEvent.StartAddress,
             dbEvent.EndAddress,
+            dbEvent.IsConfirmedByAuthor,
+            isPlannedFinished,
             dbEvent.StartDate,
             dbEvent.EndDate,
             dbEvent.Chat is null ? Guid.Empty : dbEvent.Chat.Id,

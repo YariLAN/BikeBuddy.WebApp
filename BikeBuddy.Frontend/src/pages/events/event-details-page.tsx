@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { cn } from "@/lib/utils"
-import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound, MessageSquare, X, AlertCircle, Pencil } from "lucide-react"
+import { ArrowLeft, Calendar, MapPin, Users, RouteIcon, Bike, Flag, UserRound, MessageSquare, X, AlertCircle, Pencil, Loader2 } from "lucide-react"
 import { RouteMapContainer, type RouteMapContainerRef } from "@/components/my/map/route-map-container"
 import { BicycleType, type EventResponseDetails, EventStatus, EventType, PointDetails } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
@@ -42,6 +42,8 @@ const getStatusInfo = (status: EventStatus) => {
       return { label: "Открыт", color: "bg-green-500" }
     case EventStatus.Closed:
       return { label: "Закрыт для присоединения", color: "bg-yellow-500" }
+    case EventStatus.Started:
+      return { label: "Начат", color : "bg-cyan-500"}
     case EventStatus.Completed:
       return { label: "Завершен", color: "bg-blue-500" }
     case EventStatus.Canceled:
@@ -57,7 +59,7 @@ export default function EventDetailsPage() {
   const routeMapRef = useRef<RouteMapContainerRef>(null)
   const [formData, setEvent] = useState<EventResponseDetails | null>(null)
   const [isJoining, setIsJoining] = useState(false)
-  const [isCancelling, setIsCancelling] = useState(false)
+  const [isConfirming, setIsConfirming] = useState(false)
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -166,8 +168,6 @@ export default function EventDetailsPage() {
       return
     }
 
-    setIsCancelling(true)
-
     try {
       const result = await eventStore.cancelEventById(eventId)
 
@@ -179,6 +179,39 @@ export default function EventDetailsPage() {
       }
     } catch (error : any) {
       alertExpectedError(error.message)
+    }
+  }
+
+  // useEffect(() => {
+  //   if (formData?.event?.points && formData.event.points.length > 0 && routeMapRef.current) {
+  //     routeMapRef.current.setPoints(formData.event.points as PointDetails[]);
+  //   }
+  // }, [formData?.event, routeMapRef.current]);
+
+  const handleConfirmEvent = async (isStartConfimed : boolean = true) => {
+    if (!eventId) return
+
+    setIsConfirming(true)
+    try {
+      
+      const result = (isStartConfimed) ? await eventStore.confirmEvent(eventId) : await eventStore.confirmFinishEvent(eventId)
+
+      if (result.data) {
+        if (isStartConfimed) {
+          formData!.event.isCorfirmedByAuthor = result.data
+        }
+        else {
+          formData!.event.status = EventStatus.Completed
+        }
+
+        toastAlert(`Заезд успешно ${isStartConfimed ? "подтвержден" : "завершен"}`, "", 'success', 'bottom-end')
+      } else if (result.error) {
+        alertExpectedError(result.error)
+      }
+    } catch (error : any) {
+      alertExpectedError(error.message)
+    } finally {
+      setIsConfirming(false)
     }
   }
 
@@ -240,9 +273,29 @@ export default function EventDetailsPage() {
 
   const statusInfo = getStatusInfo(formData.event.status)
   const canJoinChat = formData.event.status === EventStatus.Opened && formData.event.countMembers > 1
+  const isEdit = formData.event.status === EventStatus.Opened || formData.event.status === EventStatus.Closed
 
   return (
     <div className="container mx-auto px-5 py-8">
+
+      <div className="flex mb-6 justify-end">
+        {formData.event.isCorfirmedByAuthor && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-100 px-2 py-1 rounded-md">
+                  <span className="text-xs font-medium">Заезд подтвержден</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Заезд подтвержден организатором или системой</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}        
+      </div>   
+
+
       <div className="flex items-center mb-8">
         <Button variant="outline" onClick={() => navigate("/events")} className="mr-10">
           <ArrowLeft className="h-5 w-5 mr-2" />
@@ -251,20 +304,22 @@ export default function EventDetailsPage() {
         <h1 className="text-3xl font-bold">{formData.event.name}</h1>
 
         <div className="ml-auto flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className={cn("w-3 h-3 rounded-full", statusInfo.color)} style={{ border: "1px black solid" }} />
-            <span className="text-sm font-medium">{statusInfo.label}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className={cn("w-3 h-3 rounded-full", statusInfo.color)} style={{ border: "1px black solid" }} />
+              <span className="text-sm font-medium">{statusInfo.label}</span>
+            </div>
           </div>
           
           {formData.canEdit && (
             <>
-              {formData.event.status !== EventStatus.Canceled && (
+              { (isEdit) && (
                 <Button variant="outline" className="bg-yellow-50" onClick={handleEditEvent}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Редактировать
                 </Button>
               )}
-              {formData.event.status !== EventStatus.Canceled && (
+              { isEdit && (
                 <div className="flex items-center gap-10">
                   {/* Кнопка отмены события (только для автора) */}
                   <Button variant="destructive" className=""  onClick={() => showCancelDialog()}>
@@ -280,7 +335,7 @@ export default function EventDetailsPage() {
 
       {formData.event.status === EventStatus.Canceled && (
         <div className="mb-6 bg-red border-1-4 border-red-500 rounded-md shadow-sm dark:bg-red-900/20 dark:border-red-800">
-          <Alert variant="destructive" className="p-4">
+          <Alert variant="destructive" className="p-4 bg-red-50">
             <AlertCircle className="h-6 w-6 text-red-500"/>
             <AlertTitle  className="text-lg text-red-700 ml-3">Заезд отменен</AlertTitle>
             <AlertDescription className="text-red-600 dark:text-red-300 ml-3">
@@ -289,6 +344,71 @@ export default function EventDetailsPage() {
           </Alert>
         </div>
       )}
+
+      {formData.event.status != EventStatus.Canceled && formData.event.isCorfirmedByAuthor === false && formData.canEdit && (
+        <div className="mb-6 bg-red border-1-4 border-orange-500 rounded-md shadow-sm dark:bg-orange-900/20 dark:border-orange-800">
+          <Alert variant="destructive" className="p-4 bg-orange-50">
+            <div className="flex items-start">
+              <AlertCircle className="h-6 w-6 text-orange-500"/>
+              <div className="ml-3 flex-1">
+                <AlertTitle  className="text-lg text-orange-600 ml-3">{formData.event.author.userName}, подтвердите заезд</AlertTitle>
+                <AlertDescription className="text-orange-600 dark:text-orange-300 ml-3">
+                  <span>Этот заезд в скором времени начнется. Необходимо подтвердить организатором заезд</span>          
+                </AlertDescription>
+              </div>
+              <Button
+                variant='outline'
+                className="ml-4 bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-200 hover:text-orange-800"
+                disabled={isConfirming}
+                onClick={() => handleConfirmEvent(true)}
+              >
+                {isConfirming ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Подтверждение...
+                  </>
+                ) : (
+                  "Подтвердить"
+                )}
+              </Button>
+            </div>
+          </Alert>
+        </div>
+      )}
+
+      {formData.event.status != EventStatus.Canceled && formData.event.isCorfirmedByAuthor && formData.event.isPlannedFinished 
+        && formData.event.status != EventStatus.Completed && formData.canEdit && 
+        (
+          <div className="mb-6 border-1-4 border-blue-500 rounded-md shadow-sm dark:bg-blue-900/20 dark:border-blue-800">
+            <Alert variant="default" className="p-4 bg-blue-50">
+              <div className="flex items-start">
+                <AlertCircle className="h-6 w-6 text-blue-500"/>
+                <div className="ml-3 flex-1">
+                  <AlertTitle  className="text-lg text-blue-600 ml-3">{formData.event.author.userName}, подтвердите завершение</AlertTitle>
+                  <AlertDescription className="text-blue-600 dark:text-blue-300 ml-3">
+                    <span>Этот заезд ожидает завершения по плану. Необходимо подтвердить организатором заезда</span>          
+                    <span><p>Если заезд не завершен, подтвердить можно позже</p></span>          
+                  </AlertDescription>
+                </div>
+                <Button
+                  variant='outline'
+                  className="ml-4 bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200 hover:text-blue-800"
+                  disabled={isConfirming}
+                  onClick={() => handleConfirmEvent(false)}
+                >
+                  {isConfirming ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Подтверждение...
+                    </>
+                  ) : (
+                    "Подтвердить"
+                  )}
+                </Button>
+              </div>
+            </Alert>
+          </div>
+        )}
 
       {/* Карта */}
       <Card className="mb-8 overflow-hidden">
@@ -367,6 +487,7 @@ export default function EventDetailsPage() {
           <Card>
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4">Организатор</h3>
+
               <div className="flex items-center mb-6">
                 <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mr-3">
                   <UserRound className="h-6 w-6 text-muted-foreground" />

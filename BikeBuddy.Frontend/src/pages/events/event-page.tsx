@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 const bikeTypes = [
   { value: BicycleType.Default,  label: 'Городской' },
@@ -79,6 +80,8 @@ export default function EventsPage() {
         return { label: "Открыт", color: "bg-green-500 hover:bg-green-600" }
       case EventStatus.Closed:
         return { label: "Закрыт для присоединения", color: "bg-yellow-500 hover:bg-yellow-600" }
+      case EventStatus.Started:
+        return { label: "Начат", color : "bg-cyan-500 hover:bg-cyan-600"}
       case EventStatus.Completed:
         return { label: "Завершен", color: "bg-blue-500 hover:bg-blue-600" }
       case EventStatus.Canceled:
@@ -323,19 +326,24 @@ export default function EventsPage() {
                       alt={event.name}
                       className={cn("object-cover", isCompactView ? "h-full w-full" : event.imageUrl ? "w-full" : "w-[350px]")}
                     />
-                    <div className="absolute top-3 left-3 flex items-center gap-2">
-                      <div 
-                        className={cn(
-                          "w-3 h-3 rounded-full", 
-                          statusInfo.color
-                        )}
-                        style={{border: '1px black solid'}}
-                        title={statusInfo.label}
-                      />
-                      <span className="text-xs font-medium bg-black/70 px-2 py-0.5 text-white rounded">
-                        {statusInfo.label}
-                      </span>
-                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="absolute top-3 left-3 flex items-center gap-2">
+                            <div style={{border: '1px black solid'}} className={cn("w-3 h-3 rounded-full", statusInfo.color)} />
+                            <span className="text-xs font-medium bg-black/60 text-white px-2 py-0.5 rounded">
+                              {statusInfo.label}
+                            </span>
+                            {event.isCorfirmedByAuthor && (
+                              <span className="text-xs font-medium bg-green-500 text-white px-2 py-0.5 rounded">✓</span>
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Статус: {statusInfo.label} {event.isCorfirmedByAuthor ? " (подтверждено)" : ""}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   
                   <div className={cn("flex flex-col",isCompactView ? "flex-1" : "w-full")}>

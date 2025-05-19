@@ -11,15 +11,16 @@ import { Bell } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
-import { NotificationResponse, SweetAlertType, TypeTitle } from "@/core/models/notification/notification-models"
+import { getNotificationBgColor, getNotificationColor, NotificationResponse, SweetAlertType, TypeTitle } from "@/core/models/notification/notification-models"
 import useAuthStore from "@/stores/auth"
 import useNotificationStore from "@/stores/notification"
 import { useEffect, useRef, useState } from "react"
-import { LOCAL_BASE_URL, LOCAL_SITE_URL } from "@/core/constants"
+import { LOCAL_BASE_URL } from "@/core/constants"
 import * as signalR from "@microsoft/signalr"
 import JwtService from "@/core/services/JwtService"
 import { alertError, alertExpectedError, alertWithAction, toastAlert } from "@/core/helpers"
 import useEventStore from "@/stores/event"
+import { useNavigate } from "react-router-dom"
 
 export function NotificationDropdown() {
 
@@ -30,6 +31,8 @@ export function NotificationDropdown() {
   const notificationConnectionRef = useRef<signalR.HubConnection | null>(null)
   const [hasUnread, setHasNotifications] = useState(false)
   const [notifications, setNotifications] = useState<NotificationResponse[]>([])
+
+  const navigate = useNavigate()
 
   const formatNotificationTime = (date: Date) => {
     try {
@@ -58,7 +61,7 @@ export function NotificationDropdown() {
       notificationConnectionRef.current.on("ReceiveNotification", (notification : NotificationResponse) => {
         console.log(notification);
 
-        setNotifications( (prev) => [ ...prev, notification])
+        setNotifications( (prev) => [ notification, ...prev])
         setHasNotifications(true)
       })
 
@@ -134,6 +137,7 @@ export function NotificationDropdown() {
        
       if (result.data) {
         setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: result.data! } : n)))
+        setHasNotifications(notifications.every(n => !n.isRead))
       }
     } catch (error : any) {
       alertExpectedError(error.message)
@@ -142,25 +146,36 @@ export function NotificationDropdown() {
 
   const handleNotificationClick = async (notification: NotificationResponse) => {
     await markNotificationAsRead(notification.id)
-    
+   
+    const msg = `<div class="notification"><p class="notification-message">${notification.message}</p> 
+      <span id="navigate-link" style="color: #069; cursor: pointer; text-decoration: underline">Перейти к заезду</span></div>
+    `
+    const type = SweetAlertType[notification.type]
+
     if (notification.title == TypeTitle.ConfirmEvent) {
       let alert = alertWithAction(
-        notification.title, 
-        `${notification.message}. <a href="${LOCAL_SITE_URL}${notification.url}">Перейти к заезду</a>`,
-        SweetAlertType[notification.type],
-        "Подтвердить", 
-        "Закрыть",
-        "Отменить заезд")
+        notification.title, msg, notification.url, type,"", "Закрыть", "Отменить заезд", navigate
+      )
 
       alert.then(async (result) => {
         if (result.isDenied) {
           const id = notification.url.split('/')[1];
           await cancelEvent(id)
         }
-        else if (result.isConfirmed) {
-          toastAlert("", "Заезд успешно подтвержден", 'success', 'bottom-end')
-        }
       });
+    }
+    else if (notification.title == TypeTitle.AutoConfirmStart) {
+      alertWithAction(notification.title, msg, notification.url, type, "", "Закрыть", "", navigate, 360)
+    }
+    else if (notification.title == TypeTitle.ConfirmFinish) {
+      let alert = alertWithAction(notification.title, msg, notification.url, type, "", "Закрыть", "", navigate)
+
+      alert.then(async (result) => {
+        
+      })
+    }
+    else if (notification.title.includes(TypeTitle.RepeatConfirmFinish)) {
+      alertWithAction(notification.title, msg, notification.url, type, "", "Закрыть", "", navigate)
     }
   }
 
@@ -195,7 +210,7 @@ export function NotificationDropdown() {
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-96">
+      <DropdownMenuContent align="end" className="w-[470px]">
         <DropdownMenuLabel className="flex justify-between items-center">
           <span>Уведомления</span>
           {notifications.length > 0 && hasUnread && (
@@ -222,13 +237,15 @@ export function NotificationDropdown() {
                   key={notification.id}
                   className={cn(
                     "flex flex-col items-start py-2 px-2 cursor-pointer",
-                    !notification.isRead && "bg-muted/50",
+                    // !notification.isRead && "bg-muted/50",
+                    getNotificationBgColor(notification.type, notification.isRead),
                   )}
                   onClick={async () => await handleNotificationClick(notification)}
                 >
                   <div className="flex w-full gap-2 px-0.5">
                     {!notification.isRead && (
-                      <span className="flex-shrink-0 w-2 h-2 rounded-full bg-primary mt-5"></span>
+                      <span className={cn("flex-shrink-0 w-2 h-2 rounded-full bg-primary mt-5", getNotificationColor(notification.type))}>
+                      </span>
                     )}
 
                     <div className="flex-1 flex flex-col px-1">       

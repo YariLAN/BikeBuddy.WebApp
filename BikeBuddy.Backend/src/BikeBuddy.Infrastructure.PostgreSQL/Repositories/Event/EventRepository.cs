@@ -1,6 +1,7 @@
 ﻿using BikeBuddy.Application.DtoModels.Common;
 using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Services.Event;
+using BikeBuddy.Domain.Models;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -72,6 +73,16 @@ public class EventRepository(ApplicationDbContext context) : IEventRepository
     {
         try
         {
+            if (context.Entry(eventModel).State == EntityState.Detached)
+            {
+                context.Update(eventModel);
+            }
+
+            if (eventModel is ICreatedUpdateAt entityWithTimestamps)
+            {
+                entityWithTimestamps.UpdatedAt = DateTime.UtcNow;
+            }
+
             await context.SaveChangesAsync(cancellationToken);
             return true;
         }

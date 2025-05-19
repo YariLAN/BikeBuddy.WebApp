@@ -27,7 +27,6 @@ public class NotificationUserController : ControllerBase
             .ToResponse();
     }
 
-
     [HttpPost("{notificationId:Guid}/read")]
     public async Task<ActionResult<bool>> MarkNotificationAsRead(
         [FromServices] INotificationService notificationService,

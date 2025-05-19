@@ -10,7 +10,9 @@ interface EventState {
     getEvents: (filter: SearchFilterDto<EventFilterDto>) => Promise<ApiResponse<PageData<EventListResponse>>>;
     getEventById: (eventId: string) => Promise<ApiResponse<EventResponseDetails>>;
     cancelEventById: (eventId: string) => Promise<ApiResponse<boolean>>;
-    updateEvent: (eventId: string, event: UpdateEventRequest) => Promise<ApiResponse<boolean>>
+    updateEvent: (eventId: string, event: UpdateEventRequest) => Promise<ApiResponse<boolean>>;
+    confirmEvent : (eventId: string) => Promise<ApiResponse<boolean>>;
+    confirmFinishEvent : (eventId: string) => Promise<ApiResponse<boolean>>;
 }
 
 const useEventStore = create<EventState>(
@@ -40,6 +42,14 @@ const useEventStore = create<EventState>(
         updateEvent: async (eventId: string, event: UpdateEventRequest) => {
             const result = await apiService.put<boolean>(`/events/${eventId}`, event);
             return result;
+        },
+        confirmEvent: async (eventId : string) => {
+            const result = await apiService.post<boolean>(`/events/${eventId}/confirm`, {}, true);
+            return result;
+        },
+        confirmFinishEvent: async (eventId : string) => {
+            const result = await apiService.post<boolean>(`/events/${eventId}/finish`, {}, true);
+            return result
         }
     })
 )

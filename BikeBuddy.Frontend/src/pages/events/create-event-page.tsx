@@ -58,7 +58,7 @@ export default function CreateEventPage() {
     countMembers: undefined,
     currentCountMembers: undefined,
     points: [],
-    status: EventStatus.Opened
+    status: EventStatus.Opened,
     // images: [],
     // mapImageFile: null
   })
@@ -84,6 +84,7 @@ export default function CreateEventPage() {
           startDate: new Date(eventData.startDate),
           endDate: new Date(eventData.endDate),
           points: eventData.points,
+          status: eventData.status,
         })
 
         if (eventData.points && eventData.points.length > 0 && routeMapRef.current) {
@@ -266,6 +267,7 @@ export default function CreateEventPage() {
             'Тип заезда',
             'Выберите рекомендуемый тип велосипеда',
             <Select
+              disabled={formData.status === EventStatus.Started}
               value={formData.type?.toString()}
               onValueChange={(value) => handleInputChange('type', value)}
             >
@@ -288,6 +290,7 @@ export default function CreateEventPage() {
             'Тип велосипеда',
             'Выберите рекомендуемый тип велосипеда',
             <Select
+              disabled={formData.status === EventStatus.Started}
               value={formData.bicycleType?.toString()}
               onValueChange={(value) => handleInputChange('bicycleType', value)}
             >
@@ -314,6 +317,7 @@ export default function CreateEventPage() {
             'Введите число участников',
             <Input
               type="number"
+              disabled={formData.status === EventStatus.Started}
               min={isEditMode ? formData.currentCountMembers : 0}
               value={formData.countMembers}
               onChange={(e) => handleInputChange('countMembers', Number(e.target.value))}
@@ -344,6 +348,7 @@ export default function CreateEventPage() {
               'Адрес старта',
               'Выберите точку старта на карте',
               <Input
+                disabled={formData.status === EventStatus.Started}
                 value={formData.startAddress || ''}
                 onChange={(e) => handleInputChange('startAddress', e.target.value)}
                 className={errors.startAddress ? 'border-red-500' : ''}
@@ -357,11 +362,13 @@ export default function CreateEventPage() {
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
+                    disabled={formData.status === EventStatus.Started}
                     variant={"outline"}
                     className={cn(
                       "w-full justify-start text-left font-normal",
                       !formData.startDate && "text-muted-foreground",
-                      errors.startDate && "border-red-500"
+                      errors.startDate && "border-red-500",
+                      formData.status === EventStatus.Started && "bg-muted"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -451,6 +458,7 @@ export default function CreateEventPage() {
               'Адрес финиша',
               'Выберите точку финиша на карте',
               <Input
+                disabled={formData.status === EventStatus.Started}
                 value={formData.endAddress || ''}
                 onChange={(e) => handleInputChange('endAddress', e.target.value)}
                 className={errors.endAddress ? 'border-red-500' : ''}

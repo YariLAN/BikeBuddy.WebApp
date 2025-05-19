@@ -1,8 +1,9 @@
 export enum EventStatus {
 	Opened = 0,
 	Closed = 1,
-	Completed = 2,
-	Canceled = 3
+    Started = 2,
+	Completed = 3,
+	Canceled = 4
 }
 
 export enum BicycleType {
@@ -90,6 +91,7 @@ export interface EventListResponse {
     endDate : Date,
     nameAuthor : string,
     status : EventStatus,
+    isCorfirmedByAuthor: boolean | null | undefined,
     imageUrl : string
 } 
 
@@ -104,6 +106,8 @@ export interface EventResponse {
     distance: number,
     startAddress: string,
     endAddress: string,
+    isCorfirmedByAuthor: boolean | undefined | null,
+    isPlannedFinished: boolean,
     startDate: Date,
     endDate: Date,
     chatId : string,

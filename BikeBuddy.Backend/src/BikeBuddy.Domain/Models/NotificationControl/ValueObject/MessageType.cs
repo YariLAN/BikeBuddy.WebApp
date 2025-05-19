@@ -4,5 +4,6 @@ public enum MessageType
 {
     Info,
     Warning,
-    Success
+    Success,
+    Question
 }

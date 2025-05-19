@@ -32,6 +32,7 @@ public class UpdateEventService(IEventRepository eventRepository, IEventJobSched
             eventDb.Value.UpdateStatus(EventStatus.CLOSED);
 
         var tempStartDate = eventDb.Value.StartDate;
+        var tempEndDate = eventDb.Value.EndDate;
 
         eventDb.Value.Update(
             updateRequest.Name,
@@ -46,12 +47,20 @@ public class UpdateEventService(IEventRepository eventRepository, IEventJobSched
             updateRequest.EndDate,
             EventDetails.Create(points));
 
+        if (tempStartDate != updateRequest.StartDate || tempEndDate != updateRequest.EndDate)
+        {
+            _eventJobSchedulerService.DeleteJobsForEvent(eventDb.Value.Id, cancellationToken);
+            _eventJobSchedulerService.Schedule(eventDb.Value.Id, userId, updateRequest.StartDate, eventDb.Value.EndDate, cancellationToken);
+
+            if ((updateRequest.StartDate - DateTime.Now).TotalHours > 3 && eventDb.Value.IsConfirmedByAuthor.HasValue)
+            {
+                eventDb.Value.UpdateConfirmed(null);
+            }
+        }
+
         var updResult = await eventRepository.UpdateAsync(eventDb.Value, cancellationToken);
 
         if (updResult.IsFailure) return updResult.Error;
-
-        if (tempStartDate != updateRequest.StartDate)
-            _eventJobSchedulerService.Schedule(eventDb.Value.Id, userId, updateRequest.StartDate, eventDb.Value.EndDate);
 
         return updResult;
     }

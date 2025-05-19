@@ -8,6 +8,9 @@ public enum EventStatus
     // Закрыто для присоединения
     CLOSED,
 
+    // Заезд стартовал
+    STARTED,
+
     // Пройдено
     COMPLETED,
 

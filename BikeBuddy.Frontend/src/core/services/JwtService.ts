@@ -70,7 +70,6 @@ export const isTokenExpired = (token: string | null = getToken()): boolean => {
   if (!payload) return true;
 
   const currentTime = Math.floor(Date.now() / 1000);
-  console.log(currentTime, "   ", payload.exp)
   return payload.exp < currentTime;
 }
 

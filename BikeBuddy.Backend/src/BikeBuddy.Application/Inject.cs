@@ -11,6 +11,7 @@ using BikeBuddy.Application.Services.Chat.SendMessageService;
 using BikeBuddy.Application.Services.Chat.StateManagerService;
 using BikeBuddy.Application.Services.Common.Notification;
 using BikeBuddy.Application.Services.Event.CancelEventService;
+using BikeBuddy.Application.Services.Event.ConfirmEventService;
 using BikeBuddy.Application.Services.Event.CreateEventService;
 using BikeBuddy.Application.Services.Event.GetEventService;
 using BikeBuddy.Application.Services.Event.GetEventsService;
@@ -76,6 +77,7 @@ public static class Inject
         services.AddScoped<IUploadMapService, UploadMapService>();
         services.AddScoped<ICancelEventService, CancelEventService>();
         services.AddScoped<IUpdateEventService, UpdateEventService>();
+        services.AddScoped<IConfirmEventService, ConfirmEventService>();
 
         // Chat
         services.AddScoped<IJoinChatService, JoinChatService>();

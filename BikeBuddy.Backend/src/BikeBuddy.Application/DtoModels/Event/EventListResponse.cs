@@ -16,4 +16,5 @@ public record EventListResponse(
     DateTime EndDate,
     string NameAuthor,
     EventStatus Status,
+    bool? IsCorfirmedByAuthor,
     string ImageUrl);
