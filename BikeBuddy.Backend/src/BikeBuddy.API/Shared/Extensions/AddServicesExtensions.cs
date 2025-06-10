@@ -74,7 +74,7 @@ public static class AddServicesExtensions
         {
             opt.AddPolicy(name: nameCors, builder =>
             {
-                builder.WithOrigins("https://localhost:5173")
+                builder.WithOrigins("https://localhost:5173", "https://26.79.163.106:5173")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

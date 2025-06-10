@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import JwtService from './JwtService';
-import { AuthResponse } from '@/stores/auth';
+import useAuthStore, { AuthResponse } from '@/stores/auth';
 import { LOCAL_BASE_URL } from '../constants';
 
 export type ApiResponse<T> = {
@@ -37,6 +37,12 @@ export class ApiService {
                 const originalRequest = error.config as CustomInternalAxiosRequestConfig;
 
                 if (error.response?.status === 401 && originalRequest && !originalRequest.retry) {
+                    if (!document.cookie.split('; ').some(row => row.startsWith('refresh='))) {
+                        JwtService.destroyToken();
+                        useAuthStore.setState({isAuthenticated: false})
+                        window.location.href = '/';
+                    }
+
                     if (this.isRefreshing) {
                         return new Promise(resolve => {
                             this.subscribeTokenRefresh(token => {
@@ -104,7 +110,9 @@ export class ApiService {
             return newToken;
         } catch (error) {
             JwtService.destroyToken();
+            useAuthStore.setState({isAuthenticated: false})
             window.location.href = '/';
+
             return Promise.reject(error);
         }
     }

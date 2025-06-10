@@ -36,6 +36,8 @@ builder.Services.AddSignalR(opt =>
     opt.KeepAliveInterval = TimeSpan.FromSeconds(5);
 });
 
+//builder.WebHost.UseUrls("https://26.79.163.106:3002");
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

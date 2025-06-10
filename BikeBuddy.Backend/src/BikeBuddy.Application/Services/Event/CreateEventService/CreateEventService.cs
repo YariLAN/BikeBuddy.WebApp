@@ -28,7 +28,7 @@ public class CreateEventService(
 
         var eventResult = await eventRepository.CreateAsync(dbEvent, cancellationToken);
 
-        if (eventResult.IsFailure)
+        if (eventResult.IsFailure) 
             return eventResult.Error;
 
         _eventJobSchedulerService.Schedule(eventResult.Value, userId.Id, dbEvent.StartDate, dbEvent.EndDate, cancellationToken);

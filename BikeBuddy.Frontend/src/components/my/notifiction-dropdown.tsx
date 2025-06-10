@@ -137,7 +137,8 @@ export function NotificationDropdown() {
        
       if (result.data) {
         setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: result.data! } : n)))
-        setHasNotifications(notifications.every(n => !n.isRead))
+        let res = notifications.some(n => !n.isRead)
+        setHasNotifications(res)
       }
     } catch (error : any) {
       alertExpectedError(error.message)

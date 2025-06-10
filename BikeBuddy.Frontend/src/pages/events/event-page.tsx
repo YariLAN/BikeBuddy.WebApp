@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Input } from "@/components/ui/input"
 
 const bikeTypes = [
   { value: BicycleType.Default,  label: 'Городской' },
@@ -34,6 +35,31 @@ const eventTypes = [
   { value: EventType.Tour,      label: 'Путешествие'}
 ]
 
+interface ActiveFilterTagProps {
+  label: string;
+  value: string | number;
+  onRemove: () => void;
+  icon?: React.ReactNode;
+}
+
+const ActiveFilterTag = ({ label, value, onRemove, icon }: ActiveFilterTagProps) => (
+  <div className="flex items-center bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-100 px-2 py-1 rounded-md mr-2 mb-2">
+    {icon && <span className="mr-1">{icon}</span>}
+    <span className="text-xs font-medium">
+      {label}: {value}
+    </span>
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={onRemove}
+      className="h-5 w-5 p-0 ml-1 text-green-800 dark:text-green-100 hover:bg-green-200 dark:hover:bg-green-800/30"
+    >
+      <X className="h-3 w-3" />
+      <span className="sr-only">Очистить фильтр</span>
+    </Button>
+  </div>
+);
+
 export default function EventsPage() {
   const navigate = useNavigate()
   const [isCompactView, setIsCompactView] = useState(false)
@@ -43,7 +69,13 @@ export default function EventsPage() {
   const [error, setError] = useState<string | null>(null)
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+
   const [participantsFilter, setParticipantsFilter] = useState<number>(0)
+  const [startAddressFilter, setSartAddressFilter] = useState<string>("")
+
+  const [countNotApplyedFilter, setCountNotApplyedFilter] = useState<number>(0)
+  const [startAddressNotApplyedFilter, setStartAddressNotApplyedFilter] = useState<string>("")
+
   const [isFilterActive, setIsFilterActive] = useState(false)
 
   const [offset, setOffset] = useState(0)
@@ -101,7 +133,10 @@ export default function EventsPage() {
       const filter: SearchFilterDto<EventFilterDto> = {
         offset: offset, 
         limit : limit,
-        filter: { countMembers: participantsFilter}
+        filter: { 
+          countMembers: participantsFilter,
+          startAddress: startAddressFilter 
+        }
       }
 
       const result = await eventStore.getEvents(filter)
@@ -122,7 +157,7 @@ export default function EventsPage() {
 
   useEffect(() => {
     getEvents()
-  }, [offset, participantsFilter])
+  }, [offset, participantsFilter, startAddressFilter])
 
   const formatDate = (dateString: Date) => {
     const date = new Date(dateString)
@@ -134,15 +169,22 @@ export default function EventsPage() {
     return format(date, "HH:mm", { locale: ru })
   }
 
-  const applyFilter = (value: number) => {
-    setParticipantsFilter(value)
+  const applyFilter = () => {
+    setParticipantsFilter(countNotApplyedFilter)
+    setSartAddressFilter(startAddressNotApplyedFilter)
+
     setOffset(0)
-    setIsFilterActive(value > 0)
+    setIsFilterActive(countNotApplyedFilter > 0 || !!startAddressNotApplyedFilter)
     setIsFilterOpen(false)
   }
 
   const clearFilter = () => {
     setParticipantsFilter(0)
+    setSartAddressFilter("")
+
+    setCountNotApplyedFilter(0)
+    setStartAddressNotApplyedFilter("")
+
     setIsFilterActive(false)
     setOffset(0)
     setIsFilterOpen(false)
@@ -182,16 +224,26 @@ export default function EventsPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="participants">Минимальное количество участников</Label>
-                    <span className="text-sm font-medium">{participantsFilter}</span>
+                    <span className="text-sm font-medium">{countNotApplyedFilter}</span>
                   </div>
                   <Slider
                     id="participants"
                     min={0}
                     max={20}
                     step={1}
-                    value={[participantsFilter]}
-                    onValueChange={(value) => setParticipantsFilter(value[0])}
+                    value={[countNotApplyedFilter]}
+                    onValueChange={(value) => setCountNotApplyedFilter(value[0])}
                     className="py-4"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address">Адрес стартовой точки</Label>
+                  <Input
+                    id="address"
+                    placeholder="Введите адрес"
+                    value={startAddressNotApplyedFilter}
+                    onChange={(e) => setStartAddressNotApplyedFilter(e.target.value)}
                   />
                 </div>
 
@@ -201,7 +253,7 @@ export default function EventsPage() {
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => applyFilter(participantsFilter)}
+                    onClick={() => applyFilter()}
                     className="bg-green-600 hover:bg-green-700"
                   >
                     Применить
@@ -248,22 +300,41 @@ export default function EventsPage() {
         </div>
       </div>
 
-      {/* Индикатор активного фильтра */}
       {isFilterActive && (
-        <div className="mb-4 flex items-center">
+        <div className="mb-4">
           <span className="text-sm text-muted-foreground mr-2">Активные фильтры:</span>
-          <div className="flex items-center bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-100 px-2 py-1 rounded-md">
-            <Users className="mr-1 h-3 w-3" />
-            <span className="text-xs font-medium">Мин. участников: {participantsFilter}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearFilter}
-              className="h-5 w-5 p-0 ml-1 text-green-800 dark:text-green-100 hover:bg-green-200 dark:hover:bg-green-800/30"
-            >
-              <X className="h-3 w-3" />
-              <span className="sr-only">Очистить фильтр</span>
-            </Button>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            {participantsFilter > 0 && (
+              <ActiveFilterTag
+                label="Мин. участников"
+                value={participantsFilter}
+                onRemove={() => {
+                  setParticipantsFilter(0)
+                  setCountNotApplyedFilter(0)
+
+                  setOffset(0)
+                  setIsFilterActive(!!startAddressNotApplyedFilter)
+                  setIsFilterOpen(false)
+                }}
+                icon={<Users className="h-3 w-3" />}
+              />
+            )}
+            
+            {startAddressFilter && (
+              <ActiveFilterTag
+                label="Адрес старта"
+                value={startAddressFilter}
+                onRemove={() => {
+                  setSartAddressFilter("")
+                  setStartAddressNotApplyedFilter("")
+
+                  setOffset(0)
+                  setIsFilterActive(countNotApplyedFilter > 0)
+                  setIsFilterOpen(false)
+                }}
+                icon={<MapPin className="h-3 w-3" />}
+              />
+            )}
           </div>
         </div>
       )}

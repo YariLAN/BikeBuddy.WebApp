@@ -296,15 +296,15 @@ export default function EventDetailsPage() {
       </div>   
 
 
-      <div className="flex items-center mb-8">
+      <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
         <Button variant="outline" onClick={() => navigate("/events")} className="mr-10">
           <ArrowLeft className="h-5 w-5 mr-2" />
           Назад
         </Button>
-        <h1 className="text-3xl font-bold">{formData.event.name}</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-center">{formData.event.name}</h1>
 
-        <div className="ml-auto flex items-center gap-6">
-          <div className="flex items-center gap-3">
+        <div className="md:ml-auto flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-3 m-auto">
             <div className="flex items-center gap-2">
               <div className={cn("w-3 h-3 rounded-full", statusInfo.color)} style={{ border: "1px black solid" }} />
               <span className="text-sm font-medium">{statusInfo.label}</span>
@@ -312,7 +312,7 @@ export default function EventDetailsPage() {
           </div>
           
           {formData.canEdit && (
-            <>
+            <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
               { (isEdit) && (
                 <Button variant="outline" className="bg-yellow-50" onClick={handleEditEvent}>
                   <Pencil className="mr-2 h-4 w-4" />
@@ -322,13 +322,13 @@ export default function EventDetailsPage() {
               { isEdit && (
                 <div className="flex items-center gap-10">
                   {/* Кнопка отмены события (только для автора) */}
-                  <Button variant="destructive" className=""  onClick={() => showCancelDialog()}>
+                  <Button variant="destructive" className="w-full"  onClick={() => showCancelDialog()}>
                     <X className="mr-2 h-4 w-4" />
                     Отменить заезд
                   </Button>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>

@@ -35,7 +35,7 @@ public class RefreshService : IRefreshService
 
         var userId = _jwtProvider.GetUserIdFromAccessToken(accessToken);
 
-        if (!userId.IsFailure)
+        if (userId.IsFailure)
             return userId.Error;
 
         var dbRefreshToken = await _refreshTokensRepository.Get(userId.Value, refreshToken, cancellationToken);

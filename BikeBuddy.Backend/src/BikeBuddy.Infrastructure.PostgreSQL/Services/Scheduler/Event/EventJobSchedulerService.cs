@@ -20,7 +20,7 @@ public class EventJobSchedulerService(JobStorage _jobStorage) : IEventJobSchedul
 
         if (start > DateTime.Now)
             BackgroundJob.Schedule<IEventJobExecutor>(x =>
-                x.AutoConfirmStart(eventId, cancellationToken), start - DateTime.Now);
+                x.AutoConfirmStart(eventId, cancellationToken), start - DateTime.Now);                                          
 
         if (notifyEnd > DateTime.Now)
             BackgroundJob.Schedule<IEventJobExecutor>(x =>

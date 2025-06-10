@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.Common;
 using BikeBuddy.Application.DtoModels.Event;
+using BikeBuddy.Application.Helpers;
 using BikeBuddy.Application.Services.Event;
 using BikeBuddy.Domain.Models;
 using BikeBuddy.Domain.Shared;
@@ -45,19 +46,14 @@ public class EventRepository(ApplicationDbContext context) : IEventRepository
     {
         try
         {
-            IQueryable<EventModel> events = context.Events.Include(e => e.User).AsNoTracking();
-
-            if (eventFilter.Filter != null)
-            {
-                if (eventFilter.Filter.CountMembers > 0)
-                {
-                    events = events.Where(e => e.CountMembers == eventFilter.Filter.CountMembers);
-                }
-            }
+            IQueryable<EventModel> events = context.Events
+                .Include(e => e.User)
+                .AsNoTracking()
+                .ApplyFilters(eventFilter.Filter);
 
             return (
               await events
-                .OrderBy(x => x.CreatedAt)
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip(eventFilter.Offset)
                 .Take(eventFilter.Limit)
                 .ToListAsync(cancellationToken),
