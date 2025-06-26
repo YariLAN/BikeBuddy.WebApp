@@ -30,6 +30,7 @@ export const profileSchema = yup.object({
     .max(new Date(), "Дата не может быть в будущем"),
   address: yup
     .string()
+    .required()
     .max(200, "Максимум 200 символов")
     .nullable(),
 })

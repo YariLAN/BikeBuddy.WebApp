@@ -18,7 +18,7 @@ public class UserMapper
             profile.Name,
             profile.MiddleName,
             profile.BirthDay,
-            profile.Address.ToString());
+            profile.Address.ToString() ?? "");
     }     
     
     public static UserResponse ToMap(UserProfile profile)
