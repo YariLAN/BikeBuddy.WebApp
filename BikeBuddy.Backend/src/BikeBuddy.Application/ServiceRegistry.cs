@@ -30,7 +30,7 @@ using System.Text;
 
 namespace BikeBuddy.Application;
 
-public static class Inject
+public static class ServiceRegistry
 {
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
@@ -94,7 +94,7 @@ public static class Inject
         // Jobs
         services.AddScoped<IEventJobExecutor,  EventJobExecutor>();
 
-        services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
+        services.AddValidatorsFromAssembly(typeof(ServiceRegistry).Assembly);
 
         return services;
     }

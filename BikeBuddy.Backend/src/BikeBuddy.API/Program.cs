@@ -3,7 +3,6 @@ using BikeBuddy.API.Services;
 using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application;
 using BikeBuddy.Application.Services.Common;
-using BikeBuddy.Application.Services.Common.Notification;
 using BikeBuddy.Infrastructure;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;

@@ -23,7 +23,7 @@ public class MinioProvider : IFileProvider
     {
         await IfBucketsNotExistCreateBucket([bucketName], cancellationToken);
 
-         var result = await PutObject(fileData, bucketName, objectName, mimeType, cancellationToken);
+        var result = await PutObject(fileData, bucketName, objectName, mimeType, cancellationToken);
 
         if (result.IsFailure)
             return result.Error;

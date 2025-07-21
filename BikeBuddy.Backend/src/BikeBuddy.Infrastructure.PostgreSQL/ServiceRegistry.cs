@@ -23,7 +23,7 @@ using Minio;
 
 namespace BikeBuddy.Infrastructure;
 
-public static class Inject
+public static class ServiceRegistry
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
@@ -46,9 +46,6 @@ public static class Inject
     private static IServiceCollection AddMinio(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.MINIO));
-
-        var minioOptions = configuration.GetSection(MinioOptions.MINIO).Get<MinioOptions>()
-                           ?? throw new ApplicationException("Missing minio configuration");
 
         services.AddMinio(options =>
         {
