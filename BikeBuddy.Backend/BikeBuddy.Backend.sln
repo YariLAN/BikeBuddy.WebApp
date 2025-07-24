@@ -15,6 +15,10 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeBuddy.Application", "src\BikeBuddy.Application\BikeBuddy.Application.csproj", "{08F4150B-1765-4655-BFF2-6DDF102950AE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C8CEB22E-886E-488A-8C9E-7D3EE87C146D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "tests\UnitTests\UnitTests.csproj", "{E27EF786-F2D3-4EE0-A3A6-69F04A15F761}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +45,10 @@ Global
 		{08F4150B-1765-4655-BFF2-6DDF102950AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08F4150B-1765-4655-BFF2-6DDF102950AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08F4150B-1765-4655-BFF2-6DDF102950AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E27EF786-F2D3-4EE0-A3A6-69F04A15F761}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E27EF786-F2D3-4EE0-A3A6-69F04A15F761}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E27EF786-F2D3-4EE0-A3A6-69F04A15F761}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E27EF786-F2D3-4EE0-A3A6-69F04A15F761}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,6 +58,7 @@ Global
 		{BFE758F2-C6EF-475B-9BCC-0B898187F3BD} = {A4B5BFC3-74C0-4575-ADCD-25C1AC89A327}
 		{27161FA6-6B5C-4FF1-808D-41CD851B2EFE} = {A4B5BFC3-74C0-4575-ADCD-25C1AC89A327}
 		{08F4150B-1765-4655-BFF2-6DDF102950AE} = {A4B5BFC3-74C0-4575-ADCD-25C1AC89A327}
+		{E27EF786-F2D3-4EE0-A3A6-69F04A15F761} = {C8CEB22E-886E-488A-8C9E-7D3EE87C146D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DB107654-F3B8-4698-AC0F-49C3A8FB0BFC}
