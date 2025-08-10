@@ -20,6 +20,8 @@ using Hangfire.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Minio;
+using NETCore.MailKit.Extensions;
+using NETCore.MailKit.Infrastructure.Internal;
 
 namespace BikeBuddy.Infrastructure;
 
@@ -30,7 +32,8 @@ public static class ServiceRegistry
         services.AddScoped<ApplicationDbContext>()
                 .AddRepositories()
                 .AddMinio(configuration)
-                .AddHangfire(configuration);
+                .AddHangfire(configuration)
+                .AddNotifications(configuration);
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtProvider, JwtProvider>();
@@ -39,6 +42,7 @@ public static class ServiceRegistry
         services.AddScoped<IEventJobSchedulerService, EventJobSchedulerService>();
 
         services.AddTransient<IGoogleService, GoogleService>();
+        services.AddTransient<IEmailService, EmailService>();
 
         return services;
     }
@@ -71,6 +75,34 @@ public static class ServiceRegistry
         });
 
         services.AddHangfireServer();
+
+        return services;
+    }
+
+    private static IServiceCollection AddNotifications(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddMailKit(configuration);
+
+        return services;
+    }
+
+    private static IServiceCollection AddMailKit(this IServiceCollection services, IConfiguration configuration)
+    {
+        var smtp = configuration.GetSection(nameof(SmtpOptions)).Get<SmtpOptions>();
+
+        services.AddMailKit(optionBuilder =>
+        {
+            optionBuilder.UseMailKit(new MailKitOptions
+            {
+                Server = smtp!.Server,
+                Port = Convert.ToInt32(smtp!.Port),
+                Account = smtp!.Account,
+                Password = smtp!.Password,
+                SenderEmail = smtp!.SenderEmail,
+                SenderName = smtp!.SenderName,
+                Security = true
+            });
+        });
 
         return services;
     }

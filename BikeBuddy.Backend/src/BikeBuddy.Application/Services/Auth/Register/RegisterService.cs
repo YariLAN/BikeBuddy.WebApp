@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.User.Auth;
 using BikeBuddy.Application.Mappers.User.Auth;
+using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 
@@ -9,13 +10,16 @@ public class RegisterService : IRegisterService
 {
     private readonly IAuthRepository _authRepository;
     private readonly IPasswordHasher _passwordHasher;
+    private IEmailService _emailService;
 
     public RegisterService(
         IAuthRepository authRepository, 
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher, 
+        IEmailService emailService)
     {
         _authRepository = authRepository;
         _passwordHasher = passwordHasher;
+        _emailService = emailService;
     }
 
     public async Task<Result<Guid, Error>> ExecuteAsync(RegisterRequest request, CancellationToken token)
@@ -33,6 +37,10 @@ public class RegisterService : IRegisterService
         var passwordHash = _passwordHasher.Generate(request.Password);
 
         var authUser = AuthMapper.ToMap(request, passwordHash);
+
+        await _emailService.SendToUserAsync(new SendEmailCommand(request.Email, 
+                "Подтвердите регистрацию на сайте",
+                "Перейдите по ссылке ниже"), token);
 
         return await _authRepository.CreateAsync(authUser, token);
     }
