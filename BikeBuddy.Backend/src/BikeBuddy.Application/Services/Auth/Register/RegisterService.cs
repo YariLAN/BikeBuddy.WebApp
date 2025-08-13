@@ -11,6 +11,7 @@ public class RegisterService : IRegisterService
     private readonly IAuthRepository _authRepository;
     private readonly IPasswordHasher _passwordHasher;
     private IEmailService _emailService;
+    private IEmailValidateService _emailValidateService;
 
     public RegisterService(
         IAuthRepository authRepository, 
@@ -22,14 +23,14 @@ public class RegisterService : IRegisterService
         _emailService = emailService;
     }
 
-    public async Task<Result<Guid, Error>> ExecuteAsync(RegisterRequest request, CancellationToken token)
+    public async Task<Result<Guid, Error>> ExecuteAsync(RegisterRequest request, CancellationToken ct)
     {
-        var user = await _authRepository.GetByEmailAsync(request.Email, token);
+        var user = await _authRepository.GetByEmailAsync(request.Email, ct);
         
         if (user is not null)
             return Error.Conflict($"Пользователь с такой почтой {request.Email} уже существует");
 
-        user = await _authRepository.GetByUsernameAsync(request.UserName, token);
+        user = await _authRepository.GetByUsernameAsync(request.UserName, ct);
 
         if (user is not null)
             return Error.Conflict($"Пользователь с ником {request.UserName} уже существует");
@@ -38,10 +39,14 @@ public class RegisterService : IRegisterService
 
         var authUser = AuthMapper.ToMap(request, passwordHash);
 
+        var token = _emailValidateService.GenerateConfirmationToken(
+            new GenerateTokenCommand(authUser.Id, authUser.Email));
+
         await _emailService.SendToUserAsync(new SendEmailCommand(request.Email, 
                 "Подтвердите регистрацию на сайте",
-                "Перейдите по ссылке ниже"), token);
+                "Перейдите по ссылке ниже",
+                $"validate/{token}"), ct);
 
-        return await _authRepository.CreateAsync(authUser, token);
+        return await _authRepository.CreateAsync(authUser, ct);
     }
 }
