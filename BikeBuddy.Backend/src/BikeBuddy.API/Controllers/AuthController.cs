@@ -4,6 +4,7 @@ using BikeBuddy.Application.Services.Auth.Login;
 using BikeBuddy.Application.Services.Auth.Logout;
 using BikeBuddy.Application.Services.Auth.Refresh;
 using BikeBuddy.Application.Services.Auth.Register;
+using BikeBuddy.Application.Services.Auth.Verify;
 using BikeBuddy.Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
 
@@ -60,6 +61,20 @@ namespace BikeBuddy.API.Controllers
             CancellationToken cancellationToken)
         {
             var result = await refreshService.ExecuteAsync(HttpContext, cancellationToken);
+
+            return result.ToResponse();
+        }
+
+        [HttpGet("verify")]
+        public async Task<ActionResult<bool>> Verify(
+            [FromServices] IEmailVerificationService emailVerificationService,
+            [FromQuery] Guid userId,
+            [FromQuery] string token,
+            CancellationToken cancellationToken)
+        {
+            var command = new EmailVerificationCommand(userId, Uri.UnescapeDataString(token), DateTimeOffset.Now);
+
+            var result = await emailVerificationService.ExecuteAsync(command, cancellationToken);
 
             return result.ToResponse();
         }

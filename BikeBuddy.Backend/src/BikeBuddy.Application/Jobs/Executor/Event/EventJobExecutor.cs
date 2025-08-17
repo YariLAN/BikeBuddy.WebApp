@@ -20,7 +20,7 @@ public class EventJobExecutor(IEventRepository eventRepository, INotificationSer
         var msg = $"До начала заезда \"{eventDb.Value.Name}\" осталось 3 часа " +
             $"({eventDb.Value.StartDate.ToString("dd MMMM yyyy 'в' HH:mm", CultureInfo.GetCultureInfo("ru-RU"))}), подтвердите его в карточке или отмените полностью.";
 
-        await notificationService.SenAsync(authorId, 
+        await notificationService.SendAsync(authorId, 
             new NotificationDto(authorId, "Подтвердите заезд", msg, $"events/{eventDb.Value.Id}", MessageType.Warning), cancellationToken);
 
         eventDb.Value.UpdateConfirmed(false);
@@ -36,7 +36,7 @@ public class EventJobExecutor(IEventRepository eventRepository, INotificationSer
 
         var authorId = eventDb.Value.CreatedBy!.Value;
 
-        await notificationService.SenAsync(authorId,
+        await notificationService.SendAsync(authorId,
             new NotificationDto(authorId, "Заезд стартовал", $"Система запустила событие \"{eventDb.Value.Name}\"",  $"events/{eventDb.Value.Id}", MessageType.Success),
             cancellationToken);
 
@@ -72,7 +72,7 @@ public class EventJobExecutor(IEventRepository eventRepository, INotificationSer
 
         var authorId = eventDb.Value.CreatedBy!.Value;
 
-        await notificationService.SenAsync(authorId,
+        await notificationService.SendAsync(authorId,
             new NotificationDto(authorId,
                 "Подтвердите завершение заезда",
                 $"Прошел час после планового завершения события \"{eventDb.Value.Name}\", подтвердите в карточке. Если заезд не завершен, подтвердить вы сможете позже.",
@@ -88,7 +88,7 @@ public class EventJobExecutor(IEventRepository eventRepository, INotificationSer
 
         if (eventDb.IsFailure) return eventDb.Error;
 
-        await notificationService.SenAsync(authorId,
+        await notificationService.SendAsync(authorId,
             new NotificationDto(authorId,
                 "Повторное напоминание о завершение заезда",
                 $"Заезд \"{eventDb.Value.Name}\" все еще ждет завершения, подтвердите его в карточке, как будет такая ситуация.",

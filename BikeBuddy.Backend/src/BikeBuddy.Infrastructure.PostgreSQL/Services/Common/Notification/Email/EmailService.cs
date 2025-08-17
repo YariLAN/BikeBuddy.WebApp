@@ -10,7 +10,7 @@ sealed class EmailService : NETCore.MailKit.Core.EmailService, IEmailService
     public async Task<bool> SendToUserAsync(SendEmailCommand command, CancellationToken cancellationToken = default)
     {
         var linkToHtml = !string.IsNullOrEmpty(command.Link) 
-            ? $"<p><a href=\"{command.Link}\">Ссылка на сайт</a></p>" 
+            ? $"<p><a href=\"https://localhost:5216/{command.Link}\">Ссылка на сайт</a></p>" 
             : "";
         
         try

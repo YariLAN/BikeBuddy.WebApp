@@ -27,6 +27,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using BikeBuddy.Application.Services.Auth.Verify;
 
 namespace BikeBuddy.Application;
 
@@ -58,19 +59,41 @@ public static class ServiceRegistry
 
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
-        // Auth
+        services.AddAuth()
+                .AddProfile()
+                .AddEvent()
+                .AddChat()
+                .AddNotification()
+                .AddJobs();
+        
+        services.AddValidatorsFromAssembly(typeof(ServiceRegistry).Assembly);
+
+        return services;
+    }
+
+    private static IServiceCollection AddAuth(this IServiceCollection services)
+    {
         services.AddScoped<IRegisterService, RegisterService>();
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IRefreshService, RefreshService>();
         services.AddScoped<ILogoutService, LogoutService>();
+        
+        services.AddScoped<IEmailVerificationService, EmailVerificationService>();
 
-        // Profile
+        return services;
+    }
+    
+    private static IServiceCollection AddProfile(this IServiceCollection services)
+    {
         services.AddScoped<IGetProfileService, GetProfileService>();
         services.AddScoped<ICreateProfileService, CreateProfileService>();
         services.AddScoped<IUpdateProfileService, UpdateProfileService>();
         services.AddScoped<IUploadAvatarService, UploadAvatarService>();
-
-        // Event
+        return services;
+    }    
+    
+    private static IServiceCollection AddEvent(this IServiceCollection services)
+    {
         services.AddScoped<ICreateEventService, CreateEventService>();
         services.AddScoped<IGetEventsService, GetEventsService>();
         services.AddScoped<IGetEventService, GetEventService>();
@@ -78,23 +101,29 @@ public static class ServiceRegistry
         services.AddScoped<ICancelEventService, CancelEventService>();
         services.AddScoped<IUpdateEventService, UpdateEventService>();
         services.AddScoped<IConfirmEventService, ConfirmEventService>();
-
-        // Chat
+        return services;
+    }
+    
+    private static IServiceCollection AddChat(this IServiceCollection services)
+    {
         services.AddScoped<IJoinChatService, JoinChatService>();
         services.AddScoped<ILeaveChatService, LeaveChatService>();
         services.AddScoped<ISendMessageService, SendMessageService>();
         services.AddScoped<IGetChatMessagesService, GetChatMessagesService>();
-
-        // ChatManager
+        
         services.AddScoped<IStateManagerService, StateManagerService>();
-
-        // Notification
+        return services;
+    }
+    
+    private static IServiceCollection AddNotification(this IServiceCollection services)
+    {
         services.AddScoped<INotificationService, NotificationService>();
-
-        // Jobs
+        return services;
+    }
+    
+    private static IServiceCollection AddJobs(this IServiceCollection services)
+    {
         services.AddScoped<IEventJobExecutor,  EventJobExecutor>();
-
-        services.AddValidatorsFromAssembly(typeof(ServiceRegistry).Assembly);
 
         return services;
     }

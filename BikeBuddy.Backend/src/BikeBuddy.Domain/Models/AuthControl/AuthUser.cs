@@ -6,7 +6,7 @@ using BikeBuddy.Domain.Shared;
 
 namespace BikeBuddy.Domain.Models.AuthControl;
 
-public class AuthUser
+public sealed class AuthUser
 {
     public Guid Id { get; private set; }
 
@@ -17,6 +17,10 @@ public class AuthUser
     public string UserName { get; private set; } = string.Empty;
 
     public bool IsVerified { get; private set; } = false;
+    
+    public string? ConfirmationToken { get; private set; }
+    
+    public DateTimeOffset? ConfirmationExpiresAt { get; private set; }
 
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
@@ -47,6 +51,18 @@ public class AuthUser
         LastLoginAt = lastLogin;
     }
 
+    public void UpdateLastLoginAt()
+    {
+        LastLoginAt = DateTime.UtcNow;
+    }
+
+    public void AddOrUpdateConfirmationData(bool isVerified, string? token = null, DateTimeOffset? expiresAt = null)
+    {
+        IsVerified = isVerified;
+        ConfirmationToken = token;
+        ConfirmationExpiresAt = expiresAt;
+    }
+    
     public static AuthUser Create(
         Guid id, 
         string email, 
@@ -57,10 +73,5 @@ public class AuthUser
         DateTime? lastLogin = null)
     {
         return new AuthUser(id, email, username, password, isVerified, createdAt, lastLogin);
-    }
-
-    public void UpdateLastLoginAt()
-    {
-        LastLoginAt = DateTime.UtcNow;
     }
 }

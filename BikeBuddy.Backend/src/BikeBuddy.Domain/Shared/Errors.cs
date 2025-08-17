@@ -105,4 +105,17 @@ public class Errors
             return Error.Conflict($"Author of the chat ({forId}) can't leave a chat");
         }
     }
+
+    public static class Auth
+    {
+        public static Error NotFoundByToken()
+        {
+            return Error.NotFound($"Record not found by token");
+        }
+        
+        public static Error IsVerified(Guid userId)
+        {
+            return Error.Validation($"User by {userId} is verified");
+        }
+    }
 }

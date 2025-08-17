@@ -1,6 +1,9 @@
-﻿using BikeBuddy.Application.DtoModels.User.Auth;
+﻿using System.Globalization;
+using BikeBuddy.Application.DtoModels.User.Auth;
 using BikeBuddy.Application.Mappers.User.Auth;
+using BikeBuddy.Application.Services.Auth.Verify;
 using BikeBuddy.Application.Services.Common;
+
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 
@@ -11,16 +14,18 @@ public class RegisterService : IRegisterService
     private readonly IAuthRepository _authRepository;
     private readonly IPasswordHasher _passwordHasher;
     private IEmailService _emailService;
-    private IEmailValidateService _emailValidateService;
+    private IEmailVerificationService _emailVerificationService;
 
     public RegisterService(
         IAuthRepository authRepository, 
         IPasswordHasher passwordHasher, 
-        IEmailService emailService)
+        IEmailService emailService, 
+        IEmailVerificationService emailValidateService)
     {
         _authRepository = authRepository;
         _passwordHasher = passwordHasher;
         _emailService = emailService;
+        _emailVerificationService = emailValidateService;
     }
 
     public async Task<Result<Guid, Error>> ExecuteAsync(RegisterRequest request, CancellationToken ct)
@@ -39,13 +44,17 @@ public class RegisterService : IRegisterService
 
         var authUser = AuthMapper.ToMap(request, passwordHash);
 
-        var token = _emailValidateService.GenerateConfirmationToken(
+        var token = _emailVerificationService.GenerateConfirmationToken(
             new GenerateTokenCommand(authUser.Id, authUser.Email));
+        
+        authUser.AddOrUpdateConfirmationData(false, token.Token, token.ExpiresAt);
 
-        await _emailService.SendToUserAsync(new SendEmailCommand(request.Email, 
+        var encodedToken = Uri.EscapeDataString(token.Token);
+        
+        await _emailService.SendToUserAsync(new SendEmailCommand(request.Email,
                 "Подтвердите регистрацию на сайте",
                 "Перейдите по ссылке ниже",
-                $"validate/{token}"), ct);
+                $"auth/verify?userId={authUser.Id}&token={encodedToken}"), ct);
 
         return await _authRepository.CreateAsync(authUser, ct);
     }

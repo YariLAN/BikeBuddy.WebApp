@@ -1,5 +1,7 @@
 ﻿using BikeBuddy.Application.Services.Auth;
 using BikeBuddy.Domain.Models.AuthControl;
+using BikeBuddy.Domain.Shared;
+using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace BikeBuddy.Infrastructure.Repositories.Auth;
@@ -74,6 +76,29 @@ public class AuthRepository(ApplicationDbContext context) : IAuthRepository
         {
             Console.WriteLine(ex.Message);
             return false;
+        }
+    }
+
+    public Task<AuthUser?> GetByConfirmationTokenOrDefaultAsync(
+        string token, 
+        CancellationToken cancellationToken)
+    {
+        var user = context.Users.FirstOrDefaultAsync(au => au.ConfirmationToken == token,
+            cancellationToken: cancellationToken);
+
+        return user;
+    }
+
+    public async Task<Result<bool, Error>> UpdateAsync(AuthUser user, CancellationToken cancellationToken)
+    {
+        try
+        {
+            context.Users.Update(user);
+            await context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (Exception ex) {
+            return Error.Failure($"Ошибка обновления пользователя: {ex.Message}");
         }
     }
 }

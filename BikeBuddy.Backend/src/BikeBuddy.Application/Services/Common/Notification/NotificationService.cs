@@ -12,7 +12,7 @@ public class NotificationService(
     IAuthRepository authRepository,
     IRealTimeNotifier realTimeNotifier) : INotificationService
 {
-    public async Task<Result<Task, Error>> SenAsync(Guid recipientId, NotificationDto notification, CancellationToken cancellationToken)
+    public async Task<Result<Task, Error>> SendAsync(Guid recipientId, NotificationDto notification, CancellationToken cancellationToken)
     {
         var user = await authRepository.GetAsync(recipientId, cancellationToken);
 

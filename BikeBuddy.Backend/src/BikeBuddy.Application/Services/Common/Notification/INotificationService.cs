@@ -7,7 +7,7 @@ namespace BikeBuddy.Application.Services.Common.Notification;
 
 public interface INotificationService
 {
-    Task<Result<Task, Error>> SenAsync(Guid recipientId, NotificationDto notification, CancellationToken cancellationToken);
+    Task<Result<Task, Error>> SendAsync(Guid recipientId, NotificationDto notification, CancellationToken cancellationToken);
 
     Task<Result<PageData<NotificationResponse>, Error>> GetByUserAsync(Guid recipientId, CancellationToken cancellationToken);
 
