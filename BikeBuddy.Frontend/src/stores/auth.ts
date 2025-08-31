@@ -1,4 +1,4 @@
-import { apiService } from '@/core/services/ApiService';
+import { ApiResponse, apiService } from '@/core/services/ApiService';
 import JwtService from '@/core/services/JwtService';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware'
@@ -8,6 +8,7 @@ interface AuthState {
   login: (login: string, password: string) => void;
   logout: () => void;
   register: (email: string, username: string, password: string) => void;
+  verify: (userId : string, token: string) => Promise<ApiResponse<boolean>>
 }
 
 const useAuthStore = create(
@@ -42,6 +43,14 @@ const useAuthStore = create(
         try {
           const response = await apiService.post<AuthResponse>('/auth/register', { email, username, password }, true);
           console.log("Register: ", response.data)
+        } catch (err: any) {
+          throw new Error(err.message)
+        }
+      },
+
+      verify: async (userId, token) => {
+        try {
+          return await apiService.get<boolean>(`/auth/verify?userId=${userId}&token=${token}`);
         } catch (err: any) {
           throw new Error(err.message)
         }

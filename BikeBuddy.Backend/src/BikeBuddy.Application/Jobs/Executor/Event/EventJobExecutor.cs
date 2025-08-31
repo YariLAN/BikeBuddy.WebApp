@@ -18,10 +18,12 @@ public class EventJobExecutor(IEventRepository eventRepository, INotificationSer
         if (eventDb.IsFailure) return eventDb.Error;
 
         var msg = $"До начала заезда \"{eventDb.Value.Name}\" осталось 3 часа " +
-            $"({eventDb.Value.StartDate.ToString("dd MMMM yyyy 'в' HH:mm", CultureInfo.GetCultureInfo("ru-RU"))}), подтвердите его в карточке или отмените полностью.";
+                  $"({eventDb.Value.StartDate.ToString("dd MMMM yyyy 'в' HH:mm", CultureInfo.GetCultureInfo("ru-RU"))}), " +
+                  $"подтвердите его в карточке или отмените полностью.";
 
         await notificationService.SendAsync(authorId, 
-            new NotificationDto(authorId, "Подтвердите заезд", msg, $"events/{eventDb.Value.Id}", MessageType.Warning), cancellationToken);
+            new NotificationDto(authorId, "Подтвердите заезд", msg, 
+                $"events/{eventDb.Value.Id}", MessageType.Warning), cancellationToken);
 
         eventDb.Value.UpdateConfirmed(false);
 

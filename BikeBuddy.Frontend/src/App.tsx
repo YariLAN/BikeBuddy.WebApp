@@ -17,6 +17,7 @@ import { items } from './components/my/menu-items';
 import CreateEventPage from './pages/events/create-event-page';
 import EventDetailsPage from './pages/events/event-details-page';
 import EventChatPage from './pages/events/event-chat-page';
+import EmailVerificationPage from './pages/auth/email-verification-page';
 
 export default function App() {
 
@@ -74,6 +75,7 @@ export default function App() {
                 path="/profile/:userId" 
                 element={<ProtectedProfileRoute />} 
               />
+              <Route path="/auth/verify" element={<EmailVerificationPage />} />
               <Route 
                 path={items[0].url}
                 element={authStore.isAuthenticated ? <EventsPage /> : <Navigate to="/" replace />} 
