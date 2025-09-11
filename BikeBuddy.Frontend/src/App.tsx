@@ -10,7 +10,7 @@ import { useIsMobile } from './hooks/use-mobile';
 import useAuthStore from './stores/auth';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import ProfilePage from './pages/profile/profile-page';
-import EventsPage from './pages/events/event-page'
+import EventsPage, { PageMode } from './pages/events/event-page'
 
 import JwtService from './core/services/JwtService';
 import { items } from './components/my/menu-items';
@@ -79,6 +79,10 @@ export default function App() {
               <Route 
                 path={items[0].url}
                 element={authStore.isAuthenticated ? <EventsPage /> : <Navigate to="/" replace />} 
+              />
+              <Route 
+                path={items[1].url}
+                element={authStore.isAuthenticated ? <EventsPage mode={PageMode.History} /> : <Navigate to="/" replace />} 
               />
               <Route 
                 path={`${items[0].url}/create`}

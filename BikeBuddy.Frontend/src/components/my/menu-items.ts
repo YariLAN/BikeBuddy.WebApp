@@ -1,7 +1,8 @@
-import { Bike, Mails,  PersonStandingIcon, Search, Settings, Ticket, Users, } from "lucide-react"
+import { Bike, Mails, Search, Settings, Ticket, Users, } from "lucide-react"
    
 export const names = {
     Events: "События",
+    History: "История поездок",
     Setting: "Настройки"
 }
 
@@ -13,8 +14,8 @@ export const items = [
     icon: Ticket,
   },
   {
-    title: "История поездок",
-    url: "#",
+    title: names.History,
+    url: "/events/history",
     icon: Bike,
   },
   {
