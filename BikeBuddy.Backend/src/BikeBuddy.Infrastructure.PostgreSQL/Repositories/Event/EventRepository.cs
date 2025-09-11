@@ -48,6 +48,8 @@ public class EventRepository(ApplicationDbContext context) : IEventRepository
         {
             IQueryable<EventModel> events = context.Events
                 .Include(e => e.User)
+                .Include(x => x.Chat)
+                    .ThenInclude(c => c.Members)
                 .AsNoTracking()
                 .ApplyFilters(eventFilter.Filter);
 

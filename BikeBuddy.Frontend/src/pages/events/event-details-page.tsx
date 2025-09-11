@@ -96,6 +96,8 @@ export default function EventDetailsPage() {
 
   useEffect(() => {
     fetchEventDetails()
+
+    return () => {}
   }, [eventId, eventStore])
 
   const formatDate = (dateString: Date) => {

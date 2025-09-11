@@ -139,6 +139,7 @@ export interface EventResponseDetails {
 export interface EventFilterDto {
     countMembers : number,
     startAddress : string,
+    participantIds? : string[]
 }
 
 export interface UpdateEventRequest {

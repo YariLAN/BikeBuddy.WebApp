@@ -2,4 +2,5 @@
 
 public record EventFilterDto(
     int CountMembers,
-    string StartAddress);
+    string StartAddress,
+    List<string> ParticipantIds);

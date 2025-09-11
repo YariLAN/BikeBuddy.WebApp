@@ -19,7 +19,7 @@ export default function EmailVerifycationPage() {
 
     const authStore = useAuthStore();
 
-    const verifyEmail = async (signal? : AbortSignal) => {
+    const verifyEmail = async () => {
         const userId = searchParams.get('userId');
         const token = searchParams.get('token');
 
@@ -43,11 +43,7 @@ export default function EmailVerifycationPage() {
     }
 
     useEffect(() => {
-        const controller = new AbortController();
-
-        verifyEmail(controller.signal);
-
-        return () => controller.abort()
+        verifyEmail();
     }, [])
 
     const handleGoToLogin = () => {

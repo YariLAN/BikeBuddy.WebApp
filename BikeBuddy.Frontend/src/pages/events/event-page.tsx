@@ -16,6 +16,7 @@ import { Slider } from "@/components/ui/slider"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input"
+import JwtService from "@/core/services/JwtService"
 
 const bikeTypes = [
   { value: BicycleType.Default,  label: 'Городской' },
@@ -60,7 +61,18 @@ const ActiveFilterTag = ({ label, value, onRemove, icon }: ActiveFilterTagProps)
   </div>
 );
 
-export default function EventsPage() {
+export enum PageMode {
+  NewEvent,
+  History
+}
+
+interface EventsPageProps {
+  mode?: PageMode
+}
+
+export default function EventsPage({ mode = PageMode.NewEvent } : EventsPageProps) {
+  const decodedToken = JwtService.decodeToken();
+
   const navigate = useNavigate()
   const [isCompactView, setIsCompactView] = useState(false)
   const [events, setEvents] = useState<Array<EventListResponse>>([])
@@ -135,7 +147,8 @@ export default function EventsPage() {
         limit : limit,
         filter: { 
           countMembers: participantsFilter,
-          startAddress: startAddressFilter 
+          startAddress: startAddressFilter,
+          participantIds: (mode == PageMode.History) ? [decodedToken!.nameId] : []
         }
       }
 
@@ -157,7 +170,7 @@ export default function EventsPage() {
 
   useEffect(() => {
     getEvents()
-  }, [offset, participantsFilter, startAddressFilter])
+  }, [offset, participantsFilter, startAddressFilter, mode])
 
   const formatDate = (dateString: Date) => {
     const date = new Date(dateString)
@@ -193,7 +206,9 @@ export default function EventsPage() {
   return (
     <div className="px-7 sm:px-7 md:px-20 lg:px-16 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Велособытия</h1>
+        <h1 className="text-3xl font-bold">
+          {mode == PageMode.History ? "История поездок" : "Велособытия" }
+        </h1>
         <div className="flex items-center gap-4">
 
           {/* Кнопка фильтров */}
@@ -351,7 +366,9 @@ export default function EventsPage() {
       ) : events.length === 0 ? (
         <div className="flex flex-col justify-center items-center py-20">
           <p className="text-lg mb-4">
-            {isFilterActive ? "Нет событий, соответствующих выбранным фильтрам" : "Пока нет созданных событий"}
+            {isFilterActive ? "Нет событий, соответствующих выбранным фильтрам" :
+              mode === PageMode.History ? "В истории нет ни одной поездки" : "Пока нет созданных событий"
+            }
           </p>
 
           {!isFilterActive ? (

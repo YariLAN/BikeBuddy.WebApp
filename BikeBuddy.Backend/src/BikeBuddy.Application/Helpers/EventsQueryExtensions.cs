@@ -17,6 +17,12 @@ public static class EventsQueryExtensions
             if (!string.IsNullOrEmpty(filter.StartAddress)) {
                 query = query.Where(e => e.StartAddress.Contains(filter.StartAddress));
             }
+
+            if (filter.ParticipantIds.Count > 0)
+            {
+                query = query.Where(e => e.Chat.Members.Any(
+                    m => filter.ParticipantIds.Contains(m.UserId.ToString())));
+            } 
         }
 
         return query;
