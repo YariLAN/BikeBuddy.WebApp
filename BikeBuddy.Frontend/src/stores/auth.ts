@@ -3,18 +3,30 @@ import JwtService from '@/core/services/JwtService';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware'
 
-interface AuthState {
-  isAuthenticated: boolean;
+
+interface IActionState {
   login: (login: string, password: string) => void;
   logout: () => void;
   register: (email: string, username: string, password: string) => void;
-  verify: (userId : string, token: string) => Promise<ApiResponse<boolean>>
+  verify: (userId : string | null, token: string | null) => void
 }
+
+interface IInitialState {
+  isAuthenticated: boolean,
+  isVerified: boolean,
+  isLoading: boolean
+  error: string
+}
+
+interface AuthState extends IInitialState, IActionState {}
 
 const useAuthStore = create(
   persist<AuthState>(
     (set) => ({
       isAuthenticated: false,
+      isVerified: false,
+      isLoading: false,
+      error: '',
       login: async (login, password) => {
         try {
           const response = await apiService.post<AuthResponse>('/auth/login', { login, password }, true); 
@@ -48,11 +60,29 @@ const useAuthStore = create(
         }
       },
 
-      verify: async (userId, token) => {
+      verify: async (userId, token) => {     
+
+        if (!userId || !token) {
+          set({ error: "Неверная ссылка"});
+          return Promise.reject("Неверная ссылка")
+        }
+
+        set({ isLoading: true, isVerified: false, error: '' })
+
         try {
-          return await apiService.get<boolean>(`/auth/verify?userId=${userId}&token=${token}`);
+          const result = await apiService.get<boolean>(`/auth/verify?userId=${userId}&token=${token}`);
+
+          if (result.error) {
+            set({ error: result.error })
+          }
+          else if (result.data) {
+            set({ isVerified: result.data })
+          }
+          
         } catch (err: any) {
           throw new Error(err.message)
+        } finally {
+          set({ isLoading: false })
         }
       }
     }),
@@ -72,4 +102,8 @@ export type LoginRequest = {
     login: string;
     password: string;
 }
+
+export const useEmailVerify = (userId: string | null, token: string | null) => useAuthStore.getState().verify(userId, token);
+export const useIsLoading = () => useAuthStore(state => state.isLoading);
+export const useShowError = () => useAuthStore(state => state.error);
 
