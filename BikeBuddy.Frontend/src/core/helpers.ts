@@ -132,6 +132,43 @@ export function toastAlert(text : string, title: string, type: SweetAlertIcon, p
   });
 }
 
+export function toastWithAction(
+  text : string, 
+  title: string, 
+  type: SweetAlertIcon, 
+  position: SweetAlertPosition = "top",
+  confirmButtonText : string,
+  cancelButtonText : string) {
+
+  const Toast = Swal.mixin({
+    position: position,
+    timer: 5000,
+    toast: true,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    },
+    width: 400,
+  })
+
+  return Toast.fire({
+    title: title || "Сообщение",
+    html: text,
+    icon: type,
+    buttonsStyling: true,
+    confirmButtonText: confirmButtonText,
+    cancelButtonText: cancelButtonText,
+    showConfirmButton: !!confirmButtonText,
+    showCancelButton: !!cancelButtonText,
+    customClass: {
+      confirmButton: "btn btn-danger",
+      popup: "swal-alert-info"
+    },
+    heightAuto: true
+  });
+}
+
   export default {
     errorText,
     alertError,

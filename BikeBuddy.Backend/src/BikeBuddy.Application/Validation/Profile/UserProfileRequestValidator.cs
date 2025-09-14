@@ -19,13 +19,11 @@ public class UserProfileRequestValidator : AbstractValidator<UserProfileRequest>
             .MaximumLength(Constants.HIGH_TEXT_LENGTH)
             .WithError(Errors.General.ValueIsInvalidLength("Name"))
             .NotEmpty()
-            .WithError(Errors.General.ValueIsEmpty("Name"));          
-        
+            .WithError(Errors.General.ValueIsEmpty("Name"));
+
         RuleFor(p => p.MiddleName)
             .MaximumLength(Constants.HIGH_TEXT_LENGTH)
-            .WithError(Errors.General.ValueIsInvalidLength("MiddleName"))
-            .NotEmpty()
-            .WithError(Errors.General.ValueIsEmpty("Name"));
+            .WithError(Errors.General.ValueIsInvalidLength("MiddleName"));
 
         RuleFor(p => p.Address).MustBeValueObject(Address.Create);
     }

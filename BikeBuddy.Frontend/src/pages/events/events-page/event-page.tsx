@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils" 
-import { BicycleType, EventFilterDto, EventListResponse, EventStatus, EventType } from "@/core/models/event/event-models"
+import { BicycleType, bikeTypes, EventFilterDto, EventListResponse, EventStatus, EventType, eventTypes } from "@/core/models/event/event-models"
 import { SearchFilterDto } from "@/stores/search_types"
 import useEventStore from "@/stores/event"
-import { alertExpectedError } from "@/core/helpers"
+import { alertExpectedError, alertWithAction, toastWithAction } from "@/core/helpers"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { Separator } from "@/components/ui/separator"
@@ -17,49 +17,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input"
 import JwtService from "@/core/services/JwtService"
-
-const bikeTypes = [
-  { value: BicycleType.Default,  label: 'Городской' },
-  { value: BicycleType.Road,     label: 'Шоссейный' },
-  { value: BicycleType.Mountain, label: 'Горный' },
-  { value: BicycleType.BMX,      label: 'BMX' },
-  { value: BicycleType.Any,      label: 'Любой' },
-]
-
-const eventTypes = [
-  { value: EventType.Solo,      label: 'Индивидуальный' },
-  { value: EventType.Group,     label: 'Групповой' },
-  { value: EventType.Leisure,   label: 'Прогулка' },
-  { value: EventType.Race,      label: 'Веломарафон' },
-  { value: EventType.Challenge, label: 'Вызов' },
-  { value: EventType.Training,  label: 'Тренировка'},
-  { value: EventType.Tour,      label: 'Путешествие'}
-]
-
-interface ActiveFilterTagProps {
-  label: string;
-  value: string | number;
-  onRemove: () => void;
-  icon?: React.ReactNode;
-}
-
-const ActiveFilterTag = ({ label, value, onRemove, icon }: ActiveFilterTagProps) => (
-  <div className="flex items-center bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-100 px-2 py-1 rounded-md mr-2 mb-2">
-    {icon && <span className="mr-1">{icon}</span>}
-    <span className="text-xs font-medium">
-      {label}: {value}
-    </span>
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={onRemove}
-      className="h-5 w-5 p-0 ml-1 text-green-800 dark:text-green-100 hover:bg-green-200 dark:hover:bg-green-800/30"
-    >
-      <X className="h-3 w-3" />
-      <span className="sr-only">Очистить фильтр</span>
-    </Button>
-  </div>
-);
+import ActiveFilterTag from "@/components/ui/active-filter-tag"
+import { useIsProfileFilled } from "@/stores/profile"
 
 export enum PageMode {
   NewEvent,
@@ -68,6 +27,23 @@ export enum PageMode {
 
 interface EventsPageProps {
   mode?: PageMode
+}
+
+const getStatusInfo = (status: EventStatus) => {
+  switch (status) {
+    case EventStatus.Opened:
+      return { label: "Открыт", color: "bg-green-500 hover:bg-green-600" }
+    case EventStatus.Closed:
+      return { label: "Закрыт для присоединения", color: "bg-yellow-500 hover:bg-yellow-600" }
+    case EventStatus.Started:
+      return { label: "Начат", color : "bg-cyan-500 hover:bg-cyan-600"}
+    case EventStatus.Completed:
+      return { label: "Завершен", color: "bg-blue-500 hover:bg-blue-600" }
+    case EventStatus.Canceled:
+      return { label: "Отменен", color: "bg-red-500 hover:bg-red-600" }
+    default:
+      return { label: "Неизвестно", color: "bg-gray-500 hover:bg-gray-600" }
+  }
 }
 
 export default function EventsPage({ mode = PageMode.NewEvent } : EventsPageProps) {
@@ -93,6 +69,29 @@ export default function EventsPage({ mode = PageMode.NewEvent } : EventsPageProp
   const [offset, setOffset] = useState(0)
   const limit = 8
 
+  const isProfileFilled = useIsProfileFilled()
+  const onCreateEvent = async () => {
+    if (!isProfileFilled) {
+      let userId = JwtService.decodeToken()?.nameId
+
+      const toast = await toastWithAction(
+        "Пожалуйста, заполните профиль", 
+        "Предупреждение", 
+        "warning",
+        "top",
+        "Перейти",
+        "Закрыть"
+      )
+
+      if (toast.isConfirmed) {
+        navigate(`/profile/${userId}`)
+      }
+    }
+    else {
+      navigate("/events/create")
+    }
+  }
+
   const totalPages = Math.ceil(totalCountEvents / limit)
   const currentPage = Math.floor(offset / limit) + 1
 
@@ -116,23 +115,6 @@ export default function EventsPage({ mode = PageMode.NewEvent } : EventsPageProp
   const setEventType = (eventType: EventType): string => {
     const type = eventTypes.find((t) => t.value === eventType)
     return type ? type.label : "Неизвестный"
-  }
-
-  const getStatusInfo = (status: EventStatus) => {
-    switch (status) {
-      case EventStatus.Opened:
-        return { label: "Открыт", color: "bg-green-500 hover:bg-green-600" }
-      case EventStatus.Closed:
-        return { label: "Закрыт для присоединения", color: "bg-yellow-500 hover:bg-yellow-600" }
-      case EventStatus.Started:
-        return { label: "Начат", color : "bg-cyan-500 hover:bg-cyan-600"}
-      case EventStatus.Completed:
-        return { label: "Завершен", color: "bg-blue-500 hover:bg-blue-600" }
-      case EventStatus.Canceled:
-        return { label: "Отменен", color: "bg-red-500 hover:bg-red-600" }
-      default:
-        return { label: "Неизвестно", color: "bg-gray-500 hover:bg-gray-600" }
-    }
   }
 
   const eventStore = useEventStore()
@@ -306,7 +288,7 @@ export default function EventsPage({ mode = PageMode.NewEvent } : EventsPageProp
 
           {/* Кнопка создания события */}
           <Button 
-            onClick={() => navigate('/events/create')}
+            onClick={async () => await onCreateEvent()}
             size="lg"
           >
             <Plus className="mr-2 h-5 w-5" />
@@ -372,7 +354,7 @@ export default function EventsPage({ mode = PageMode.NewEvent } : EventsPageProp
           </p>
 
           {!isFilterActive ? (
-            <Button onClick={() => navigate("/events/create")}>
+            <Button onClick={async () => await onCreateEvent()}>
               <Plus className="mr-2 h-5 w-5" />
               Создать первое событие
             </Button>

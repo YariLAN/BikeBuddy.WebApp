@@ -3,9 +3,9 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import useAuthStore, { useEmailVerify, useIsLoading, useShowError } from "@/stores/auth";
+import useAuthStore, { useEmailVerify } from "@/stores/auth";
 import {  CheckCircle, Mail, XCircle } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const useVerifyEmail = () => {

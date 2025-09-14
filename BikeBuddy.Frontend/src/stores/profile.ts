@@ -95,4 +95,8 @@ const useProfileStore = create(
         }
     )
 )
+
 export default useProfileStore
+
+// селекторы
+export const useIsProfileFilled = () => useProfileStore(state => state.isProfileFilled);
