@@ -140,7 +140,7 @@ export default function EventsPage({ mode = PageMode.NewEvent } : EventsPageProp
         setEvents(result.data.body)
         setTotalCountEvents(result.data.total)
       }
-      else {
+      else if (result.error) {
         alertExpectedError(result.error!) 
       }
     } catch (error : any) {

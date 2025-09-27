@@ -45,8 +45,6 @@ public class RefreshService : IRefreshService
         if (dbRefreshToken.ExpiresAt < DateTime.UtcNow)
         {
             httpContext.Response.Cookies.Delete("refresh");
-
-            return Error.UnAuthorized("Refresh Token expires");
         }
 
         var principal = _jwtProvider.GetPrincipalFromAccessToken(accessToken);

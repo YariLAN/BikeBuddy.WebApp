@@ -41,6 +41,7 @@ export class ApiService {
                         JwtService.destroyToken();
                         useAuthStore.setState({isAuthenticated: false})
                         window.location.href = '/';
+                        return;
                     }
 
                     if (this.isRefreshing) {

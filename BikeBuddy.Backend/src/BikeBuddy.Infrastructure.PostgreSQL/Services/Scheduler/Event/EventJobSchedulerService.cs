@@ -14,9 +14,10 @@ public class EventJobSchedulerService(JobStorage _jobStorage) : IEventJobSchedul
         var notifyEnd = end.AddHours(1);
         var repeatNotifyEnd = notifyEnd.AddHours(4);
 
-        if (notifyStart > DateTime.Now)
+        var delay = notifyStart - DateTime.Now;
+        if (DateTime.Now <= start)
             BackgroundJob.Schedule<IEventJobExecutor>(x =>
-                x.NotifyAboutStartConfirmation(eventId, authorId, cancellationToken), notifyStart - DateTime.Now);
+                x.NotifyAboutStartConfirmation(eventId, authorId, cancellationToken), delay > TimeSpan.Zero ? delay : TimeSpan.Zero);
 
         if (start > DateTime.Now)
             BackgroundJob.Schedule<IEventJobExecutor>(x =>

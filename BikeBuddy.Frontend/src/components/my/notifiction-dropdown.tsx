@@ -30,7 +30,13 @@ export function NotificationDropdown() {
 
   const notificationConnectionRef = useRef<signalR.HubConnection | null>(null)
   const [hasUnread, setHasNotifications] = useState(false)
+
   const [notifications, setNotifications] = useState<NotificationResponse[]>([])
+  const notificationRef = useRef<NotificationResponse[]>(notifications)
+
+  useEffect(() => {
+    setHasNotifications(!(notifications.every(n => n.isRead)))
+  }, [notifications])
 
   const navigate = useNavigate()
 
@@ -62,7 +68,6 @@ export function NotificationDropdown() {
         console.log(notification);
 
         setNotifications( (prev) => [ notification, ...prev])
-        setHasNotifications(true)
       })
 
       notificationConnectionRef.current
@@ -110,7 +115,6 @@ export function NotificationDropdown() {
        
       if (result.data) {
         setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
-        setHasNotifications(false)
       }
     } catch (error : any) {
       alertExpectedError(error.message)
@@ -137,8 +141,6 @@ export function NotificationDropdown() {
        
       if (result.data) {
         setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: result.data! } : n)))
-        const res = notifications.every(n => n.isRead)
-        setHasNotifications(!res)
       }
     } catch (error : any) {
       alertExpectedError(error.message)
@@ -188,7 +190,6 @@ export function NotificationDropdown() {
 
           if (result.data) {
             setNotifications(result.data.body)
-            setHasNotifications(result.data.body.some((n) => !n.isRead))
           } else if (result.error) {
             alertExpectedError(result.error)
           }
@@ -214,7 +215,7 @@ export function NotificationDropdown() {
       <DropdownMenuContent align="end" className="w-[470px]">
         <DropdownMenuLabel className="flex justify-between items-center">
           <span>Уведомления</span>
-          {notifications.length > 0 && hasUnread && (
+          {notificationRef.current.length > 0 && hasUnread && (
             <button
               onClick={async (e) => {
                 e.preventDefault()

@@ -29,11 +29,6 @@ export const items = [
     icon: Users,
   },
   {
-    title: "Поиск",
-    url: "#",
-    icon: Search,
-  },
-  {
     title: names.Setting,
     url: "#",
     icon: Settings,
