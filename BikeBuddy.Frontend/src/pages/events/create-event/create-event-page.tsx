@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { ValidationService } from "@/core/services/ValidationService"
 import { eventSchema, type EventFormData } from "@/core/validations/event"
 import { Button } from "@/components/ui/button"
@@ -27,7 +27,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
 import { bikeTypes, CreateEventRequest, EventStatus, eventTypes, UpdateEventRequest } from "@/core/models/event/event-models"
 import useEventStore from "@/stores/event"
-import { alertExpectedError, alertInfo } from "@/core/helpers"
+import { alertExpectedError, alertInfo, toastAlert } from "@/core/helpers"
 import JwtService from "@/core/services/JwtService"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
@@ -37,6 +37,8 @@ import { ApiResponse } from "@/core/services/ApiService"
 const validationService = new ValidationService(eventSchema)
 
 export default function CreateEventPage() {
+  const eventStore = useEventStore()
+
   const { eventId } = useParams<{ eventId: string}>()
   const isEditMode = !!eventId
   
@@ -66,7 +68,9 @@ export default function CreateEventPage() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  const eventStore = useEventStore()
+  const [uploadedImages, setUploadedImages] = useState<File[]>([])
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([])
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([])
   
   useEffect(() => {
     if (isEditMode && eventId) {
@@ -93,6 +97,12 @@ export default function CreateEventPage() {
       }
     }
   }, [eventId, isEditMode])
+
+  useEffect(() => {
+    return () => {
+      imagePreviewUrls.forEach((url) => URL.revokeObjectURL(url))
+    }
+  }, [])
 
   const formattedDate = (date : Date) => {
     const dateCopy = new Date(date)
@@ -168,6 +178,59 @@ export default function CreateEventPage() {
       setIsSubmitting(false)
     }
   }
+
+  const handleImageSelect = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (!file?.type.startsWith('image/')) {
+      toastAlert('Выберите файл изображения', '', 'error', 'bottom-right')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toastAlert('Размер изображения не должен превышать 5 МБ', '', 'error', 'bottom-right')
+      return
+    }
+
+    const previewUrl = URL.createObjectURL(file)
+
+    const newImages = [...uploadedImages]
+    const newPreviews = [...imagePreviewUrls]
+    
+    if (newPreviews[index]) {
+      URL.revokeObjectURL(newPreviews[index])
+    }
+
+    newImages[index] = file
+    newPreviews[index] = previewUrl
+
+    setUploadedImages(newImages)
+    setImagePreviewUrls(newPreviews)
+  }
+
+  const handleRemoveImage = (index: number) => {
+      const newImages = [...uploadedImages]
+      const newPreviews = [...imagePreviewUrls]
+
+      if (newPreviews[index]) {
+        URL.revokeObjectURL(newPreviews[index])
+      }
+
+      newImages.splice(index, 1)
+      newPreviews.splice(index, 1)
+
+      setUploadedImages(newImages)
+      setImagePreviewUrls(newPreviews)
+
+      if (fileInputRefs.current[index]) {
+        fileInputRefs.current[index]!.value = ""
+      }
+  }
+
+  const handleImageClick = (index: number) => {
+    fileInputRefs.current[index]?.click()
+  }
+
 
   const renderFormField = (
     name: string,
@@ -484,21 +547,58 @@ export default function CreateEventPage() {
             Дополнительные фотографии
           </label>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[...Array(5)].map((_, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "aspect-square rounded-lg border-2 border-dashed",
-                  "flex items-center justify-center",
-                  "cursor-pointer hover:border-primary/50 transition-colors",
-                  // index < (formData.images?.length || 0)
-                  //   ? "border-primary bg-primary/10"
-                  //   : "border-muted"
-                )}
-              >
-                <Upload className="h-6 w-6 text-muted-foreground" />
-              </div>
-            ))}
+            {[...Array(5)].map((_, index) => {
+              
+              const hasImage = imagePreviewUrls[index]
+
+              return (
+                <div
+                    key={index}
+                    className={cn(
+                      "aspect-square rounded-lg border-2 relative overflow-hidden group",
+                      hasImage 
+                        ? "border-primary bg-primary/10"
+                        : "border-dashed border-muted hover:border-primary/50 cursor-pointer transition-colors",
+                    )}
+                    onClick={() => !hasImage && handleImageClick(index)}
+                    >
+                    <input
+                        ref={(el) => (fileInputRefs.current[index] = el)}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleImageSelect(index, e)}
+                    />
+
+                    {hasImage ? (
+                      <>
+                          <img
+                              src={imagePreviewUrls[index] || "/placeholder.svg"}
+                              alt={`Uploaded ${index + 1}`}
+                              className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleRemoveImage(index)
+                                }}
+                              >
+                                Удалить
+                              </Button>
+                          </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Upload className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                    )}
+                </div>
+              )
+          })}
           </div>
           <p className="text-sm text-muted-foreground">
             Максимум 5 изображений
