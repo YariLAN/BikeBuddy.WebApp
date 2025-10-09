@@ -1,4 +1,5 @@
 ﻿using BikeBuddy.Domain.Models.EventControl.ValueObjects;
+using Microsoft.AspNetCore.Http;
 
 namespace BikeBuddy.Application.DtoModels.Event;
 
@@ -27,6 +28,7 @@ public record CreateEventRequest(
     DateTime StartDate,
     DateTime EndDate,
     IEnumerable<PointDetailsDto> Points,
+    IReadOnlyList<IFormFile> Files,
     Guid UserId,
     EventStatus Status) 
     : EventRequest(Name, Description, Type, BicycleType, CountMembers, Distance, StartAddress, EndAddress, StartDate, EndDate, Points);
