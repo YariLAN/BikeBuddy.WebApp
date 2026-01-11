@@ -10,6 +10,8 @@ using System.Threading;
 
 namespace BikeBuddy.Infrastructure.Services.Common;
 
+internal sealed record FileInfo(byte[] fileData, string bucketName, string objectName, string mimeType);
+
 public class MinioProvider : IFileProvider
 {
     private readonly IMinioClient _minioClient;
@@ -52,10 +54,30 @@ public class MinioProvider : IFileProvider
         return await UploadFileAsync(fileData, bucketName, objectName, mimeType, cancellationToken);
     }
 
-
-    public Task<List<string>> UploadFilesAsync(List<(byte[] fileData, string objectName)> files, string bucketName)
+    public async Task<Result<string, Error>> UploadFilesAsync(List<IFormFile> files, string bucketName,
+        string folderName, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (files.Count <= 0)
+            return "";
+        
+        List<FileInfo> fileInfos = [];
+        
+        foreach (var file in files)
+        {
+            if (file.Length == 0)
+                return Error.Validation("File is empty");
+
+            var fileData = await file.ToByteArrayAsync();
+
+            fileInfos.Add(new FileInfo(fileData, bucketName, $"{folderName}/{file.FileName}", Path.GetExtension(file.FileName)));
+        }
+
+        var result = await PutMultipleObjects(fileInfos, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error;
+
+        return result.Value;
     }
 
     public async Task<Result<string, Error>> GetFileByFileNamesAsync(string fileName, string bucketName, CancellationToken cancellationToken)
@@ -96,7 +118,7 @@ public class MinioProvider : IFileProvider
         string mimeType,
         CancellationToken cancellationToken)
     {
-        var putObjectAtgs = new PutObjectArgs()
+        var putObjectArgs = new PutObjectArgs()
            .WithBucket(bucketName)
            .WithStreamData(new MemoryStream(fileData))
            .WithObjectSize(fileData.Length)
@@ -105,12 +127,41 @@ public class MinioProvider : IFileProvider
 
         try
         {
-            await _minioClient.PutObjectAsync(putObjectAtgs, cancellationToken);
+            await _minioClient.PutObjectAsync(putObjectArgs, cancellationToken);
             return objectName;
         }
         catch (Exception ex)
         {
             return Error.Failure("Fail to upload file in minio");
+        }
+    }
+
+    private async Task<Result<string, Error>> PutMultipleObjects(
+        List<FileInfo> files,
+        CancellationToken cancellationToken)
+    {
+        var putObjectsArgs = files.Select(f =>
+            new PutObjectArgs()
+                .WithBucket(f.bucketName)
+                .WithStreamData(new MemoryStream(f.fileData))
+                .WithObjectSize(f.fileData.Length)
+                .WithObject(f.objectName)
+                .WithContentType(f.mimeType)
+        );
+
+        var uploadTasks = putObjectsArgs
+            .Select(args => _minioClient.PutObjectAsync(args, cancellationToken))
+            .ToList();
+        
+        try
+        {
+            var results = await Task.WhenAll(uploadTasks);
+            
+            return files.First().objectName;
+        }
+        catch (Exception ex)
+        {
+            return Error.Failure($"Failed to upload files: {ex.Message}");
         }
     }
 

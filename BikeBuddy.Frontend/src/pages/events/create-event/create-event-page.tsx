@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/popover"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
-import { cn } from "@/lib/utils"
+import { cn, createFormData } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, ArrowLeft } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
@@ -65,7 +65,7 @@ export default function CreateEventPage() {
     currentCountMembers: undefined,
     points: [],
     status: EventStatus.Opened,
-    // images: [],
+    files: [],
     // mapImageFile: null
   })
   
@@ -119,21 +119,19 @@ export default function CreateEventPage() {
   }
 
   const onSubmit = async (e: React.FormEvent) => {
-    
-    const files = imageInputListRef.current?.getFiles();
-    console.log(files)
-
     e.preventDefault()
-    console.log(e)
     setIsSubmitting(true)
-
+    
     const validateResult = await validationService.validateForm(formData)
-
+    
     if (!validateResult.isValid) {
       setErrors(validateResult.errors)
       setIsSubmitting(false)
       return
     }
+
+    const files = imageInputListRef.current?.getFiles();
+    formData.files = files
 
     try {
       formData.startDate = formattedDate(formData.startDate!)

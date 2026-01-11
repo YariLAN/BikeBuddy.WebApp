@@ -47,6 +47,7 @@ export const eventSchema = yup.object({
     .min(1, "Участников не может быть ноль или меньше")
     .required("Число участников заезда обязательно"),
   currentCountMembers: yup.number(),
+
   // images: yup
   //   .array()
   //   .of(yup.string())
@@ -55,6 +56,7 @@ export const eventSchema = yup.object({
 
 export type EventFormData = yup.InferType<typeof eventSchema> & {
   points: PointDetails[]
+  files: File[]
   // mapImageFile: Blob | null; 
   status : EventStatus
   userId : string
