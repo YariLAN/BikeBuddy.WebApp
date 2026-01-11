@@ -63,9 +63,10 @@ export default function CreateEventPage() {
     distance: undefined,
     countMembers: undefined,
     currentCountMembers: undefined,
+    files:[],
     points: [],
     status: EventStatus.Opened,
-    files: [],
+    // images: [],
     // mapImageFile: null
   })
   
@@ -119,6 +120,10 @@ export default function CreateEventPage() {
   }
 
   const onSubmit = async (e: React.FormEvent) => {
+    
+    const files = imageInputListRef.current?.getFiles();
+    formData.files = files
+
     e.preventDefault()
     setIsSubmitting(true)
     
@@ -129,10 +134,7 @@ export default function CreateEventPage() {
       setIsSubmitting(false)
       return
     }
-
-    const files = imageInputListRef.current?.getFiles();
-    formData.files = files
-
+    
     try {
       formData.startDate = formattedDate(formData.startDate!)
       formData.endDate = formattedDate(formData.endDate!)

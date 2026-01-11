@@ -2,9 +2,16 @@ using BikeBuddy.API.Hubs;
 using BikeBuddy.API.Services;
 using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application;
+using BikeBuddy.Application.Services.Auth.Register;
 using BikeBuddy.Application.Services.Common;
+using BikeBuddy.Domain.Models.AuthControl;
 using BikeBuddy.Infrastructure;
+using BikeBuddy.Infrastructure.Services.Auth.Google;
 using Hangfire;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
@@ -22,9 +29,16 @@ builder.Services.AddScoped<IRealTimeNotifier, RealTimeNotifier>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
 
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 builder.Services.AddFluentValidationAutoValidation(configuration =>
 {
     configuration.OverrideDefaultResultFactoryWith<CustomValidationResultFactory>();
+    configuration.EnableFormBindingSourceAutomaticValidation = true;
+    configuration.EnableCustomBindingSourceAutomaticValidation = true;
 });
 
 builder.Services.AddCors("CorsPolicy");
@@ -66,5 +80,30 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseHangfireDashboard("/hangfire");
+
+app.MapPost("/api/account/login/google", ( [FromQuery] string returnUrl, LinkGenerator linkGenerator,
+    SignInManager<AuthUser> signInManager, HttpContext context) =>
+{
+    var properties = signInManager.ConfigureExternalAuthenticationProperties("Google",
+        linkGenerator.GetPathByName(context, "GoogleAuthCallback") 
+        + $"?returnUrl={returnUrl}");
+
+    return Results.Challenge(properties, ["Google"]);
+});
+
+app.MapGet("/api/account/login/google/callback", async ([FromQuery] string returnUrl, 
+    HttpContext context, IGoogleService googleService) =>
+{
+    var result = await context.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+
+    if (!result.Succeeded)
+    {
+        return Results.Unauthorized();
+    }
+
+    await googleService.Login(result.Principal, context, CancellationToken.None);
+
+    return Results.Redirect(returnUrl);
+}).WithName("GoogleAuthCallback");
 
 app.Run();

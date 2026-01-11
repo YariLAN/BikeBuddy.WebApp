@@ -1,6 +1,6 @@
 namespace BikeBuddy.Infrastructure.Options;
 
-public class SmtpOptions
+internal sealed class SmtpOptions
 {
     public string Server { get; set; } = string.Empty;
 

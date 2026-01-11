@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig, AxiosRequestConfig } from 'axios';
 import JwtService from './JwtService';
 import useAuthStore, { AuthResponse } from '@/stores/auth';
 import { LOCAL_BASE_URL } from '../constants';
@@ -151,8 +151,8 @@ export class ApiService {
         }
     }
 
-    async post<T>(url: string, data: any = null, withCredentials: boolean = false): Promise<ApiResponse<T>> {
-        const response: AxiosResponse = await this.api.post(url, data, { withCredentials: withCredentials });
+    async post<T>(url: string, data: any = null, withCredentials: boolean = false, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+        const response: AxiosResponse = await this.api.post(url, data, { withCredentials: withCredentials, ...config });
         return response as ApiResponse<T>
     }
 

@@ -28,7 +28,7 @@ services:
     networks:
         - deploy-bikebuddy-dev
     volumes:
-        - postgres-data:/var/lib/postgresql/data 
+        - postgres-data:/var/lib/postgresql
 
   hangfire_db:
     container_name: hangfire_db
@@ -43,7 +43,7 @@ services:
     networks:
         - deploy-bikebuddy-dev
     volumes:
-        - hangfire-data:/var/lib/postgresql/data
+        - hangfire-data:/var/lib/postgresql
 
   minio:
     container_name: bikebuddy_minio

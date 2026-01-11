@@ -1,6 +1,6 @@
 ﻿namespace BikeBuddy.Infrastructure.Options;
 
-internal class MinioOptions
+internal sealed class MinioOptions
 {
     public const string MINIO = "Minio";
 
