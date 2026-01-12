@@ -3,6 +3,7 @@ import { ApiResponse, apiService } from "@/core/services/ApiService";
 import { convertBlobToFormData } from "@/lib/utils";
 import { create } from "zustand";
 import { PageData, SearchFilterDto } from "./search_types";
+import { serialize } from 'object-to-formdata';
 
 interface EventState {
     uploadMap: (eventId : string, fileBlob : Blob) => Promise<ApiResponse<string>>;
@@ -24,35 +25,9 @@ const useEventStore = create<EventState>(
             return result
         },
         createEvent: async (event: CreateEventRequest) => {
+            const formData = serialize(event);
 
-            const formData = new FormData();
-
-            formData.append("Name", event.name);
-            formData.append("Description", event.description);
-            formData.append("Type", event.type.toString());
-            formData.append("BicycleType", event.bicycleType.toString());
-            formData.append("CountMembers", event.countMembers.toString());
-            formData.append("Distance", event.distance.toString());
-            formData.append("StartAddress", event.startAddress);
-            formData.append("EndAddress", event.endAddress);
-            formData.append("StartDate", event.startDate.toISOString());
-            formData.append("EndDate", event.endDate.toISOString());
-            formData.append("UserId", event.userId);
-            formData.append("Status", event.status.toString());
-
-            // Добавляем Points как JSON
-            formData.append("Points", JSON.stringify(event.points));
-
-            // Добавляем файлы
-            if (event.files && event.files.length > 0) {
-                event.files.forEach((file, index) => {
-                    formData.append("Files", file);
-                });
-            }
-
-            let result = await apiService.post<string>('/events/create', formData, true, { headers: { 
-                'Content-Type' : 'multipart/form-data',
-            }});
+            let result = await apiService.file_post<string>('/events/create', formData, true);
             return result
         },
         getEvents: async (filter: SearchFilterDto<EventFilterDto>) => {

@@ -95,13 +95,13 @@ export const ImageInputList = forwardRef<ImageInputListRef, ImageInputListProps>
                 
                     return (
                         <ImageInput
-                        index={index}
-                        hasImage={imagePreviewUrls[index] != null}
-                        fileInputRefs={fileInputRefs}
-                        imagePreviewUrls={imagePreviewUrls}
-                        handleImageSelect={handleImageSelect}
-                        handleRemoveImage={handleRemoveImage}
-                        handleImageClick={handleImageClick}
+                            index={index}
+                            hasImage={imagePreviewUrls[index] != null}
+                            fileInputRefs={fileInputRefs}
+                            imagePreviewUrls={imagePreviewUrls}
+                            handleImageSelect={handleImageSelect}
+                            handleRemoveImage={handleRemoveImage}
+                            handleImageClick={handleImageClick}
                         />
                     )
                 })}

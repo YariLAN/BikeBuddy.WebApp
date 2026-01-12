@@ -156,7 +156,6 @@ public class MinioProvider : IFileProvider
         try
         {
             var results = await Task.WhenAll(uploadTasks);
-            
             return files.First().objectName;
         }
         catch (Exception ex)

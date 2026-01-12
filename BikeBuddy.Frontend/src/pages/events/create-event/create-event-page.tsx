@@ -63,7 +63,7 @@ export default function CreateEventPage() {
     distance: undefined,
     countMembers: undefined,
     currentCountMembers: undefined,
-    files:[],
+    files: [],
     points: [],
     status: EventStatus.Opened,
     // images: [],

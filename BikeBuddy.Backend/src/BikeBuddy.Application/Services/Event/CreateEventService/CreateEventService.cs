@@ -34,7 +34,7 @@ public class CreateEventService(
             return eventResult.Error;
         
         var resultFile = await fileProvider.UploadFilesAsync(
-            request.Files.ToList(), 
+            request.Files?.ToList() ?? [], 
             Files.BucketNameConstants.EVENT_IMAGES,  
             $"{eventResult.Value}",
             cancellationToken);

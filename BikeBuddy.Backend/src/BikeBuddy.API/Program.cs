@@ -1,3 +1,4 @@
+using System.Globalization;
 using BikeBuddy.API.Hubs;
 using BikeBuddy.API.Services;
 using BikeBuddy.API.Shared.Extensions;
@@ -16,6 +17,11 @@ using Microsoft.EntityFrameworkCore;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var cultureInfo = new CultureInfo("en-US");
+
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -36,7 +42,6 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 builder.Services.AddFluentValidationAutoValidation(configuration =>
 {
-    configuration.OverrideDefaultResultFactoryWith<CustomValidationResultFactory>();
     configuration.EnableFormBindingSourceAutomaticValidation = true;
     configuration.EnableCustomBindingSourceAutomaticValidation = true;
 });
