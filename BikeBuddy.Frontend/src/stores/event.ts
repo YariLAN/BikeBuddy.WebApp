@@ -25,7 +25,9 @@ const useEventStore = create<EventState>(
             return result
         },
         createEvent: async (event: CreateEventRequest) => {
-            const formData = serialize(event);
+            const formData = serialize(event, {
+                indices: true
+            });
 
             let result = await apiService.file_post<string>('/events/create', formData, true);
             return result

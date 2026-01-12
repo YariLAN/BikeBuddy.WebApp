@@ -52,7 +52,7 @@ export const ImageInputList = forwardRef<ImageInputListRef, ImageInputListProps>
         const newPreviews = [...imagePreviewUrls]
         
         if (newPreviews[index]) {
-        URL.revokeObjectURL(newPreviews[index])
+            URL.revokeObjectURL(newPreviews[index])
         }
 
         newImages[index] = file

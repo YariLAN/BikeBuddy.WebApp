@@ -30,5 +30,5 @@ public record CreateEventRequest(
     IEnumerable<PointDetailsDto> Points,
     Guid UserId,
     EventStatus Status,
-    IReadOnlyList<IFormFile>? Files = null) 
+    IReadOnlyList<IFormFile>? Files) 
     : EventRequest(Name, Description, Type, BicycleType, CountMembers, Distance, StartAddress, EndAddress, StartDate, EndDate, Points);

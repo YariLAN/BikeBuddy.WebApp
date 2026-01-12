@@ -122,7 +122,7 @@ export default function CreateEventPage() {
   const onSubmit = async (e: React.FormEvent) => {
     
     const files = imageInputListRef.current?.getFiles();
-    formData.files = files
+    formData.files = files?.filter(Boolean)
 
     e.preventDefault()
     setIsSubmitting(true)
