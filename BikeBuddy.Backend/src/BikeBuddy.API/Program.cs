@@ -1,5 +1,3 @@
-using System.Globalization;
-using BikeBuddy.API.Hubs;
 using BikeBuddy.API.Services;
 using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application;
@@ -8,20 +6,13 @@ using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Domain.Models.AuthControl;
 using BikeBuddy.Infrastructure;
 using BikeBuddy.Infrastructure.Services.Auth.Google;
-using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var cultureInfo = new CultureInfo("en-US");
-
-CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
-CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -58,33 +49,9 @@ builder.Services.AddSignalR(opt =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.Configure();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db =scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await db.Database.MigrateAsync();
-}
-
-app.UseCors("CorsPolicy");
-
-
-app.MapHub<GroupChatHub>("/hub/group-chat");
-
-app.MapHub<NotificationHub>("/hub/notifications");
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.UseHangfireDashboard("/hangfire");
+await app.MigrateDatabase();
 
 app.MapPost("/api/account/login/google", ( [FromQuery] string returnUrl, LinkGenerator linkGenerator,
     SignInManager<AuthUser> signInManager, HttpContext context) =>
