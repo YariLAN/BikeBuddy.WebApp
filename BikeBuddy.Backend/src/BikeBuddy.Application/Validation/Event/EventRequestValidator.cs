@@ -47,7 +47,8 @@ public static class EventValidationRules
         validator.RuleFor(e => e.EndDate).GreaterThanOrEqualTo(e => e.StartDate)
             .WithError(Errors.Event.DateRangeIsInvalid("EndDate"));
 
-        validator.RuleForEach(e => e.Points).MustBeValueObject(x => PointDetails.Create(x.OrderId, x.Point.Lat, x.Point.Lon, x.Address));
+        validator.RuleForEach(e => e.Points)
+            .MustBeValueObject(x => PointDetails.Create(x.OrderId, x.Point.Lat, x.Point.Lon, x.Address));
     }
 }
 
@@ -63,6 +64,8 @@ public class CreateEventRequestValidation : AbstractValidator<CreateEventRequest
             .WithError(Errors.General.ValueIsEmpty("UserId"));
 
         RuleFor(e => e.Status).IsInEnum().WithError(Errors.General.ValueIsInvalid("Status"));
+
+        RuleForEach(e => e.Files).NotEmpty();
     }
 }
       
