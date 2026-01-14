@@ -1,4 +1,4 @@
-﻿using BikeBuddy.Application.Services.Common;
+﻿using BikeBuddy.Application.Services.Common.S3;
 using BikeBuddy.Domain.Shared;
 using BikeBuddy.Infrastructure.Extensions;
 using CSharpFunctionalExtensions;
@@ -12,7 +12,7 @@ namespace BikeBuddy.Infrastructure.Services.Common;
 
 internal sealed record FileInfo(byte[] fileData, string bucketName, string objectName, string mimeType);
 
-public class MinioProvider : IFileProvider
+public class MinioProvider : IS3Provider
 {
     private readonly IMinioClient _minioClient;
 
@@ -43,7 +43,7 @@ public class MinioProvider : IFileProvider
         return await UploadFileAsync(fileData, bucketName, objectName, mimeType, cancellationToken);
     }
 
-    public async Task<Result<IReadOnlyList<FileItem>, Error>> GetAllByObjectAsync(string bucketName, string prefix, CancellationToken ct)
+    public async Task<Result<IReadOnlyList<S3ObjectInfo>, Error>> GetAllByObjectAsync(string bucketName, string prefix, CancellationToken ct)
     {
         await CreateBucketIfNotExist([bucketName], ct);
 
@@ -58,14 +58,14 @@ public class MinioProvider : IFileProvider
 
             var observable = _minioClient.ListObjectsAsync(args, ct);
 
-            List<FileItem> files = [];
+            List<S3ObjectInfo> files = [];
 
             var tcs = new TaskCompletionSource<bool>();
             var subscription = observable.Subscribe(item =>
                 {
                     var fileName = Path.GetFileName(item.Key);
 
-                    files.Add(new FileItem(
+                    files.Add(new(
                         fileName,
                         $"{_minioClient.Config.Endpoint}/{bucketName}/{prefixWithFiles}{Uri.EscapeDataString(fileName)}",
                         item.Size,

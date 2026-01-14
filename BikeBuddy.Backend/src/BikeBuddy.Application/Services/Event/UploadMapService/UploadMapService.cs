@@ -1,4 +1,4 @@
-﻿using BikeBuddy.Application.Services.Common;
+﻿using BikeBuddy.Application.Services.Common.S3;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
@@ -6,7 +6,7 @@ using static BikeBuddy.Domain.Shared.Files;
 
 namespace BikeBuddy.Application.Services.Event.UploadMapService;
 
-public class UploadMapService(IFileProvider fileProvider) : IUploadMapService
+public sealed class UploadMapService(IS3Provider fileProvider) : IUploadMapService
 {
     public async Task<Result<string, Error>> ExecuteAsync(Guid eventId, IFormFile file, CancellationToken cancellationToken)
     {

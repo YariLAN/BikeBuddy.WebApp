@@ -22,5 +22,5 @@ public record EventResponse(
     Guid ChatId,
     UserResponse Author,
     IEnumerable<PointDetailsDto> Points,
-    IReadOnlyList<FileInfo> Images,
+    IReadOnlyList<FileInfo> ExistingImages,
     EventStatus Status);

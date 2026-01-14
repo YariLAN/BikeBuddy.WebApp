@@ -1,12 +1,15 @@
 ﻿using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Mappers.User;
-using BikeBuddy.Application.Services.Common;
+using BikeBuddy.Application.Services.Common.S3;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 
 using EventDomain = BikeBuddy.Domain.Models.EventControl.Event;
 
 namespace BikeBuddy.Application.Mappers.Event;
 
+/// <summary>
+/// маппер для событий
+/// </summary>
 public static class EventMapper
 {
     public static EventDomain ToMap(CreateEventRequest request, IEnumerable<PointDetails> points)
@@ -48,7 +51,7 @@ public static class EventMapper
             imageUrl);
     }
 
-    public static EventResponse ToMap(EventDomain dbEvent, IReadOnlyList<FileItem> files)
+    public static EventResponse ToMap(EventDomain dbEvent, IReadOnlyList<S3ObjectInfo> files)
     {
         var userResponse = UserMapper.ToMap(dbEvent.User);
 
@@ -76,11 +79,11 @@ public static class EventMapper
                     .Select(x => new PointDetailsDto(x.OrderId, new PointDto(x.Point.Lat, x.Point.Lon), x.Address))
                     .ToList()
                 : [],
-            files.Count <= 0 ? [] : files.ToResponse(),
+            ExistingImages: files.Count <= 0 ? [] : files.ToResponse(),
             dbEvent.Status);
     }
 
-    private static IReadOnlyList<DtoModels.Files.FileInfo> ToResponse(this IReadOnlyList<FileItem> files)
+    private static IReadOnlyList<DtoModels.Files.FileInfo> ToResponse(this IReadOnlyList<S3ObjectInfo> files)
         => files
             .Select(f => new DtoModels.Files.FileInfo(f.FileName, f.Url, f.Size, f.UploadedAt))
             .ToList();

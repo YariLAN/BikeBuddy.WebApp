@@ -2,6 +2,7 @@
 using BikeBuddy.Application.Services.Chat;
 using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Application.Services.Common.Notification;
+using BikeBuddy.Application.Services.Common.S3;
 using BikeBuddy.Application.Services.Event;
 using BikeBuddy.Application.Services.Profile;
 using BikeBuddy.Application.Services.Scheduler.Event;
@@ -62,7 +63,7 @@ public static class ServiceRegistry
                    .Build();
         });
 
-        services.AddTransient<IFileProvider, MinioProvider>();
+        services.AddTransient<IS3Provider, MinioProvider>();
 
         return services;
     }

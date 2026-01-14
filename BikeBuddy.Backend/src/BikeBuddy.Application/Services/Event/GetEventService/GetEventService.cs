@@ -3,11 +3,11 @@ using BikeBuddy.Application.Mappers.Event;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using System.Security.Claims;
-using BikeBuddy.Application.Services.Common;
+using BikeBuddy.Application.Services.Common.S3;
 
 namespace BikeBuddy.Application.Services.Event.GetEventService;
 
-public class GetEventService(IEventRepository eventRepository, IFileProvider fileProvider) : IGetEventService
+public sealed class GetEventService(IEventRepository eventRepository, IS3Provider fileProvider) : IGetEventService
 {
     public async Task<Result<EventResponseDetails, Error>> ExecuteAsync(Guid eventId, ClaimsPrincipal user, CancellationToken cancellationToken)
     {
