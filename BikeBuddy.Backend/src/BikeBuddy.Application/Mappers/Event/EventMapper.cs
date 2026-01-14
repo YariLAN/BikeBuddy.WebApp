@@ -1,10 +1,11 @@
 ﻿using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Mappers.User;
+using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 
 namespace BikeBuddy.Application.Mappers.Event;
 
-public class EventMapper
+public static class EventMapper
 {
     public static Domain.Models.EventControl.Event ToMap(CreateEventRequest request, IEnumerable<PointDetails> points)
     {
@@ -45,7 +46,7 @@ public class EventMapper
             imageUrl);
     }
 
-    public static EventResponse ToMap(Domain.Models.EventControl.Event dbEvent)
+    public static EventResponse ToMap(Domain.Models.EventControl.Event dbEvent, IReadOnlyList<FileItem> files)
     {
         var userResponse = UserMapper.ToMap(dbEvent.User);
 
@@ -73,6 +74,12 @@ public class EventMapper
                     .Select(x => new PointDetailsDto(x.OrderId, new PointDto(x.Point.Lat, x.Point.Lon), x.Address))
                     .ToList()
                 : [],
+            files.Count <= 0 ? [] : files.ToResponse(),
             dbEvent.Status);
     }
+
+    private static IReadOnlyList<DtoModels.Files.FileInfo> ToResponse(this IReadOnlyList<FileItem> files)
+        => files
+            .Select(f => new DtoModels.Files.FileInfo(f.FileName, f.Url, f.Size, f.UploadedAt))
+            .ToList();
 }
