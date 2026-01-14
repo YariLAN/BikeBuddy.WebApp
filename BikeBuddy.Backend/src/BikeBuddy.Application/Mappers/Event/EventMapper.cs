@@ -3,13 +3,15 @@ using BikeBuddy.Application.Mappers.User;
 using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 
+using EventDomain = BikeBuddy.Domain.Models.EventControl.Event;
+
 namespace BikeBuddy.Application.Mappers.Event;
 
 public static class EventMapper
 {
-    public static Domain.Models.EventControl.Event ToMap(CreateEventRequest request, IEnumerable<PointDetails> points)
+    public static EventDomain ToMap(CreateEventRequest request, IEnumerable<PointDetails> points)
     {
-        return Domain.Models.EventControl.Event.Create(
+        return EventDomain.Create(
             id: Guid.NewGuid(),
             name: request.Name,
             description: request.Description,
@@ -26,7 +28,7 @@ public static class EventMapper
             createdBy: request.UserId);
     }
 
-    public static EventListResponse ToMap(Domain.Models.EventControl.Event dbEvent, string imageUrl)
+    public static EventListResponse ToMap(EventDomain dbEvent, string imageUrl)
     {
         return new EventListResponse(
             dbEvent.Id,
@@ -46,7 +48,7 @@ public static class EventMapper
             imageUrl);
     }
 
-    public static EventResponse ToMap(Domain.Models.EventControl.Event dbEvent, IReadOnlyList<FileItem> files)
+    public static EventResponse ToMap(EventDomain dbEvent, IReadOnlyList<FileItem> files)
     {
         var userResponse = UserMapper.ToMap(dbEvent.User);
 
