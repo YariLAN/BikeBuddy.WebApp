@@ -46,29 +46,27 @@ public class MinioProvider : IS3Provider
     public async Task<Result<IReadOnlyList<S3ObjectInfo>, Error>> GetAllByObjectAsync(string bucketName, string prefix, CancellationToken ct)
     {
         await CreateBucketIfNotExist([bucketName], ct);
-
-        var prefixWithFiles = prefix.EndsWith("/") ? prefix : prefix + "/";
+        List<S3ObjectInfo> files = [];
 
         try
-        {
+        { 
+            var prefixWithFiles = prefix.EndsWith("/") ? prefix : prefix + "/";
             var args = new ListObjectsArgs()
                 .WithBucket(bucketName)
                 .WithPrefix(prefixWithFiles)
                 .WithRecursive(true);
 
             var observable = _minioClient.ListObjectsAsync(args, ct);
-
-            List<S3ObjectInfo> files = [];
-
+            
             var tcs = new TaskCompletionSource<bool>();
             var subscription = observable.Subscribe(item =>
                 {
                     var fileName = Path.GetFileName(item.Key);
-
+                    
                     files.Add(new(
                         fileName,
                         $"{_minioClient.Config.Endpoint}/{bucketName}/{prefixWithFiles}{Uri.EscapeDataString(fileName)}",
-                        item.Size,
+                        item.Size, 
                         item.LastModifiedDateTime));
                 },
                 () => tcs.TrySetResult(true));
@@ -76,7 +74,9 @@ public class MinioProvider : IS3Provider
             await tcs.Task;
             subscription.Dispose();
             
-            return files;
+            return files
+                .OrderBy(f => f.UploadedAt)
+                .ToList();
         }
         catch
         {

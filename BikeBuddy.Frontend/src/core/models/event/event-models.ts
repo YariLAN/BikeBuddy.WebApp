@@ -1,3 +1,6 @@
+import { FileInfo } from "../fileInfo"
+import { UserResponse } from "../user-models"
+
 export enum EventStatus {
 	Opened = 0,
 	Closed = 1,
@@ -114,19 +117,8 @@ export interface EventResponse {
     chatId : string,
     author: UserResponse
     points: PointDetails[]
+    existingImages : FileInfo[],
     status: EventStatus
-}
-
-export interface UserResponse {
-    userID: string,
-    userName: string,
-    email: string,
-    surname: string,
-    name: string,
-    middleName: string,
-    birthDay: string,
-    address: string,
-    photoUrl: string,
 }
 
 export interface EventResponseDetails {

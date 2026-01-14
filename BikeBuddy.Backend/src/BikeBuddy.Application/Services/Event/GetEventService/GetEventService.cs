@@ -20,13 +20,18 @@ public sealed class GetEventService(IEventRepository eventRepository, IS3Provide
 
         var isMemberChat = dbEventResult.Value.Chat?.Members?.Any(user => user == userId) ?? false;
 
-        var files = await fileProvider.GetAllByObjectAsync(
+        var filesResult = await fileProvider.GetAllByObjectAsync(
             Files.BucketNameConstants.EVENT_IMAGES,
             $"{dbEventResult.Value.Id}",
             cancellationToken);
 
+        var files = filesResult.IsSuccess
+            ? filesResult.Value.Where(f
+                => !f.FileName.EndsWith(Files.FileNameConstants.MAP_IMAGE_FILENAME)).ToList()
+            : [];
+
         return new EventResponseDetails(
-            Event: EventMapper.ToMap(dbEventResult.Value, files.Value), 
+            Event: EventMapper.ToMap(dbEventResult.Value, files), 
             CanEdit: userId == dbEventResult.Value.CreatedBy,
             IsMemberChat: isMemberChat
         ); 

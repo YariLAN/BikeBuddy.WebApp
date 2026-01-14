@@ -17,6 +17,9 @@ import useChatStore from "@/stores/chat"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import Swal from "sweetalert2"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { ImageInputList } from "@/components/my/ImageInputList"
+import { ImageInputMode } from "@/components/my/ImageInput/type"
+import { ImageInputListRef } from "@/components/my/ImageInputList/type"
 
 const bikeTypes = [
   { value: BicycleType.Default, label: "Городской" },
@@ -57,6 +60,8 @@ export default function EventDetailsPage() {
   const { eventId } = useParams<{ eventId: string }>()
   const navigate = useNavigate()
   const routeMapRef = useRef<RouteMapContainerRef>(null)
+  const imageInputRef = useRef<ImageInputListRef>(null)
+
   const [formData, setEvent] = useState<EventResponseDetails | null>(null)
   const [isJoining, setIsJoining] = useState(false)
   const [isConfirming, setIsConfirming] = useState(false)
@@ -82,6 +87,11 @@ export default function EventDetailsPage() {
         if (event.points && event.points.length > 0 && routeMapRef.current) {
           routeMapRef.current.setPoints(event.points as PointDetails[])
         }
+
+        if (event.existingImages.length > 0) {
+          imageInputRef.current?.setUrls(event.existingImages.map((i) => i.url))
+        }
+
       } else if (result.error) {
         setError(result.error)
         alertExpectedError(result.error)
@@ -554,6 +564,14 @@ export default function EventDetailsPage() {
               </TooltipProvider>
             </CardContent>
           </Card>
+        </div>
+
+        <div className="lg:col-span-3">
+          <ImageInputList 
+            ref={imageInputRef}
+            count={formData.event.existingImages.length} 
+            mode={ImageInputMode.View} 
+          />
         </div>
       </div>
     </div>

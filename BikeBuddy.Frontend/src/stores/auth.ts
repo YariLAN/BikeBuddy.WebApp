@@ -1,4 +1,4 @@
-import { ApiResponse, apiService } from '@/core/services/ApiService';
+import { apiService } from '@/core/services/ApiService';
 import JwtService from '@/core/services/JwtService';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware'

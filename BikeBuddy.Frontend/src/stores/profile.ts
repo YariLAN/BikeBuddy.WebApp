@@ -1,25 +1,8 @@
+import { UserProfileRequest, UserProfileResponse } from "@/core/models/user-models";
 import { ApiResponse, apiService } from "@/core/services/ApiService";
 import { convertFileToFormData } from "@/lib/utils";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-export interface UserProfileResponse {
-    id : string,
-    surname : string,
-    name : string,
-    middleName : string,
-    birthDay? : Date,
-    address? : string,
-    avatarUrl: string
-}
-
-export interface UserProfileRequest {
-    surname : string,
-    name : string,
-    middleName : string,
-    birthDay? : Date,
-    address? : string
-}
 
 export interface Address {
     country : string,

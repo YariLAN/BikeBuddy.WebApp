@@ -1,15 +1,9 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
-import ImageInput from "./imageInput"
+import ImageInput from "../ImageInput"
 import { toastAlert } from "@/core/helpers"
 import { isSupportedImageFormat } from "@/lib/fileHelpers"
-
-interface ImageInputListProps {
-    count : number
-}
-
-export interface ImageInputListRef {
-    getFiles: () => File[];
-}
+import { ImageInputListProps, ImageInputListRef } from "./type"
+import { ImageInputMode } from "../ImageInput/type"
 
 export const ImageInputList = forwardRef<ImageInputListRef, ImageInputListProps>((props, ref) =>
 {
@@ -19,14 +13,15 @@ export const ImageInputList = forwardRef<ImageInputListRef, ImageInputListProps>
     const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([])
 
     useImperativeHandle(ref, () => ({
-        getFiles: () => uploadedImages
+        getFiles: () => uploadedImages,
+        setUrls: (urls: string[]) => setImagePreviewUrls(urls)
     }));
 
     useEffect(() => {
         return () => {
             imagePreviewUrls.forEach((url) => URL.revokeObjectURL(url))
         }
-    }, [])
+    }, [imagePreviewUrls])
 
     const handleImageSelect = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
@@ -86,7 +81,7 @@ export const ImageInputList = forwardRef<ImageInputListRef, ImageInputListProps>
     }
 
     return (
-        <div className="space-y-2">
+        props.count > 0 && <div className="space-y-2">
           <label className="text-sm font-medium leading-none">
             Дополнительные фотографии
           </label>
@@ -94,21 +89,24 @@ export const ImageInputList = forwardRef<ImageInputListRef, ImageInputListProps>
                 {[...Array(props.count)].map((_, index) => {
                 
                     return (
-                        <ImageInput
-                            index={index}
-                            hasImage={imagePreviewUrls[index] != null}
-                            fileInputRefs={fileInputRefs}
-                            imagePreviewUrls={imagePreviewUrls}
-                            handleImageSelect={handleImageSelect}
-                            handleRemoveImage={handleRemoveImage}
-                            handleImageClick={handleImageClick}
-                        />
+                        <div key={index}>
+                            <ImageInput
+                                mode={props.mode}
+                                index={index}
+                                hasImage={imagePreviewUrls[index] != null}
+                                fileInputRefs={fileInputRefs}
+                                imagePreviewUrls={imagePreviewUrls}
+                                handleImageSelect={handleImageSelect}
+                                handleRemoveImage={handleRemoveImage}
+                                handleImageClick={handleImageClick}
+                            />
+                        </div>
                     )
                 })}
           </div>
-          <p className="text-sm text-muted-foreground">
+          {props.mode == ImageInputMode.Edit && <p className="text-sm text-muted-foreground">
             {`Максимум ${props.count} изображений`}
-          </p>
+          </p>}
         </div>
     )
 })

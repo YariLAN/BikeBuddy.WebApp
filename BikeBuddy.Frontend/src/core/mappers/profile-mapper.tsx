@@ -1,4 +1,4 @@
-import { UserProfileRequest, UserProfileResponse } from "@/stores/profile";
+import { UserProfileRequest, UserProfileResponse } from "../models/user-models";
 import { TokenPayload } from "../services/JwtService";
 
 export const mapFormDataToRequest = (data: any) : UserProfileRequest => ({

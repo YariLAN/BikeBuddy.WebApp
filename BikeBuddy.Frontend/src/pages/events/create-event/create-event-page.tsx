@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/popover"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
-import { cn, createFormData } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { CalendarIcon, Loader2, AlertCircle, ArrowLeft } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { RouteMapContainer, RouteMapContainerRef } from "@/components/my/map/route-map-container"
@@ -33,7 +33,9 @@ import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { markerToPointDetails } from "@/core/mappers/event-mapper"
 import { ApiResponse } from "@/core/services/ApiService"
-import { ImageInputList, ImageInputListRef } from "./imageInputList"
+import { ImageInputListRef } from "@/components/my/ImageInputList/type"
+import { ImageInputList } from "@/components/my/ImageInputList"
+import { ImageInputMode } from "@/components/my/ImageInput/type"
 
 const validationService = new ValidationService(eventSchema)
 
@@ -487,7 +489,7 @@ export default function CreateEventPage() {
         </div>
 
         {/* Загрузка изображений */}
-        <ImageInputList count={5} ref={imageInputListRef} />
+        <ImageInputList count={5} mode={ImageInputMode.Edit} ref={imageInputListRef} />
 
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>

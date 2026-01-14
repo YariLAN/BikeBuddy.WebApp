@@ -1,4 +1,4 @@
-import { Bike, Mails, Search, Settings, Ticket, Users, } from "lucide-react"
+import { Bike, Mails, Settings, Ticket, Users, } from "lucide-react"
    
 export const names = {
     Events: "События",

@@ -2,18 +2,20 @@ import { useNavigate, useParams } from "react-router-dom";
 import ProfileForm from "./profile-form";
 import { useEffect, useState } from "react";
 import JwtService from "@/core/services/JwtService";
-import useProfileStore, { UserProfileResponse } from "@/stores/profile";
+import useProfileStore from "@/stores/profile";
 import { Warning } from "@/components/my/warning";
+import { UserProfileResponse } from "@/core/models/user-models";
 
 interface ProfilePageProps {
     userId?: string
 }
 
 const defaultProfile: UserProfileResponse = {
-    id : '',
-    surname : '',
-    name : '',
-    middleName : '',
+    id: '',
+    surname: '',
+    name: '',
+    middleName: '',
+    avatarUrl: ""
 }
 
 export default function ProfilePage( {userId: propsUserId } : ProfilePageProps) {

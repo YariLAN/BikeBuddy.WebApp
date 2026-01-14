@@ -24,13 +24,14 @@ import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 import { ValidationService } from "@/core/services/ValidationService"
 import { profileSchema } from "@/core/validations/profile"
-import useProfileStore, { UserProfileResponse } from "@/stores/profile"
+import useProfileStore from "@/stores/profile"
 import JwtService from "@/core/services/JwtService"
 import { alertExpectedError, alertInfo } from "@/core/helpers"
 import { getFormData, mapFormDataToRequest } from "@/core/mappers/profile-mapper"
 import { ApiResponse } from "@/core/services/ApiService"
 import '@geoapify/geocoder-autocomplete/styles/round-borders.css';
 import { GeoapifyContext, GeoapifyGeocoderAutocomplete } from '@geoapify/react-geocoder-autocomplete';
+import { UserProfileResponse } from "@/core/models/user-models"
 
 interface ProfileDataProps {
   profile : UserProfileResponse,
