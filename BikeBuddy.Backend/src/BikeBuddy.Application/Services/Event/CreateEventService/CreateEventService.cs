@@ -1,7 +1,7 @@
 ﻿using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Mappers.Event;
 using BikeBuddy.Application.Services.Auth;
-using BikeBuddy.Application.Services.Common;
+using BikeBuddy.Application.Services.Common.S3;
 using BikeBuddy.Application.Services.Scheduler.Event;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
 using BikeBuddy.Domain.Shared;
@@ -9,10 +9,10 @@ using CSharpFunctionalExtensions;
 
 namespace BikeBuddy.Application.Services.Event.CreateEventService;
 
-public class CreateEventService(
+public sealed class CreateEventService(
     IAuthRepository authRepository, 
     IEventRepository eventRepository,
-    IFileProvider fileProvider,
+    IS3Provider fileProvider,
     IEventJobSchedulerService _eventJobSchedulerService) : ICreateEventService
 {
     public async Task<Result<Guid, Error>> ExecuteAsync(CreateEventRequest request, CancellationToken cancellationToken)
@@ -34,7 +34,7 @@ public class CreateEventService(
             return eventResult.Error;
         
         var resultFile = await fileProvider.UploadFilesAsync(
-            request.Files.ToList(), 
+            request.Files?.ToList() ?? [], 
             Files.BucketNameConstants.EVENT_IMAGES,  
             $"{eventResult.Value}",
             cancellationToken);

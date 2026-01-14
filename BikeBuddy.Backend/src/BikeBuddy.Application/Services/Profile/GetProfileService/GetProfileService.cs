@@ -2,12 +2,11 @@
 using BikeBuddy.Application.Mappers.User.Profile;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
-using static BikeBuddy.Domain.Shared.Files;
-using BikeBuddy.Application.Services.Common;
+using BikeBuddy.Application.Services.Common.S3;
 
 namespace BikeBuddy.Application.Services.Profile.GetProfileService;
 
-public class GetProfileService(IUserProfileRepository _userProfileRepository, IFileProvider fileProvider) : IGetProfileService
+public sealed class GetProfileService(IUserProfileRepository _userProfileRepository, IS3Provider fileProvider) : IGetProfileService
 {
     public async Task<Result<UserProfileResponse, Error>> ExecuteAsync(Guid userId, CancellationToken cancellationToken)
     {

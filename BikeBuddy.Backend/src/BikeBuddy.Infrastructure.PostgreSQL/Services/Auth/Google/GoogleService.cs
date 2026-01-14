@@ -24,14 +24,16 @@ public class GoogleService : IGoogleService
         _authRepository = authRepository;
     }
 
-    public async Task<Result<AuthResponse, string>> Login(string credential, HttpContext httpContext,  CancellationToken cancellationToken)
+    public async Task<Result<AuthResponse, string>> Login(ClaimsPrincipal principal, HttpContext httpContext,  CancellationToken cancellationToken)
     {
         var settings = new GoogleJsonWebSignature.ValidationSettings()
         {
             Audience = new List<string> { "" }
         };
 
-        var payload = await GoogleJsonWebSignature.ValidateAsync(credential, settings);
+        var email = principal.FindFirstValue(ClaimTypes.Email);
+
+        var payload = await GoogleJsonWebSignature.ValidateAsync(email, settings);
 
         var user = await _authRepository.GetByUsernameAsync(payload.Name, cancellationToken);
 

@@ -20,10 +20,11 @@ namespace BikeBuddy.API.Controllers
     public class EventController : ControllerBase
     {
         [HttpPost("create")]
+        [Consumes("multipart/form-data")]
         public async Task<ActionResult<Guid>> CreateEvent(
         [FromServices] ICreateEventService createEventService,
         [FromServices] IValidator<CreateEventRequest> validator,
-        [FromBody] CreateEventRequest request,
+        [FromForm] CreateEventRequest request,
         CancellationToken cancellationToken)
         {
             var result = await createEventService.ExecuteAsync(request, cancellationToken);

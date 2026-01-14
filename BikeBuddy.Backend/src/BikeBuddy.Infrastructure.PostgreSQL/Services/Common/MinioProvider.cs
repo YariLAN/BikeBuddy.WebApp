@@ -1,4 +1,4 @@
-﻿using BikeBuddy.Application.Services.Common;
+﻿using BikeBuddy.Application.Services.Common.S3;
 using BikeBuddy.Domain.Shared;
 using BikeBuddy.Infrastructure.Extensions;
 using CSharpFunctionalExtensions;
@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Minio;
 using Minio.DataModel.Args;
 using Minio.Exceptions;
-using System.Threading;
+using Minio.ApiEndpoints;
 
 namespace BikeBuddy.Infrastructure.Services.Common;
 
 internal sealed record FileInfo(byte[] fileData, string bucketName, string objectName, string mimeType);
 
-public class MinioProvider : IFileProvider
+public class MinioProvider : IS3Provider
 {
     private readonly IMinioClient _minioClient;
 
@@ -23,7 +23,7 @@ public class MinioProvider : IFileProvider
 
     public async Task<Result<string, Error>> UploadFileAsync(byte[] fileData, string bucketName, string objectName, string mimeType, CancellationToken cancellationToken)
     {
-        await IfBucketsNotExistCreateBucket([bucketName], cancellationToken);
+        await CreateBucketIfNotExist([bucketName], cancellationToken);
 
         var result = await PutObject(fileData, bucketName, objectName, mimeType, cancellationToken);
 
@@ -33,17 +33,6 @@ public class MinioProvider : IFileProvider
         return result.Value;
     }
 
-    public async Task<Result<string, Error>> UploadFileAsync(string dataUrl, string bucketName, string objectName, string mimeType, CancellationToken cancellationToken)
-    {
-        var fileBytesResult = DataUrlToBytes(dataUrl);
-
-        if (fileBytesResult.IsFailure)
-            return fileBytesResult.Error;
-
-        return await UploadFileAsync(fileBytesResult.Value, bucketName, objectName, mimeType, cancellationToken);
-    }
-
-
     public async Task<Result<string, Error>> UploadFileAsync(IFormFile file, string bucketName, string objectName, string mimeType, CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0)
@@ -52,6 +41,47 @@ public class MinioProvider : IFileProvider
         var fileData = await file.ToByteArrayAsync();
 
         return await UploadFileAsync(fileData, bucketName, objectName, mimeType, cancellationToken);
+    }
+
+    public async Task<Result<IReadOnlyList<S3ObjectInfo>, Error>> GetAllByObjectAsync(string bucketName, string prefix, CancellationToken ct)
+    {
+        await CreateBucketIfNotExist([bucketName], ct);
+
+        var prefixWithFiles = prefix.EndsWith("/") ? prefix : prefix + "/";
+
+        try
+        {
+            var args = new ListObjectsArgs()
+                .WithBucket(bucketName)
+                .WithPrefix(prefixWithFiles)
+                .WithRecursive(true);
+
+            var observable = _minioClient.ListObjectsAsync(args, ct);
+
+            List<S3ObjectInfo> files = [];
+
+            var tcs = new TaskCompletionSource<bool>();
+            var subscription = observable.Subscribe(item =>
+                {
+                    var fileName = Path.GetFileName(item.Key);
+
+                    files.Add(new(
+                        fileName,
+                        $"{_minioClient.Config.Endpoint}/{bucketName}/{prefixWithFiles}{Uri.EscapeDataString(fileName)}",
+                        item.Size,
+                        item.LastModifiedDateTime));
+                },
+                () => tcs.TrySetResult(true));
+
+            await tcs.Task;
+            subscription.Dispose();
+            
+            return files;
+        }
+        catch
+        {
+            return Error.Failure("Failed to getting files from bucket");
+        }
     }
 
     public async Task<Result<string, Error>> UploadFilesAsync(List<IFormFile> files, string bucketName,
@@ -111,6 +141,31 @@ public class MinioProvider : IFileProvider
         }
     }
     
+    public async Task<Result<string, Error>> GetPermanentFileUrlAsync(string fileName, string bucketName, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var statObjectArgs = new StatObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(fileName);
+
+            try
+            {
+                await _minioClient.StatObjectAsync(statObjectArgs, cancellationToken);
+            }
+            catch (MinioException)
+            {
+                return string.Empty;
+            }
+
+            return $"{_minioClient.Config.Endpoint}/{bucketName}/{Uri.EscapeDataString(fileName)}";
+        }
+        catch (Exception ex)
+        {
+            return Error.Failure($"Ошибка получения URL файла {fileName}: {ex.Message}");
+        }
+    }
+    
     private async Task<Result<string, Error>> PutObject(
         byte[] fileData,
         string bucketName,
@@ -156,7 +211,6 @@ public class MinioProvider : IFileProvider
         try
         {
             var results = await Task.WhenAll(uploadTasks);
-            
             return files.First().objectName;
         }
         catch (Exception ex)
@@ -177,7 +231,7 @@ public class MinioProvider : IFileProvider
         return Convert.FromBase64String(base64Data);
     }
 
-    private async Task IfBucketsNotExistCreateBucket(IEnumerable<string> buckets, CancellationToken cancellationToken)
+    private async Task CreateBucketIfNotExist(IEnumerable<string> buckets, CancellationToken cancellationToken)
     {
         HashSet<string> bucketNames = [.. buckets];
 
@@ -196,28 +250,4 @@ public class MinioProvider : IFileProvider
         }
     }
 
-    public async Task<Result<string, Error>> GetPermanentFileUrlAsync(string fileName, string bucketName, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var statObjectArgs = new StatObjectArgs()
-                .WithBucket(bucketName)
-                .WithObject(fileName);
-
-            try
-            {
-                await _minioClient.StatObjectAsync(statObjectArgs, cancellationToken);
-            }
-            catch (MinioException)
-            {
-                return string.Empty;
-            }
-
-            return $"{_minioClient.Config.Endpoint}/{bucketName}/{Uri.EscapeDataString(fileName)}";
-        }
-        catch (Exception ex)
-        {
-            return Error.Failure($"Ошибка получения URL файла {fileName}: {ex.Message}");
-        }
-    }
 }

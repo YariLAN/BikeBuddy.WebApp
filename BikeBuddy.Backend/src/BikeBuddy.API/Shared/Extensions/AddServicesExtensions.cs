@@ -4,6 +4,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using BikeBuddy.Infrastructure.Options;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace BikeBuddy.API.Shared.Extensions;
 
@@ -12,6 +14,8 @@ public static class AddServicesExtensions
     public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtOptions = configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
+
+        var google = configuration.GetSection(OAuthGoogleOption.OPTION_NAME).Get<OAuthGoogleOption>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opt =>
@@ -26,6 +30,13 @@ public static class AddServicesExtensions
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions!.SecretKey))
                 };
+            })
+            .AddCookie()
+            .AddGoogle(opt =>
+            {
+                opt.ClientId = google!.ClientId;
+                opt.ClientSecret = google.ClientSecret;
+                opt.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme; 
             });
 
         services.AddAuthorization();

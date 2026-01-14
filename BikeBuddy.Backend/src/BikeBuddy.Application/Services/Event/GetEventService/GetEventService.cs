@@ -3,10 +3,11 @@ using BikeBuddy.Application.Mappers.Event;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using System.Security.Claims;
+using BikeBuddy.Application.Services.Common.S3;
 
 namespace BikeBuddy.Application.Services.Event.GetEventService;
 
-public class GetEventService(IEventRepository eventRepository) : IGetEventService
+public sealed class GetEventService(IEventRepository eventRepository, IS3Provider fileProvider) : IGetEventService
 {
     public async Task<Result<EventResponseDetails, Error>> ExecuteAsync(Guid eventId, ClaimsPrincipal user, CancellationToken cancellationToken)
     {
@@ -17,10 +18,15 @@ public class GetEventService(IEventRepository eventRepository) : IGetEventServic
         if (dbEventResult.IsFailure)
             return dbEventResult.Error;
 
-        var isMemberChat = dbEventResult.Value.Chat?.Members != null ? dbEventResult.Value.Chat.Members.Any(user => user == userId) : false;
+        var isMemberChat = dbEventResult.Value.Chat?.Members?.Any(user => user == userId) ?? false;
+
+        var files = await fileProvider.GetAllByObjectAsync(
+            Files.BucketNameConstants.EVENT_IMAGES,
+            $"{dbEventResult.Value.Id}",
+            cancellationToken);
 
         return new EventResponseDetails(
-            Event: EventMapper.ToMap(dbEventResult.Value), 
+            Event: EventMapper.ToMap(dbEventResult.Value, files.Value), 
             CanEdit: userId == dbEventResult.Value.CreatedBy,
             IsMemberChat: isMemberChat
         ); 

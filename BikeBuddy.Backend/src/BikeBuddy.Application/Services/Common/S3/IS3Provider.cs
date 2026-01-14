@@ -2,20 +2,21 @@
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
 
-namespace BikeBuddy.Application.Services.Common;
+namespace BikeBuddy.Application.Services.Common.S3;
 
-public interface IFileProvider
+public interface IS3Provider
 {
     Task<Result<string, Error>> UploadFileAsync(byte[] fileData, string bucketName, string objectName, string mimeType,
         CancellationToken cancellationToken);
-
-    Task<Result<string, Error>> UploadFileAsync(string dataUrl, string bucketName, string objectName, string mimeType,
-        CancellationToken cancellationToken);
-
+    
     Task<Result<string, Error>> UploadFileAsync(IFormFile file, string bucketName, string objectName, string mimeType,
         CancellationToken cancellationToken);
 
-    Task<Result<string, Error>> GetFileByFileNamesAsync(string fileName, string bucketName, CancellationToken cancellationToken);
+    Task<Result<string, Error>> GetFileByFileNamesAsync(string fileName, string bucketName,
+        CancellationToken cancellationToken);
+
+    Task<Result<IReadOnlyList<S3ObjectInfo>, Error>> GetAllByObjectAsync(string bucketName, string prefix, 
+        CancellationToken ct = default);
 
     Task<Result<string, Error>> UploadFilesAsync(
         List<IFormFile> files, 

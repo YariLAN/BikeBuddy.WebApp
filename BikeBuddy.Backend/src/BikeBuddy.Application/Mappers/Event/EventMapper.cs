@@ -1,14 +1,20 @@
 ﻿using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Mappers.User;
+using BikeBuddy.Application.Services.Common.S3;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
+
+using EventDomain = BikeBuddy.Domain.Models.EventControl.Event;
 
 namespace BikeBuddy.Application.Mappers.Event;
 
-public class EventMapper
+/// <summary>
+/// маппер для событий
+/// </summary>
+public static class EventMapper
 {
-    public static Domain.Models.EventControl.Event ToMap(CreateEventRequest request, IEnumerable<PointDetails> points)
+    public static EventDomain ToMap(CreateEventRequest request, IEnumerable<PointDetails> points)
     {
-        return Domain.Models.EventControl.Event.Create(
+        return EventDomain.Create(
             id: Guid.NewGuid(),
             name: request.Name,
             description: request.Description,
@@ -25,7 +31,7 @@ public class EventMapper
             createdBy: request.UserId);
     }
 
-    public static EventListResponse ToMap(Domain.Models.EventControl.Event dbEvent, string imageUrl)
+    public static EventListResponse ToMap(EventDomain dbEvent, string imageUrl)
     {
         return new EventListResponse(
             dbEvent.Id,
@@ -45,7 +51,7 @@ public class EventMapper
             imageUrl);
     }
 
-    public static EventResponse ToMap(Domain.Models.EventControl.Event dbEvent)
+    public static EventResponse ToMap(EventDomain dbEvent, IReadOnlyList<S3ObjectInfo> files)
     {
         var userResponse = UserMapper.ToMap(dbEvent.User);
 
@@ -73,6 +79,12 @@ public class EventMapper
                     .Select(x => new PointDetailsDto(x.OrderId, new PointDto(x.Point.Lat, x.Point.Lon), x.Address))
                     .ToList()
                 : [],
+            ExistingImages: files.Count <= 0 ? [] : files.ToResponse(),
             dbEvent.Status);
     }
+
+    private static IReadOnlyList<DtoModels.Files.FileInfo> ToResponse(this IReadOnlyList<S3ObjectInfo> files)
+        => files
+            .Select(f => new DtoModels.Files.FileInfo(f.FileName, f.Url, f.Size, f.UploadedAt))
+            .ToList();
 }

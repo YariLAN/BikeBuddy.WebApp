@@ -3,6 +3,7 @@ import { ApiResponse, apiService } from "@/core/services/ApiService";
 import { convertBlobToFormData } from "@/lib/utils";
 import { create } from "zustand";
 import { PageData, SearchFilterDto } from "./search_types";
+import { serialize } from 'object-to-formdata';
 
 interface EventState {
     uploadMap: (eventId : string, fileBlob : Blob) => Promise<ApiResponse<string>>;
@@ -24,7 +25,12 @@ const useEventStore = create<EventState>(
             return result
         },
         createEvent: async (event: CreateEventRequest) => {
-            let result = await apiService.post<string>('/events/create', event, true);
+            const formData = serialize(event, {
+                indices: true,
+                noFilesWithArrayNotation: true,
+            });
+
+            let result = await apiService.file_post<string>('/events/create', formData, true);
             return result
         },
         getEvents: async (filter: SearchFilterDto<EventFilterDto>) => {

@@ -1,15 +1,15 @@
 ﻿using BikeBuddy.Application.DtoModels.Common;
 using BikeBuddy.Application.DtoModels.Event;
 using BikeBuddy.Application.Mappers.Event;
-using BikeBuddy.Application.Services.Common;
+using BikeBuddy.Application.Services.Common.S3;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 
 namespace BikeBuddy.Application.Services.Event.GetEventsService;
 
-public class GetEventsService(
+public sealed class GetEventsService(
     IEventRepository eventRepository, 
-    IFileProvider fileProvider) : IGetEventsService
+    IS3Provider fileProvider) : IGetEventsService
 {
     public async Task<Result<PageData<EventListResponse>, Error>> ExecuteAsync(SearchFilterDto<EventFilterDto> request, CancellationToken cancellationToken)
     {

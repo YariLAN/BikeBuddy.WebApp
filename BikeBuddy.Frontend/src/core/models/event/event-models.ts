@@ -73,6 +73,7 @@ export interface CreateEventRequest {
     startDate : Date,
     endDate : Date,
     userId : string,
+    files: File[],
     points : PointDetails[]
     status : EventStatus
 }

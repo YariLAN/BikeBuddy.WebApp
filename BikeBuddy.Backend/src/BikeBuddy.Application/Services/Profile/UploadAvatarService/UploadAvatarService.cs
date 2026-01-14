@@ -1,12 +1,13 @@
-﻿using BikeBuddy.Application.Services.Common;
+﻿using BikeBuddy.Application.Services.Common.S3;
 using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http;
+
 using static BikeBuddy.Domain.Shared.Files;
 
 namespace BikeBuddy.Application.Services.Profile.UploadAvatarService;
 
-public class UploadAvatarService(IUserProfileRepository profileRepository, IFileProvider fileProvider) : IUploadAvatarService
+public sealed class UploadAvatarService(IUserProfileRepository profileRepository, IS3Provider fileProvider) : IUploadAvatarService
 {
     public async Task<Result<string, Error>> ExecuteAsync(Guid userId, IFormFile file, CancellationToken cancellationToken)
     {

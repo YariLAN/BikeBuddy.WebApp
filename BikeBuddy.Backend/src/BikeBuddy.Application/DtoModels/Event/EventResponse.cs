@@ -1,5 +1,6 @@
 ﻿using BikeBuddy.Application.DtoModels.User;
 using BikeBuddy.Domain.Models.EventControl.ValueObjects;
+using FileInfo = BikeBuddy.Application.DtoModels.Files.FileInfo;
 
 namespace BikeBuddy.Application.DtoModels.Event;
 
@@ -21,9 +22,5 @@ public record EventResponse(
     Guid ChatId,
     UserResponse Author,
     IEnumerable<PointDetailsDto> Points,
+    IReadOnlyList<FileInfo> ExistingImages,
     EventStatus Status);
-
-public record EventResponseDetails(
-    EventResponse Event,
-    bool CanEdit,
-    bool IsMemberChat);

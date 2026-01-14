@@ -1,11 +1,15 @@
-using BikeBuddy.API.Hubs;
 using BikeBuddy.API.Services;
 using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application;
+using BikeBuddy.Application.Services.Auth.Register;
 using BikeBuddy.Application.Services.Common;
+using BikeBuddy.Domain.Models.AuthControl;
 using BikeBuddy.Infrastructure;
-using Hangfire;
-using Microsoft.EntityFrameworkCore;
+using BikeBuddy.Infrastructure.Services.Auth.Google;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,9 +26,15 @@ builder.Services.AddScoped<IRealTimeNotifier, RealTimeNotifier>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
 
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 builder.Services.AddFluentValidationAutoValidation(configuration =>
 {
-    configuration.OverrideDefaultResultFactoryWith<CustomValidationResultFactory>();
+    configuration.EnableFormBindingSourceAutomaticValidation = true;
+    configuration.EnableCustomBindingSourceAutomaticValidation = true;
 });
 
 builder.Services.AddCors("CorsPolicy");
@@ -39,32 +49,33 @@ builder.Services.AddSignalR(opt =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.Configure();
+
+await app.MigrateDatabase();
+
+app.MapPost("/api/account/login/google", ( [FromQuery] string returnUrl, LinkGenerator linkGenerator,
+    SignInManager<AuthUser> signInManager, HttpContext context) =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    var properties = signInManager.ConfigureExternalAuthenticationProperties("Google",
+        linkGenerator.GetPathByName(context, "GoogleAuthCallback") 
+        + $"?returnUrl={returnUrl}");
 
-using (var scope = app.Services.CreateScope())
+    return Results.Challenge(properties, ["Google"]);
+});
+
+app.MapGet("/api/account/login/google/callback", async ([FromQuery] string returnUrl, 
+    HttpContext context, IGoogleService googleService) =>
 {
-    var db =scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await db.Database.MigrateAsync();
-}
+    var result = await context.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
 
-app.UseCors("CorsPolicy");
+    if (!result.Succeeded)
+    {
+        return Results.Unauthorized();
+    }
 
+    await googleService.Login(result.Principal, context, CancellationToken.None);
 
-app.MapHub<GroupChatHub>("/hub/group-chat");
-
-app.MapHub<NotificationHub>("/hub/notifications");
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.UseHangfireDashboard("/hangfire");
+    return Results.Redirect(returnUrl);
+}).WithName("GoogleAuthCallback");
 
 app.Run();
