@@ -10,7 +10,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
   } from "@/components/ui/sidebar"
-import { items, names } from "./menu-items"
+import { items, names } from "./type"
 import { Settings } from "lucide-react"
 import { Link } from "react-router-dom"
 

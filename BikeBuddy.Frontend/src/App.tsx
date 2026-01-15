@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
-import { AppSidebar } from './components/my/app-sidebar';
+import { AppSidebar } from './components/my/Sidebar/app-sidebar';
 import { Header } from './pages/header';
 import { Footer } from './pages/footer';
 import { HeroSection } from './pages/main/hero-section';
@@ -13,7 +13,7 @@ import ProfilePage from './pages/profile/profile-page';
 import EventsPage, { PageMode } from './pages/events/events-page/event-page'
 
 import JwtService from './core/services/JwtService';
-import { items } from './components/my/menu-items';
+import { items } from './components/my/Sidebar/type';
 import CreateEventPage from './pages/events/create-event/create-event-page';
 import EventDetailsPage from './pages/events/event-details/event-details-page';
 import EventChatPage from './pages/events/event-chat/event-chat-page';

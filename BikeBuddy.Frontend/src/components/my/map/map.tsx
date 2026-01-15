@@ -15,9 +15,9 @@ import { Style, Stroke, Icon } from "ol/style"
 import { Select } from "ol/interaction"
 import Modify from "ol/interaction/Modify"
 import { click } from "ol/events/condition"
-import { CoordinatesDisplay } from "./coordinates-display"
 import { Marker } from "@/core/models/event/event-models"
 import { convertDataUrlToBlob } from "@/lib/utils"
+import { CoordinatesDisplay } from "./coordinates-display"
 
 
 export interface RouteMapRef {

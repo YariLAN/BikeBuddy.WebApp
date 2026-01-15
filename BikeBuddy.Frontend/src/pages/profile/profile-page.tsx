@@ -3,8 +3,8 @@ import ProfileForm from "./profile-form";
 import { useEffect, useState } from "react";
 import JwtService from "@/core/services/JwtService";
 import useProfileStore from "@/stores/profile";
-import { Warning } from "@/components/my/warning";
 import { UserProfileResponse } from "@/core/models/user-models";
+import { ProfileNotFilledWarning } from "@/components/my/ProfileNotFilledWarning";
 
 interface ProfilePageProps {
     userId?: string
@@ -48,7 +48,7 @@ export default function ProfilePage( {userId: propsUserId } : ProfilePageProps) 
     return (
         <div className="container mx-auto px-4 py-10">
             <div className="bg-background rounded-lg shadow">
-                <div className="px-8 pt-3">{!profileStore.isProfileFilled && <Warning />}</div>
+                <div className="px-8 pt-3">{!profileStore.isProfileFilled && <ProfileNotFilledWarning />}</div>
                 <ProfileForm profile={ profileDetails } />
             </div>
         </div>

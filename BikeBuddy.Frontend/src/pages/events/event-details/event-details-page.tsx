@@ -17,9 +17,9 @@ import useChatStore from "@/stores/chat"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import Swal from "sweetalert2"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ImageInputList } from "@/components/my/ImageInputList"
-import { ImageInputMode } from "@/components/my/ImageInput/type"
-import { ImageInputListRef } from "@/components/my/ImageInputList/type"
+import { ImageInputList } from "@/components/ui/ImageInputList/ImageInputList"
+import { ImageInputMode } from "@/components/ui/ImageInput/type"
+import { ImageInputListRef } from "@/components/ui/ImageInputList/type"
 
 const bikeTypes = [
   { value: BicycleType.Default, label: "Городской" },

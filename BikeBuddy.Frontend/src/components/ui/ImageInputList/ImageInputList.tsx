@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
-import ImageInput from "../ImageInput"
+import ImageInput from "../ImageInput/ImageInput"
 import { toastAlert } from "@/core/helpers"
 import { isSupportedImageFormat } from "@/lib/fileHelpers"
 import { ImageInputListProps, ImageInputListRef } from "./type"

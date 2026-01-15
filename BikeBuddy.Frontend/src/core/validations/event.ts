@@ -41,7 +41,7 @@ export const eventSchema = yup.object({
   type: yup
     .number()
     .oneOf(typeValues, "Некорректный тип заезда")
-    .required(),
+    .required("Тип заезда обязателен"),
   countMembers: yup
     .number()
     .min(1, "Участников не может быть ноль или меньше")
