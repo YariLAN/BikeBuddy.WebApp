@@ -7,6 +7,8 @@ using BikeBuddy.Application.Services.Event.CreateEventService;
 using BikeBuddy.Application.Services.Event.GetEventService;
 using BikeBuddy.Application.Services.Event.GetEventsService;
 using BikeBuddy.Application.Services.Event.UpdateEventService;
+using BikeBuddy.Application.Services.Profile.GetProfileService;
+using CSharpFunctionalExtensions;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -30,6 +32,14 @@ namespace BikeBuddy.API.Controllers
             var result = await createEventService.ExecuteAsync(request, cancellationToken);
 
             return result.ToResponse();
+        }
+
+        [HttpPost("test")]
+        public async Task<ActionResult<bool>> Test([FromServices] IGetProfileService getProfileService, CancellationToken ct)
+        {
+            var user = HttpContext.User.Identity?.Name;
+            
+            return true;
         }
 
         [HttpPost]
