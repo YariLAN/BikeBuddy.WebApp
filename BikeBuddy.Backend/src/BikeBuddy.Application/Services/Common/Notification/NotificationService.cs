@@ -43,11 +43,9 @@ public class NotificationService(
 
         var (notification, total) = result.Value;
 
-        return new PageData<NotificationResponse>
-        {
-            Body = notification.ConvertAll(n => NotificationMapper.ToMap(n)),
-            TotalCount = total,
-        };
+        return PageData<NotificationResponse>.Create(
+            notification.ConvertAll(n => NotificationMapper.ToMap(n)), 
+            total);
     }
 
     public async Task<Result<bool, Error>> MarkAsReadAsync(Guid notificationId, Guid recipientId, CancellationToken cancellationToken)

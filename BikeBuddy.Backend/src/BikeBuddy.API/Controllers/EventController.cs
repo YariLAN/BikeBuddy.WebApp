@@ -8,7 +8,6 @@ using BikeBuddy.Application.Services.Event.GetEventService;
 using BikeBuddy.Application.Services.Event.GetEventsService;
 using BikeBuddy.Application.Services.Event.UpdateEventService;
 using BikeBuddy.Application.Services.Profile.GetProfileService;
-using CSharpFunctionalExtensions;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

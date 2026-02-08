@@ -3,8 +3,6 @@ using BikeBuddy.Application.Mappers.Chat;
 using BikeBuddy.Application.Services.Chat.GetChatMessagesService;
 using BikeBuddy.Domain.Models.ChatControl;
 using BikeBuddy.Domain.Models.ChatControl.Entities;
-using BikeBuddy.Domain.Shared;
-using CSharpFunctionalExtensions;
 using Moq;
 using Xunit;
 using Shouldly;

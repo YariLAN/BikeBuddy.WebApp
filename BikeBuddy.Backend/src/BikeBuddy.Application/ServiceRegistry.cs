@@ -1,4 +1,5 @@
-﻿using BikeBuddy.Application.Jobs.Executor.Event;
+﻿using System.Buffers;
+using BikeBuddy.Application.Jobs.Executor.Event;
 using BikeBuddy.Application.Options;
 using BikeBuddy.Application.Services.Auth.Login;
 using BikeBuddy.Application.Services.Auth.Logout;
@@ -128,3 +129,5 @@ public static class ServiceRegistry
         return services;
     }
 }
+
+

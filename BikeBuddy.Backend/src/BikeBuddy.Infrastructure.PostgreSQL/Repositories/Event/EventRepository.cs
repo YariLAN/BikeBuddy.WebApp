@@ -7,13 +7,13 @@ using BikeBuddy.Domain.Shared;
 using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
 using static BikeBuddy.Domain.Shared.Errors;
-using EventModel = BikeBuddy.Domain.Models.EventControl.Event;
+using EventDomain = BikeBuddy.Domain.Models.EventControl.Event;
 
 namespace BikeBuddy.Infrastructure.Repositories.Event;
 
 public class EventRepository(ApplicationDbContext context) : IEventRepository
 {
-    public async Task<Result<Guid, Error>> CreateAsync(EventModel dbEvent, CancellationToken cancellationToken)
+    public async Task<Result<Guid, Error>> CreateAsync(EventDomain dbEvent, CancellationToken cancellationToken)
     {
         try
         {
@@ -29,7 +29,7 @@ public class EventRepository(ApplicationDbContext context) : IEventRepository
         }
     }
 
-    public async Task<Result<EventModel, Error>> GetEventAsync(Guid eventId, CancellationToken token)
+    public async Task<Result<EventDomain, Error>> GetEventAsync(Guid eventId, CancellationToken token)
     {
         var dbEvent = await context.Events
             .Include(x => x.Chat)
@@ -42,18 +42,18 @@ public class EventRepository(ApplicationDbContext context) : IEventRepository
         return dbEvent != null ? dbEvent : General.NotFound(eventId);
     }
 
-    public async Task<Result<(List<EventModel>, int), Error>> GetEventsByFilterAsync(SearchFilterDto<EventFilterDto> eventFilter, CancellationToken cancellationToken)
+    public async Task<Result<EventsRecord, Error>> GetEventsByFilterAsync(SearchFilterDto<EventFilterDto> eventFilter, CancellationToken cancellationToken)
     {
         try
         {
-            IQueryable<EventModel> events = context.Events
+            IQueryable<EventDomain> events = context.Events
                 .Include(e => e.User)
                 .Include(x => x.Chat)
                     .ThenInclude(c => c.Members)
                 .AsNoTracking()
                 .ApplyFilters(eventFilter.Filter);
 
-            return (
+            return new EventsRecord(
               await events
                 .OrderByDescending(x => x.CreatedAt)
                 .Skip(eventFilter.Offset)
@@ -67,7 +67,7 @@ public class EventRepository(ApplicationDbContext context) : IEventRepository
         }
     }
 
-    public async Task<Result<bool, Error>> UpdateAsync(EventModel eventModel, CancellationToken cancellationToken)
+    public async Task<Result<bool, Error>> UpdateAsync(EventDomain eventModel, CancellationToken cancellationToken)
     {
         try
         {

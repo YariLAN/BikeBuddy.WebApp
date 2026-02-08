@@ -1,4 +1,5 @@
-﻿using BikeBuddy.Application.Services.Auth;
+﻿using BikeBuddy.Application.Cache;
+using BikeBuddy.Application.Services.Auth;
 using BikeBuddy.Application.Services.Chat;
 using BikeBuddy.Application.Services.Common;
 using BikeBuddy.Application.Services.Common.Notification;
@@ -6,6 +7,7 @@ using BikeBuddy.Application.Services.Common.S3;
 using BikeBuddy.Application.Services.Event;
 using BikeBuddy.Application.Services.Profile;
 using BikeBuddy.Application.Services.Scheduler.Event;
+using BikeBuddy.Infrastructure.Cache;
 using BikeBuddy.Infrastructure.Options;
 using BikeBuddy.Infrastructure.Repositories.Auth;
 using BikeBuddy.Infrastructure.Repositories.Chat;
@@ -18,11 +20,13 @@ using BikeBuddy.Infrastructure.Services.Common;
 using BikeBuddy.Infrastructure.Services.Scheduler.Event;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Minio;
 using NETCore.MailKit.Extensions;
 using NETCore.MailKit.Infrastructure.Internal;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace BikeBuddy.Infrastructure;
 
@@ -32,6 +36,7 @@ public static class ServiceRegistry
     {
         services.AddScoped<ApplicationDbContext>()
                 .AddRepositories()
+                .AddCache()
                 .AddMinio(configuration)
                 .AddHangfire(configuration)
                 .AddNotifications(configuration);
@@ -124,6 +129,20 @@ public static class ServiceRegistry
 
         services.AddScoped<INotificationRepository, NotificationRepository>();
 
+        return services;
+    }
+
+    public static IServiceCollection AddCache(this IServiceCollection services)
+    {
+        services.AddFusionCache()
+            .WithDefaultEntryOptions(opt =>
+            {
+                opt.Duration = TimeSpan.FromMinutes(1);
+                opt.Priority = CacheItemPriority.High;
+            });
+
+        services.AddSingleton<IEventCache, EventCache>();
+        
         return services;
     }
 }
