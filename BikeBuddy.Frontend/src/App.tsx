@@ -56,7 +56,6 @@ export default function App() {
         </SidebarProvider>
       }
 
-        {/* Main content */}
         <main className="flex-1 w-full flex flex-col">
           <div className="flex-1">
             <Routes>

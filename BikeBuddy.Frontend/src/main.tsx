@@ -6,7 +6,9 @@ import App from './App.tsx'
 
 // TODO : вернуть StrictMode
 createRoot(document.getElementById('root')!).render(
+  <StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
+  </StrictMode>
 )

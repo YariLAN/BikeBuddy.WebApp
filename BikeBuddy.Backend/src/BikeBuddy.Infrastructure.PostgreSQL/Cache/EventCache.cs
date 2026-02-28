@@ -1,15 +1,14 @@
-using System.Text.Json;
 using BikeBuddy.Application.Cache;
 using BikeBuddy.Application.DtoModels.Event;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace BikeBuddy.Infrastructure.Cache;
 
-internal sealed class EventCache : IEventCache
+internal sealed class EventCache : CacheBase, IEventCache 
 {
+    protected override string Prefix => Constants.EVENTS;
+    
     private readonly IFusionCache _internalCache;
-
-    private const string KEY_PAGE = "{0}-page:{1}-filters:{2}";
     
     public EventCache(IFusionCache cache)
     {
@@ -18,17 +17,24 @@ internal sealed class EventCache : IEventCache
 
     public ValueTask<(List<EventListResponse>, int)> GetManyAsync(int page, EventFilterDto filter, CancellationToken ct)
     {
-        return _internalCache.GetOrDefaultAfterSetAsync(
-            key: String.Format(KEY_PAGE, Constants.EVENTS, page, JsonSerializer.Serialize(filter)),
-            defaultValue: (new List<EventListResponse>(), 0), 
+        var key = GetEventsKey(page, filter);
+        
+        return _internalCache.GetOrDefaultAfterSetAsync(key, defaultValue: (new List<EventListResponse>(), 0), 
             ct: ct);
     }
 
     public ValueTask SetManyAsync(int page, EventFilterDto filter, (List<EventListResponse>, int) data, CancellationToken ct)
     {
-        return _internalCache.SetAsync(
-            key: String.Format(KEY_PAGE, Constants.EVENTS, page, JsonSerializer.Serialize(filter)), 
-            data, 
-            token: ct);
+        var key = GetEventsKey(page, filter);
+        
+        return _internalCache.SetAsync(key, data, token: ct);
     }
+
+    private string GetEventsKey(int page, EventFilterDto filter)
+        => BuildCacheKey(
+            new("page", page.ToString()),
+            new("start_address", filter.StartAddress),
+            new("count_members", filter.CountMembers.ToString()),
+            new("participant", filter.ParticipantIds.FirstOrDefault())
+        );
 }
