@@ -137,7 +137,10 @@ export default function EventsPage({ mode = PageMode.NewEvent } : EventsPageProp
       const result = await eventStore.getEvents(filter)
 
       if (result.data != null) {
-        setEvents(result.data.body)
+        const unique = result.data.body.filter(
+          (event, index, self) => index === self.findIndex((e) => e.eventId === event.eventId))
+          
+        setEvents(unique)
         setTotalCountEvents(result.data.total)
       }
       else if (result.error) {
