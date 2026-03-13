@@ -17,7 +17,7 @@ internal sealed class EventCache : CacheBase, IEventCache
 
     public ValueTask<(List<EventListResponse>, int)> GetManyAsync(int page, EventFilterDto filter, CancellationToken ct)
     {
-        var key = GetEventsKey(page, filter);
+        var key = GetCacheKey(page, filter);
         
         return _internalCache.GetOrDefaultAfterSetAsync(key, defaultValue: (new List<EventListResponse>(), 0), 
             ct: ct);
@@ -25,12 +25,12 @@ internal sealed class EventCache : CacheBase, IEventCache
 
     public ValueTask SetManyAsync(int page, EventFilterDto filter, (List<EventListResponse>, int) data, CancellationToken ct)
     {
-        var key = GetEventsKey(page, filter);
+        var key = GetCacheKey(page, filter);
         
         return _internalCache.SetAsync(key, data, token: ct);
     }
 
-    private string GetEventsKey(int page, EventFilterDto filter)
+    private string GetCacheKey(int page, EventFilterDto filter)
         => BuildCacheKey(
             new("page", page.ToString()),
             new("start_address", filter.StartAddress),

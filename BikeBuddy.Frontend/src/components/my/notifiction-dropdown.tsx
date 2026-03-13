@@ -212,10 +212,11 @@ export function NotificationDropdown() {
           )}
         </button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end" className="w-[470px]">
         <DropdownMenuLabel className="flex justify-between items-center">
           <span>Уведомления</span>
-          {notificationRef.current.length > 0 && hasUnread && (
+          {hasUnread && (
             <button
               onClick={async (e) => {
                 e.preventDefault()
@@ -228,7 +229,9 @@ export function NotificationDropdown() {
             </button>
           )}
         </DropdownMenuLabel>
+
         <DropdownMenuSeparator />
+        
         {notifications.length === 0 ? (
           <div className="py-4 px-2 text-center text-muted-foreground">Уведомления отсутствуют</div>
         ) : (

@@ -1,4 +1,4 @@
-import { Bike, Mails, Settings, Ticket, Users, } from "lucide-react"
+import { Bike, CloudSunRain, Mails, Settings, Ticket, Users, } from "lucide-react"
    
 export const names = {
     Events: "События",
@@ -27,6 +27,11 @@ export const items = [
     title: "Друзья",
     url: "#",
     icon: Users,
+  },
+  {
+    title: "Погода",
+    url: "weather",
+    icon: CloudSunRain,
   },
   {
     title: names.Setting,

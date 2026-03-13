@@ -416,7 +416,7 @@ export default function EventsPage({ mode = PageMode.NewEvent } : EventsPageProp
                     </TooltipProvider>
                   </div>
                   
-                  <div className={cn("flex flex-col",isCompactView ? "flex-1" : "w-full")}>
+                  <div className={cn("flex flex-col !px-0", isCompactView ? "flex-1" : "w-full")}>
                     <CardHeader>
                       <CardTitle className="text-xl">{event.name}</CardTitle>
                     </CardHeader>

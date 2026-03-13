@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useIsMobile } from './hooks/use-mobile';
 import useAuthStore from './stores/auth';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import ProfilePage from './pages/profile/profile-page';
+import ProfilePage from './pages/ProfilePage/profile-page';
 import EventsPage, { PageMode } from './pages/events/events-page/event-page'
 
 import JwtService from './core/services/JwtService';
@@ -18,6 +18,7 @@ import CreateEventPage from './pages/events/create-event/create-event-page';
 import EventDetailsPage from './pages/events/event-details/event-details-page';
 import EventChatPage from './pages/events/event-chat/event-chat-page';
 import EmailVerificationPage from './pages/auth/email-verification-page';
+import WeatherPage from './pages/WeaherPage/WeatherPage';
 
 export default function App() {
 
@@ -102,6 +103,10 @@ export default function App() {
               <Route 
                 path={`${items[0].url}/:eventId/chat`}
                 element={authStore.isAuthenticated ? <EventChatPage /> : <Navigate to="/" replace />}
+              />
+              <Route 
+                path={items[4].url}
+                element={authStore.isAuthenticated ? <WeatherPage /> : <Navigate to="/" replace />}
               />
             </Routes>
           </div>
