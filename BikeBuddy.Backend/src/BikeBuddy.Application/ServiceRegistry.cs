@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using BikeBuddy.Application.Jobs.Executor.Event;
+﻿using BikeBuddy.Application.Jobs.Executor.Event;
 using BikeBuddy.Application.Options;
 using BikeBuddy.Application.Services.Auth.Login;
 using BikeBuddy.Application.Services.Auth.Logout;
@@ -20,6 +19,7 @@ using BikeBuddy.Application.Services.Event.UpdateEventService;
 using BikeBuddy.Application.Services.Event.UploadMapService;
 using BikeBuddy.Application.Services.Profile.CreateProfileService;
 using BikeBuddy.Application.Services.Profile.GetProfileService;
+using BikeBuddy.Application.Services.Profile.GetProfilesService;
 using BikeBuddy.Application.Services.Profile.UpdateProfileService;
 using BikeBuddy.Application.Services.Profile.UploadAvatarService;
 using FluentValidation;
@@ -87,6 +87,7 @@ public static class ServiceRegistry
     private static IServiceCollection AddProfile(this IServiceCollection services)
     {
         services.AddScoped<IGetProfileService, GetProfileService>();
+        services.AddScoped<IGetProfilesService, GetProfilesService>();
         services.AddScoped<ICreateProfileService, CreateProfileService>();
         services.AddScoped<IUpdateProfileService, UpdateProfileService>();
         services.AddScoped<IUploadAvatarService, UploadAvatarService>();

@@ -7,6 +7,8 @@ namespace BikeBuddy.Application.Services.Profile;
 public interface IUserProfileRepository
 {
     Task<UserProfile?> GetByUserIdAsync(Guid id, CancellationToken cancellationToken);
+    
+    Task<Result<IReadOnlyList<UserProfile>, Error>> GetAllAsync(CancellationToken cancellationToken);
 
     Task<Guid?> CreateAsync(UserProfile profile, CancellationToken cancellationToken);
 

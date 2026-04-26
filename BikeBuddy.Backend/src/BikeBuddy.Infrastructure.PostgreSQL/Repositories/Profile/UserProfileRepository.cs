@@ -8,6 +8,15 @@ namespace BikeBuddy.Infrastructure.Repositories.Profile;
 
 public class UserProfileRepository(ApplicationDbContext context) : IUserProfileRepository
 {
+    public async Task<Result<IReadOnlyList<UserProfile>, Error>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        var profiles = await context.Profiles
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return profiles;
+    }
+
     public async Task<Guid?> CreateAsync(UserProfile profile, CancellationToken cancellationToken)
     {
         try

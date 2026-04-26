@@ -2,6 +2,7 @@
 using BikeBuddy.Application.DtoModels.Profile;
 using BikeBuddy.Application.Services.Profile.CreateProfileService;
 using BikeBuddy.Application.Services.Profile.GetProfileService;
+using BikeBuddy.Application.Services.Profile.GetProfilesService;
 using BikeBuddy.Application.Services.Profile.UpdateProfileService;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -15,6 +16,16 @@ namespace BikeBuddy.API.Controllers;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class ProfileController : ControllerBase
 {
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<UserProfileResponse>>> GetProfiles(
+        [FromServices] IGetProfilesService getProfilesService,
+        CancellationToken cancellationToken)
+    {
+        var profiles = await getProfilesService.ExecuteAsync(new GetProfilesQuery(), cancellationToken);
+
+        return profiles.ToResponse();
+    }
+    
     [HttpGet("{userId:guid}")]
     public async Task<ActionResult<UserProfileResponse>> GetUserProfile(
         [FromServices] IGetProfileService getProfileService,

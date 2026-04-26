@@ -2,7 +2,7 @@
 
 public record EventDetails
 {
-    public IReadOnlyList<PointDetails> Routes { get; }
+    public IReadOnlyList<PointDetails> Routes { get; } = [];
 
     public EventDetails() { }
 

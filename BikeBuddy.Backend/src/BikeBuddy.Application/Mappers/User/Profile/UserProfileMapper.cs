@@ -1,11 +1,19 @@
 ﻿using BikeBuddy.Application.DtoModels.Profile;
 using BikeBuddy.Domain.Models.ProfileControl;
 using BikeBuddy.Domain.Models.ProfileControl.ValueObjects;
+using System.Linq;
 
 namespace BikeBuddy.Application.Mappers.User.Profile;
 
 public class UserProfileMapper
 {
+    public static IReadOnlyList<UserProfileResponse> ToMap(IReadOnlyCollection<UserProfile> profiles)
+    {
+        return profiles
+            .Select(ToMap)
+            .ToList();
+    }
+    
     public static UserProfileResponse ToMap(UserProfile profile)
     {
         return new(
