@@ -8,6 +8,7 @@ using BikeBuddy.Application.Services.Event;
 using BikeBuddy.Application.Services.Profile;
 using BikeBuddy.Application.Services.Scheduler.Event;
 using BikeBuddy.Infrastructure.Cache;
+using BikeBuddy.Infrastructure.Clients.AIAssistant;
 using BikeBuddy.Infrastructure.Options;
 using BikeBuddy.Infrastructure.Repositories.Auth;
 using BikeBuddy.Infrastructure.Repositories.Chat;
@@ -39,7 +40,8 @@ public static class ServiceRegistry
                 .AddCache()
                 .AddMinio(configuration)
                 .AddHangfire(configuration)
-                .AddNotifications(configuration);
+                .AddNotifications(configuration)
+                .AddAiAssistantClient();
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtProvider, JwtProvider>();
