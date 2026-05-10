@@ -1,6 +1,7 @@
 ﻿using BikeBuddy.API.Hubs;
 using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application.DtoModels.Chat;
+using BikeBuddy.Application.Services.Chat;
 using BikeBuddy.Application.Services.Chat.JoinChatService;
 using BikeBuddy.Application.Services.Chat.LeaveChatService;
 using BikeBuddy.Application.Services.Chat.SendMessageService;
@@ -57,5 +58,13 @@ public class ChatController(IHubContext<GroupChatHub, IGroupChatClient> _hubCont
 
         return result.ToResponse();
 
+    }
+
+    [HttpGet("test")]
+    public async Task<ActionResult<CheckMessageResponse>> CheckAsync(
+        [FromServices] ICheckMessageService service,
+        CancellationToken ct)
+    {
+        return await service.CheckAsync(ct);
     }
 }

@@ -17,6 +17,8 @@ internal static class ServiceRegistry
                 options: new OpenAIClientOptions { Endpoint = new Uri("https://api.moonshot.ai/v1") })
             .AsIChatClient()
         );
+
+        services.AddScoped<IAiAssistantClient, AiAssistantClient>();
         
         return services;
     }

@@ -17,6 +17,7 @@ using BikeBuddy.Infrastructure.Repositories.Notification;
 using BikeBuddy.Infrastructure.Repositories.Profile;
 using BikeBuddy.Infrastructure.Services.Auth;
 using BikeBuddy.Infrastructure.Services.Auth.Google;
+using BikeBuddy.Infrastructure.Services.Chat;
 using BikeBuddy.Infrastructure.Services.Common;
 using BikeBuddy.Infrastructure.Services.Scheduler.Event;
 using Hangfire;
@@ -130,6 +131,8 @@ public static class ServiceRegistry
         services.AddTransient<IMessageRepository, MessageRepository>();
 
         services.AddScoped<INotificationRepository, NotificationRepository>();
+
+        services.AddScoped<ICheckMessageService, CheckMessageService>();
 
         return services;
     }
