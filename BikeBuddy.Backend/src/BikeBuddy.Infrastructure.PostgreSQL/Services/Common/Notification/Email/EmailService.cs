@@ -2,7 +2,7 @@ using BikeBuddy.Application.Services.Common;
 using Microsoft.AspNetCore.Http;
 using NETCore.MailKit;
 
-namespace BikeBuddy.Infrastructure.Services.Common;
+namespace BikeBuddy.Infrastructure.Services.Common.Notification.Email;
 
 sealed class EmailService : NETCore.MailKit.Core.EmailService, IEmailService
 {

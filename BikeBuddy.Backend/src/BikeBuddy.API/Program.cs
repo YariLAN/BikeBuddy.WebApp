@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using BikeBuddy.API.Services;
 using BikeBuddy.API.Shared.Extensions;
 using BikeBuddy.Application;
@@ -14,7 +15,13 @@ using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()    
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });;
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddCustomSwaggerGen();

@@ -12,7 +12,7 @@ internal static class ServiceRegistry
     {
         services.AddChatClient(
             new ChatClient(
-                model: "moonshot-v1-32k",
+                model: "kimi-k2.6",
                 credential: new ApiKeyCredential(""),
                 options: new OpenAIClientOptions { Endpoint = new Uri("https://api.moonshot.ai/v1") })
             .AsIChatClient()

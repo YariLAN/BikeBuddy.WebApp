@@ -19,6 +19,7 @@ using BikeBuddy.Infrastructure.Services.Auth;
 using BikeBuddy.Infrastructure.Services.Auth.Google;
 using BikeBuddy.Infrastructure.Services.Chat;
 using BikeBuddy.Infrastructure.Services.Common;
+using BikeBuddy.Infrastructure.Services.Common.Notification.Email;
 using BikeBuddy.Infrastructure.Services.Scheduler.Event;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -98,7 +99,7 @@ public static class ServiceRegistry
     private static IServiceCollection AddMailKit(this IServiceCollection services, IConfiguration configuration)
     {
         var smtp = configuration.GetSection(nameof(SmtpOptions)).Get<SmtpOptions>();
-
+        
         services.AddMailKit(optionBuilder =>
         {
             optionBuilder.UseMailKit(new MailKitOptions

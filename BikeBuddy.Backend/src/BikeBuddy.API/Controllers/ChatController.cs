@@ -60,11 +60,13 @@ public class ChatController(IHubContext<GroupChatHub, IGroupChatClient> _hubCont
 
     }
 
-    [HttpGet("test")]
+    [HttpPost("test")]
+    [AllowAnonymous]
     public async Task<ActionResult<CheckMessageResponse>> CheckAsync(
         [FromServices] ICheckMessageService service,
+        [FromBody] CheckMessageRequest request,
         CancellationToken ct)
     {
-        return await service.CheckAsync(ct);
+        return await service.CheckAsync(request, ct);
     }
 }

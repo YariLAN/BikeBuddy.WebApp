@@ -23,7 +23,7 @@ public static class AddServicesExtensions
                 opt.SaveToken = true;
                 opt.RequireHttpsMetadata = true;
                 opt.TokenValidationParameters = new()
-                {                   
+                {
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true,
