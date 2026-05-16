@@ -3,6 +3,8 @@ name: Deploy BikeBuddy
 on:
   push:
     branches: [master]
+  pull_request:
+    branches: [master]  # запускается когда открываешь PR в master
   workflow_dispatch:
 
 jobs:
