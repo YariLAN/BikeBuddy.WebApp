@@ -23,3 +23,5 @@ jobs:
         with:
           push: true
           tags: yarila/bikebuddybackend-bikebuddy_api:latest
+          file: ./BikeBuddy.Backend/src/BikeBuddy.API/Dockerfile
+          context: ./BikeBuddy.Backend
