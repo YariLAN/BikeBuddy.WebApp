@@ -8,7 +8,9 @@ internal sealed class AiAssistantClient(IChatClient chatClient) : IAiAssistantCl
     {
         var messages = BuildMessages(request);
         var options = request.Model is not null
-            ? new ChatOptions { ModelId = request.Model }
+            ? new ChatOptions { 
+                ModelId = request.Model 
+            }
             : null;
 
         var response = await chatClient.GetResponseAsync(messages, options, ct);
