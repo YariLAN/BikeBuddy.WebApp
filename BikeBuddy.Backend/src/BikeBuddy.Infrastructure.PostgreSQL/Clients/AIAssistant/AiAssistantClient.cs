@@ -1,17 +1,22 @@
+using BikeBuddy.Infrastructure.Options;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Options;
 
 namespace BikeBuddy.Infrastructure.Clients.AIAssistant;
 
-internal sealed class AiAssistantClient(IChatClient chatClient) : IAiAssistantClient
+internal sealed class AiAssistantClient(IChatClient chatClient, IOptions<AiProviderOptions> aiOptions) : IAiAssistantClient
 {
     public async Task<ChatResponse?> CompleteAsync(AiAssistantCompleteRequest request, CancellationToken ct)
     {
         var messages = BuildMessages(request);
-        var options = request.Model is not null
-            ? new ChatOptions { 
-                ModelId = request.Model 
+        var options = new ChatOptions
+        {
+            ModelId = request.Model ?? aiOptions.Value.ModelRequired,
+            AdditionalProperties = new AdditionalPropertiesDictionary()
+            {
+                ["thinking"] = new { type = "disabled" }
             }
-            : null;
+        };
 
         var response = await chatClient.GetResponseAsync(messages, options, ct);
 

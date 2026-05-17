@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 /BikeBuddy.Frontend/.env
 /BikeBuddy.Backend/.idea/
+
+.env
+/BikeBuddy.Backend/.env

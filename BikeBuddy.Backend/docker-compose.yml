@@ -7,6 +7,8 @@ networks:
 services:
   bikebuddy_api:
     container_name: bikebuddy_api
+    env_file:
+      - .env
     image: yarila/bikebuddybackend-bikebuddy_api:latest
     networks:
       - deploy-bikebuddy-dev
