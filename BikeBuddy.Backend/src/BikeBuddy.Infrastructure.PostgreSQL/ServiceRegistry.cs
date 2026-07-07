@@ -43,7 +43,7 @@ public static class ServiceRegistry
                 .AddMinio(configuration)
                 .AddHangfire(configuration)
                 .AddNotifications(configuration)
-                .AddAiAssistantClient();
+                .AddAiAssistantClient(configuration);
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtProvider, JwtProvider>();
